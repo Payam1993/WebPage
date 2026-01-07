@@ -1,0 +1,145 @@
+.experience {
+  position: relative;
+  padding: var(--space-2xl) 0;
+  background: var(--color-night);
+  color: var(--color-cream);
+  overflow: hidden;
+}
+
+.experience-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.experience-pattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.05;
+  background-image: 
+    linear-gradient(45deg, var(--color-gold) 1px, transparent 1px),
+    linear-gradient(-45deg, var(--color-gold) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.experience-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto var(--space-xl);
+}
+
+.experience-header h2 {
+  color: var(--color-cream);
+}
+
+.experience-header .section-subtitle {
+  color: rgba(247, 243, 238, 0.7);
+}
+
+.section-overline.light {
+  color: var(--color-gold);
+}
+
+.experience-features {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: var(--space-xl);
+}
+
+.feature-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: rgba(247, 243, 238, 0.03);
+  border: 1px solid rgba(247, 243, 238, 0.08);
+  transition: all 0.4s var(--transition-smooth);
+}
+
+.feature-card:hover {
+  background: rgba(247, 243, 238, 0.06);
+  border-color: var(--color-gold);
+  transform: translateY(-5px);
+}
+
+.feature-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
+  color: var(--color-gold);
+}
+
+.feature-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.feature-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-cream);
+}
+
+.feature-card p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(247, 243, 238, 0.6);
+}
+
+.experience-amenities {
+  text-align: center;
+  padding-top: var(--space-lg);
+  border-top: 1px solid rgba(247, 243, 238, 0.1);
+}
+
+.experience-amenities h3 {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-md);
+  color: var(--color-cream);
+}
+
+.amenities-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: rgba(247, 243, 238, 0.8);
+}
+
+.amenity-check {
+  color: var(--color-terracotta);
+  font-weight: 600;
+}
+
+.experience .corner-ornament {
+  border-color: rgba(201, 169, 98, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .experience-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .experience-features {
+    grid-template-columns: 1fr;
+  }
+  
+  .amenities-list {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
