@@ -68,40 +68,37 @@ export const serviceTranslations = {
     },
     'sports': {
       name: "Sports Massage",
-      shortDesc: "Specialized massage for athletes to prevent injuries, prepare for events, and enhance recovery.",
-      longDesc: "Sports massage is specifically designed for people who are involved in physical activity. It helps prevent and treat injuries, enhance athletic performance, and reduce recovery time. Whether you're a professional athlete or a weekend warrior, sports massage can help you perform at your best. Our therapists are trained in the latest techniques to address the specific needs of active individuals.",
+      shortDesc: "Therapeutic massage designed for active people and athletes, using greater force and faster movements to improve performance and speed up recovery.",
+      longDesc: "Sports massage is a type of therapeutic massage designed for active people and athletes. It uses greater force and faster movements than relaxation massage, with the goal of improving performance and speeding up recovery.\n\n**How does it work?**\n• The therapist applies firmer pressure to work the muscles deeply\n• Fast and dynamic movements are used to stimulate the muscles\n• Techniques are adapted to the muscle groups most used in each sport or activity\n\n**What is it used for?**\n• Prepare muscles before physical activity\n• Promote recovery after exercise\n• Reduce muscle tension and fatigue\n• Help prevent sports injuries\n\n**How does it feel?**\n• It feels like an intense and energizing massage\n• The pressure is firm and the rhythm faster\n• It should be effective, not painful\n\n**Important note:** Sports massage is functional and specific, not just relaxing. The intensity and speed vary depending on the timing (before or after exercise) and should be performed by a trained professional.",
       benefits: [
-        "Prevents sports injuries",
-        "Improves flexibility",
-        "Enhances performance",
-        "Speeds up recovery",
-        "Reduces muscle soreness"
+        "Improves blood circulation",
+        "Increases muscle flexibility",
+        "Optimizes physical performance",
+        "Reduces pain and recovery time"
       ],
       features: ["Athletic focus", "Injury prevention", "Performance boost"]
     },
     'medical': {
       name: "Medical Massage",
-      shortDesc: "Therapeutic massage prescribed for specific medical conditions and rehabilitation needs.",
-      longDesc: "Medical massage is outcome-based massage, primarily the application of a specific treatment targeted to the specific problem(s) the patient presents. The treatment is administered after a thorough assessment/evaluation by the medical massage therapist with specific outcomes being the basis for treatment. It differs from regular massage in that it is specifically designed to treat diagnosed medical conditions.",
+      shortDesc: "Therapeutic and relaxing massage, but more intense and deeper than a traditional massage, focused on treating specific muscle pain.",
+      longDesc: "Medical massage is a type of therapeutic and relaxing massage, but more intense and deeper than a traditional massage. It is focused on treating specific muscle pain, loaded areas, and discomfort caused by injuries, stress, or poor posture.\n\n**How does it work?**\n• Combines relaxing techniques with deeper pressure\n• The therapist works in a localized manner, according to the patient's pain\n• Focuses on key points of the body where tension accumulates\n\n**What is it used for?**\n• Relieve muscle and joint pain\n• Treat contractures and stiffness\n• Help in the recovery of minor injuries\n• Reduce physical stress and accumulated tension\n\n**Most common areas and pain points**\n• Neck and shoulders (stress and poor posture)\n• Upper and lower back\n• Lumbar area\n• Hips and glutes\n• Legs and calves\n\n**How does it feel?**\n• It is a relaxing but firm massage\n• It may feel intense in loaded areas\n• It should always be controlled and tolerable, not painful\n\n**Important note:** Medical massage is personalized according to the patient's needs. The intensity is adjusted to each person and should be performed by a trained professional, especially when there is chronic pain or discomfort.",
       benefits: [
-        "Treats specific conditions",
-        "Aids rehabilitation",
-        "Reduces chronic pain",
+        "Reduces muscle pain",
+        "Relaxes body and mind",
         "Improves mobility",
-        "Complements medical treatment"
+        "Promotes muscle recovery"
       ],
       features: ["Therapeutic", "Rehabilitation", "Medical focus"]
     },
     'relax': {
       name: "Sensitive Relax Massage",
-      shortDesc: "Gentle, soothing massage designed for ultimate relaxation and stress relief.",
-      longDesc: "Our Sensitive Relax Massage is perfect for those seeking a gentle, nurturing touch. Using light to medium pressure, this massage promotes deep relaxation, reduces stress hormones, and creates a sense of overall well-being. The slow, flowing strokes calm the nervous system and help you disconnect from daily tensions. Ideal for those new to massage or who prefer a softer approach.",
+      shortDesc: "An exclusive sensory experience designed to disconnect from daily rhythm and immerse yourself in a deep state of calm and well-being.",
+      longDesc: "The relaxing massage is an exclusive sensory experience designed to disconnect from the daily rhythm and immerse yourself in a deep state of calm and well-being. Through soft and enveloping movements, the body and mind enter a natural balance, providing a sensation of absolute rest.\n\n**How does it work?**\n• Slow, fluid and harmonious movements that induce deep relaxation\n• Light to medium pressure, carefully adapted for maximum comfort\n• Full body work, creating a continuous and enveloping experience\n\n**What is it recommended for?**\n• Release stress and emotional tension\n• Promote deep relaxation of the nervous system\n• Improve circulation and body oxygenation\n• Promote rest, calm and integral well-being\n\n**Areas worked**\n• Back, neck and shoulders\n• Arms and hands\n• Legs and feet\n• Lumbar area\n\n**How does it feel?**\n• Deeply relaxing and comforting\n• Sensation of lightness and harmony\n• No pain, with delicate and pleasant pressure\n\n**Important note:** The relaxing massage is ideal for those seeking an absolute rest spa experience. It is not designed to treat specific muscle discomfort, but to offer a moment of disconnection, care and exclusive well-being.",
       benefits: [
-        "Deep relaxation",
-        "Stress reduction",
-        "Improved sleep",
-        "Mental clarity",
-        "Emotional balance"
+        "Deep relaxation of body and mind",
+        "Reduction of stress and accumulated fatigue",
+        "Improved mood",
+        "Sensation of balance, serenity and renewal"
       ],
       features: ["Gentle touch", "Stress relief", "Deep relaxation"]
     },
@@ -143,40 +140,37 @@ export const serviceTranslations = {
     },
     'sports': {
       name: "Masaje Deportivo",
-      shortDesc: "Masaje especializado para atletas para prevenir lesiones, prepararse para eventos y mejorar la recuperación.",
-      longDesc: "El masaje deportivo está específicamente diseñado para personas que realizan actividad física. Ayuda a prevenir y tratar lesiones, mejora el rendimiento atlético y reduce el tiempo de recuperación. Ya seas un atleta profesional o un deportista de fin de semana, el masaje deportivo puede ayudarte a rendir al máximo. Nuestros terapeutas están capacitados en las últimas técnicas para abordar las necesidades específicas de las personas activas.",
+      shortDesc: "Masaje terapéutico diseñado para personas activas y deportistas, utilizando mayor fuerza y movimientos más rápidos para mejorar el rendimiento y acelerar la recuperación.",
+      longDesc: "El masaje deportivo es un tipo de masaje terapéutico diseñado para personas activas y deportistas. Utiliza mayor fuerza y movimientos más rápidos que el masaje de relajación, con el objetivo de mejorar el rendimiento y acelerar la recuperación.\n\n**¿Cómo funciona?**\n• El terapeuta aplica presión más fuerte para trabajar los músculos en profundidad\n• Se utilizan movimientos rápidos y dinámicos para estimular los músculos\n• Las técnicas se adaptan a los grupos musculares más usados en cada deporte o actividad\n\n**¿Para qué se usa?**\n• Preparar los músculos antes de la actividad física\n• Favorecer la recuperación después del ejercicio\n• Reducir tensión muscular y fatiga\n• Ayudar a prevenir lesiones deportivas\n\n**¿Cómo se siente?**\n• Se percibe como un masaje intenso y energizante\n• La presión es firme y el ritmo más rápido\n• Debe ser efectivo, no doloroso\n\n**Nota importante:** El masaje deportivo es funcional y específico, no solo relajante. La intensidad y la velocidad varían según el momento (antes o después del ejercicio) y debe ser realizado por un profesional capacitado.",
       benefits: [
-        "Previene lesiones deportivas",
-        "Mejora la flexibilidad",
-        "Mejora el rendimiento",
-        "Acelera la recuperación",
-        "Reduce el dolor muscular"
+        "Mejora la circulación sanguínea",
+        "Aumenta la flexibilidad muscular",
+        "Optimiza el rendimiento físico",
+        "Disminuye el dolor y el tiempo de recuperación"
       ],
       features: ["Enfoque atlético", "Prevención de lesiones", "Mejora del rendimiento"]
     },
     'medical': {
       name: "Masaje Médico",
-      shortDesc: "Masaje terapéutico prescrito para condiciones médicas específicas y necesidades de rehabilitación.",
-      longDesc: "El masaje médico está basado en resultados, principalmente la aplicación de un tratamiento específico dirigido a los problemas específicos que presenta el paciente. El tratamiento se administra después de una evaluación exhaustiva por parte del terapeuta de masaje médico con resultados específicos siendo la base del tratamiento. Se diferencia del masaje regular en que está específicamente diseñado para tratar condiciones médicas diagnosticadas.",
+      shortDesc: "Masaje terapéutico y relajante, pero más intenso y profundo que un masaje tradicional, enfocado en tratar dolores musculares específicos.",
+      longDesc: "El masaje médico es un tipo de masaje terapéutico y relajante, pero más intenso y profundo que un masaje tradicional. Está enfocado en tratar dolores musculares específicos, zonas cargadas y molestias causadas por lesiones, estrés o malas posturas.\n\n**¿Cómo funciona?**\n• Combina técnicas relajantes con presión más profunda\n• El terapeuta trabaja de forma localizada, según el dolor del paciente\n• Se enfoca en puntos clave del cuerpo donde se acumula tensión\n\n**¿Para qué se usa?**\n• Aliviar dolores musculares y articulares\n• Tratar contracturas y rigidez\n• Ayudar en la recuperación de lesiones leves\n• Reducir el estrés físico y la tensión acumulada\n\n**Zonas y puntos más comunes con dolor**\n• Cuello y hombros (estrés y mala postura)\n• Espalda alta y baja\n• Zona lumbar\n• Caderas y glúteos\n• Piernas y pantorrillas\n\n**¿Cómo se siente?**\n• Es un masaje relajante pero firme\n• Puede sentirse intenso en zonas cargadas\n• Siempre debe ser controlado y tolerable, no doloroso\n\n**Nota importante:** El masaje médico es personalizado según las necesidades del paciente. La intensidad se ajusta a cada persona y debe ser realizado por un profesional capacitado, especialmente cuando hay dolor o molestias crónicas.",
       benefits: [
-        "Trata condiciones específicas",
-        "Ayuda a la rehabilitación",
-        "Reduce el dolor crónico",
+        "Disminuye el dolor muscular",
+        "Relaja el cuerpo y la mente",
         "Mejora la movilidad",
-        "Complementa el tratamiento médico"
+        "Favorece la recuperación muscular"
       ],
       features: ["Terapéutico", "Rehabilitación", "Enfoque médico"]
     },
     'relax': {
-      name: "Masaje Sensitivo Relajante",
-      shortDesc: "Masaje suave y reconfortante diseñado para la máxima relajación y alivio del estrés.",
-      longDesc: "Nuestro Masaje Sensitivo Relajante es perfecto para aquellos que buscan un toque suave y nutritivo. Usando presión ligera a media, este masaje promueve una relajación profunda, reduce las hormonas del estrés y crea una sensación de bienestar general. Los movimientos lentos y fluidos calman el sistema nervioso y te ayudan a desconectarte de las tensiones diarias. Ideal para quienes son nuevos en el masaje o prefieren un enfoque más suave.",
+      name: "Masaje Relajante – Experiencia Spa",
+      shortDesc: "Experiencia sensorial exclusiva diseñada para desconectar del ritmo diario y sumergirse en un estado profundo de calma y bienestar.",
+      longDesc: "El masaje relajante es una experiencia sensorial exclusiva diseñada para desconectar del ritmo diario y sumergirse en un estado profundo de calma y bienestar. A través de movimientos suaves y envolventes, el cuerpo y la mente entran en un equilibrio natural, proporcionando una sensación de descanso absoluto.\n\n**¿Cómo funciona?**\n• Movimientos lentos, fluidos y armoniosos que inducen una relajación profunda\n• Presión suave a media, cuidadosamente adaptada para ofrecer máximo confort\n• Trabajo global del cuerpo, creando una experiencia continua y envolvente\n\n**¿Para qué se recomienda?**\n• Liberar el estrés y la tensión emocional\n• Favorecer la relajación profunda del sistema nervioso\n• Mejorar la circulación y la oxigenación del cuerpo\n• Promover el descanso, la calma y el bienestar integral\n\n**Zonas que se trabajan**\n• Espalda, cuello y hombros\n• Brazos y manos\n• Piernas y pies\n• Zona lumbar\n\n**¿Cómo se siente?**\n• Profundamente relajante y reconfortante\n• Sensación de ligereza y armonía\n• Sin dolor, con una presión delicada y placentera\n\n**Nota importante:** El masaje relajante es ideal para quienes buscan una experiencia spa de descanso absoluto. No está diseñado para tratar molestias musculares específicas, sino para ofrecer un momento de desconexión, cuidado y bienestar exclusivo.",
       benefits: [
-        "Relajación profunda",
-        "Reducción del estrés",
-        "Mejora del sueño",
-        "Claridad mental",
-        "Equilibrio emocional"
+        "Relajación profunda del cuerpo y la mente",
+        "Reducción del estrés y la fatiga acumulada",
+        "Mejora del estado de ánimo",
+        "Sensación de equilibrio, serenidad y renovación"
       ],
       features: ["Toque suave", "Alivio del estrés", "Relajación profunda"]
     },
@@ -218,40 +212,37 @@ export const serviceTranslations = {
     },
     'sports': {
       name: "Massatge Esportiu",
-      shortDesc: "Massatge especialitzat per a atletes per prevenir lesions, preparar-se per a esdeveniments i millorar la recuperació.",
-      longDesc: "El massatge esportiu està específicament dissenyat per a persones que fan activitat física. Ajuda a prevenir i tractar lesions, millora el rendiment atlètic i redueix el temps de recuperació. Siguis un atleta professional o un esportista de cap de setmana, el massatge esportiu pot ajudar-te a rendir al màxim. Els nostres terapeutes estan capacitats en les últimes tècniques per abordar les necessitats específiques de les persones actives.",
+      shortDesc: "Massatge terapèutic dissenyat per a persones actives i esportistes, utilitzant més força i moviments més ràpids per millorar el rendiment i accelerar la recuperació.",
+      longDesc: "El massatge esportiu és un tipus de massatge terapèutic dissenyat per a persones actives i esportistes. Utilitza més força i moviments més ràpids que el massatge de relaxació, amb l'objectiu de millorar el rendiment i accelerar la recuperació.\n\n**Com funciona?**\n• El terapeuta aplica pressió més forta per treballar els músculs en profunditat\n• S'utilitzen moviments ràpids i dinàmics per estimular els músculs\n• Les tècniques s'adapten als grups musculars més usats en cada esport o activitat\n\n**Per a què s'usa?**\n• Preparar els músculs abans de l'activitat física\n• Afavorir la recuperació després de l'exercici\n• Reduir tensió muscular i fatiga\n• Ajudar a prevenir lesions esportives\n\n**Com es sent?**\n• Es percep com un massatge intens i energitzant\n• La pressió és ferma i el ritme més ràpid\n• Ha de ser efectiu, no dolorós\n\n**Nota important:** El massatge esportiu és funcional i específic, no només relaxant. La intensitat i la velocitat varien segons el moment (abans o després de l'exercici) i ha de ser realitzat per un professional capacitat.",
       benefits: [
-        "Prevé lesions esportives",
-        "Millora la flexibilitat",
-        "Millora el rendiment",
-        "Accelera la recuperació",
-        "Redueix el dolor muscular"
+        "Millora la circulació sanguínia",
+        "Augmenta la flexibilitat muscular",
+        "Optimitza el rendiment físic",
+        "Disminueix el dolor i el temps de recuperació"
       ],
       features: ["Enfocament atlètic", "Prevenció de lesions", "Millora del rendiment"]
     },
     'medical': {
       name: "Massatge Mèdic",
-      shortDesc: "Massatge terapèutic prescrit per a condicions mèdiques específiques i necessitats de rehabilitació.",
-      longDesc: "El massatge mèdic està basat en resultats, principalment l'aplicació d'un tractament específic dirigit als problemes específics que presenta el pacient. El tractament s'administra després d'una avaluació exhaustiva per part del terapeuta de massatge mèdic amb resultats específics sent la base del tractament. Es diferencia del massatge regular en què està específicament dissenyat per tractar condicions mèdiques diagnosticades.",
+      shortDesc: "Massatge terapèutic i relaxant, però més intens i profund que un massatge tradicional, enfocat a tractar dolors musculars específics.",
+      longDesc: "El massatge mèdic és un tipus de massatge terapèutic i relaxant, però més intens i profund que un massatge tradicional. Està enfocat a tractar dolors musculars específics, zones carregades i molèsties causades per lesions, estrès o males postures.\n\n**Com funciona?**\n• Combina tècniques relaxants amb pressió més profunda\n• El terapeuta treballa de forma localitzada, segons el dolor del pacient\n• S'enfoca en punts clau del cos on s'acumula tensió\n\n**Per a què s'usa?**\n• Alleujar dolors musculars i articulars\n• Tractar contractures i rigidesa\n• Ajudar en la recuperació de lesions lleus\n• Reduir l'estrès físic i la tensió acumulada\n\n**Zones i punts més comuns amb dolor**\n• Coll i espatlles (estrès i mala postura)\n• Esquena alta i baixa\n• Zona lumbar\n• Malucs i glutis\n• Cames i panxells\n\n**Com es sent?**\n• És un massatge relaxant però ferm\n• Pot sentir-se intens en zones carregades\n• Sempre ha de ser controlat i tolerable, no dolorós\n\n**Nota important:** El massatge mèdic és personalitzat segons les necessitats del pacient. La intensitat s'ajusta a cada persona i ha de ser realitzat per un professional capacitat, especialment quan hi ha dolor o molèsties cròniques.",
       benefits: [
-        "Tracta condicions específiques",
-        "Ajuda a la rehabilitació",
-        "Redueix el dolor crònic",
+        "Disminueix el dolor muscular",
+        "Relaxa el cos i la ment",
         "Millora la mobilitat",
-        "Complementa el tractament mèdic"
+        "Afavoreix la recuperació muscular"
       ],
       features: ["Terapèutic", "Rehabilitació", "Enfocament mèdic"]
     },
     'relax': {
-      name: "Massatge Sensitiu Relaxant",
-      shortDesc: "Massatge suau i reconfortant dissenyat per a la màxima relaxació i alleujament de l'estrès.",
-      longDesc: "El nostre Massatge Sensitiu Relaxant és perfecte per a aquells que busquen un toc suau i nutritiu. Usant pressió lleugera a mitjana, aquest massatge promou una relaxació profunda, redueix les hormones de l'estrès i crea una sensació de benestar general. Els moviments lents i fluids calmen el sistema nerviós i t'ajuden a desconnectar de les tensions diàries. Ideal per a qui són nous en el massatge o prefereixen un enfocament més suau.",
+      name: "Massatge Relaxant – Experiència Spa",
+      shortDesc: "Experiència sensorial exclusiva dissenyada per desconnectar del ritme diari i submergir-se en un estat profund de calma i benestar.",
+      longDesc: "El massatge relaxant és una experiència sensorial exclusiva dissenyada per desconnectar del ritme diari i submergir-se en un estat profund de calma i benestar. A través de moviments suaus i envoltants, el cos i la ment entren en un equilibri natural, proporcionant una sensació de descans absolut.\n\n**Com funciona?**\n• Moviments lents, fluids i harmoniosos que indueixen una relaxació profunda\n• Pressió suau a mitjana, curosament adaptada per oferir màxim confort\n• Treball global del cos, creant una experiència contínua i envoltant\n\n**Per a què es recomana?**\n• Alliberar l'estrès i la tensió emocional\n• Afavorir la relaxació profunda del sistema nerviós\n• Millorar la circulació i l'oxigenació del cos\n• Promoure el descans, la calma i el benestar integral\n\n**Zones que es treballen**\n• Esquena, coll i espatlles\n• Braços i mans\n• Cames i peus\n• Zona lumbar\n\n**Com es sent?**\n• Profundament relaxant i reconfortant\n• Sensació de lleugeresa i harmonia\n• Sense dolor, amb una pressió delicada i plaent\n\n**Nota important:** El massatge relaxant és ideal per a qui busquen una experiència spa de descans absolut. No està dissenyat per tractar molèsties musculars específiques, sinó per oferir un moment de desconnexió, cura i benestar exclusiu.",
       benefits: [
-        "Relaxació profunda",
-        "Reducció de l'estrès",
-        "Millora del son",
-        "Claredat mental",
-        "Equilibri emocional"
+        "Relaxació profunda del cos i la ment",
+        "Reducció de l'estrès i la fatiga acumulada",
+        "Millora de l'estat d'ànim",
+        "Sensació d'equilibri, serenitat i renovació"
       ],
       features: ["Toc suau", "Alleujament de l'estrès", "Relaxació profunda"]
     },
