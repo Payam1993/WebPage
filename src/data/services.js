@@ -44,9 +44,9 @@ export const servicesData = [
     image: "https://images.unsplash.com/photo-1591343395082-e120087004b4?w=600&q=80",
     detailImage: "https://images.unsplash.com/photo-1591343395082-e120087004b4?w=1200&q=80",
     prices: {
-      min30: 60,
-      min60: 100,
-      min90: 120
+      min30: 50,
+      min60: 90,
+      min90: 110
     }
   }
 ]
@@ -103,15 +103,15 @@ export const serviceTranslations = {
       features: ["Gentle touch", "Stress relief", "Deep relaxation"]
     },
     'feet': {
-      name: "Massage with Feet",
-      shortDesc: "Unique barefoot massage technique using the therapist's feet for deep, broad pressure.",
-      longDesc: "Ashiatsu, or barefoot massage, is a unique technique where the therapist uses their feet to deliver deep, flowing strokes. This allows for broader coverage and deeper pressure than traditional hand massage, while remaining comfortable and relaxing. The therapist holds onto overhead bars for balance and control, delivering consistent pressure that melts away tension. This is an exceptional choice for those who love deep pressure massage.",
+      name: "Foot Pressure Massage",
+      shortDesc: "A deep and harmonizing therapeutic experience where the body is worked through controlled and distributed pressure from the therapist's feet.",
+      longDesc: "The foot pressure massage is a deep and harmonizing therapeutic experience, where the body is worked through controlled and distributed pressure from the therapist's feet. This ancestral technique allows for a broader connection with the body, providing a sensation of intense calm, lightness and energetic renewal.\n\nThanks to the uniform distribution of weight and moderate pressure, the massage acts in an enveloping way, promoting deep relaxation and the body's natural detoxification processes.\n\n**How does it work?**\n• Moderate and constant pressure applied with the feet, in a controlled and safe manner\n• Distributed force that allows working large areas without generating punctual tension\n• Slow, rhythmic and fluid movements that induce a deep state of relaxation\n• Personalized pressure adaptation according to client needs\n\n**What is it recommended for?**\n• Release deep physical and mental tensions\n• Promote relaxation of the nervous system\n• Stimulate circulation and natural body drainage\n• Support detoxification and energetic balance processes\n• Induce a sensation of calm, stability and integral well-being\n\n**Areas worked**\n• Complete back\n• Arms and hands\n• Legs and feet\n• Lumbar area\n• Face (optional, upon request)\n\n**How does it feel?**\n• Deeply calming and enveloping\n• Sensation of physical and mental release\n• Firm but pleasant pressure, without pain\n• Sensation of lightness, fluidity and body balance\n\n**Important note:** This massage is designed for those seeking a deep experience of relaxation, balance and general well-being. The pressure is moderate and always adapted to client comfort, offering a safe, respectful and highly revitalizing experience.",
       benefits: [
-        "Extra deep pressure",
-        "Broad, flowing strokes",
-        "Full body coverage",
-        "Unique experience",
-        "Long-lasting relief"
+        "Deep relaxation of body and mind",
+        "Reduction of stress and accumulated tension",
+        "Improved circulation and body energy",
+        "Sensation of internal cleansing and renewal",
+        "Greater body connection and state of serenity"
       ],
       features: ["Barefoot technique", "Deep pressure", "Unique experience"]
     },
@@ -175,15 +175,15 @@ export const serviceTranslations = {
       features: ["Toque suave", "Alivio del estrés", "Relajación profunda"]
     },
     'feet': {
-      name: "Masaje con Pies",
-      shortDesc: "Técnica única de masaje descalzo usando los pies del terapeuta para una presión profunda y amplia.",
-      longDesc: "Ashiatsu, o masaje descalzo, es una técnica única donde el terapeuta usa sus pies para dar golpes profundos y fluidos. Esto permite una cobertura más amplia y una presión más profunda que el masaje tradicional con las manos, mientras permanece cómodo y relajante. El terapeuta se sostiene de barras superiores para equilibrio y control, entregando una presión consistente que derrite la tensión. Esta es una opción excepcional para aquellos que aman el masaje de presión profunda.",
+      name: "Masaje Corporal con Pies",
+      shortDesc: "Experiencia terapéutica profunda y armonizadora, en la que el cuerpo es trabajado mediante la presión controlada y distribuida de los pies del terapeuta.",
+      longDesc: "El masaje corporal con pies es una experiencia terapéutica profunda y armonizadora, en la que el cuerpo es trabajado mediante la presión controlada y distribuida de los pies del terapeuta. Esta técnica ancestral permite una conexión más amplia con el cuerpo, proporcionando una sensación de calma intensa, ligereza y renovación energética.\n\nGracias a la distribución uniforme del peso y la presión moderada, el masaje actúa de forma envolvente, favoreciendo la relajación profunda y los procesos naturales de desintoxicación del organismo.\n\n**¿Cómo funciona?**\n• Presión moderada y constante aplicada con los pies, de forma controlada y segura\n• Fuerza distribuida que permite trabajar zonas amplias sin generar tensión puntual\n• Movimientos lentos, rítmicos y fluidos que inducen un estado profundo de relajación\n• Adaptación personalizada de la presión según las necesidades del cliente\n\n**¿Para qué se recomienda?**\n• Liberar tensiones físicas y mentales profundas\n• Favorecer la relajación del sistema nervioso\n• Estimular la circulación y el drenaje natural del cuerpo\n• Apoyar procesos de desintoxicación y equilibrio energético\n• Inducir una sensación de calma, estabilidad y bienestar integral\n\n**Zonas que se trabajan**\n• Espalda completa\n• Brazos y manos\n• Piernas y pies\n• Zona lumbar\n• Rostro (opcional, bajo petición)\n\n**¿Cómo se siente?**\n• Profundamente calmante y envolvente\n• Sensación de descarga física y mental\n• Presión firme pero agradable, sin dolor\n• Sensación de ligereza, fluidez y equilibrio corporal\n\n**Nota importante:** Este masaje está diseñado para quienes buscan una experiencia profunda de relajación, equilibrio y bienestar general. La presión es moderada y siempre adaptada a la comodidad del cliente, ofreciendo una experiencia segura, respetuosa y altamente revitalizante.",
       benefits: [
-        "Presión extra profunda",
-        "Golpes amplios y fluidos",
-        "Cobertura de cuerpo completo",
-        "Experiencia única",
-        "Alivio duradero"
+        "Relajación profunda del cuerpo y la mente",
+        "Reducción del estrés y la tensión acumulada",
+        "Mejora de la circulación y la energía corporal",
+        "Sensación de limpieza interna y renovación",
+        "Mayor conexión corporal y estado de serenidad"
       ],
       features: ["Técnica descalzo", "Presión profunda", "Experiencia única"]
     },
@@ -247,15 +247,15 @@ export const serviceTranslations = {
       features: ["Toc suau", "Alleujament de l'estrès", "Relaxació profunda"]
     },
     'feet': {
-      name: "Massatge amb Peus",
-      shortDesc: "Tècnica única de massatge descalç usant els peus del terapeuta per a una pressió profunda i àmplia.",
-      longDesc: "Ashiatsu, o massatge descalç, és una tècnica única on el terapeuta usa els seus peus per donar cops profunds i fluids. Això permet una cobertura més àmplia i una pressió més profunda que el massatge tradicional amb les mans, mentre roman còmode i relaxant. El terapeuta es sosté de barres superiors per equilibri i control, entregant una pressió consistent que fon la tensió. Aquesta és una opció excepcional per a aquells que estimen el massatge de pressió profunda.",
+      name: "Massatge Corporal amb Peus",
+      shortDesc: "Experiència terapèutica profunda i harmonitzadora, en la qual el cos és treballat mitjançant la pressió controlada i distribuïda dels peus del terapeuta.",
+      longDesc: "El massatge corporal amb peus és una experiència terapèutica profunda i harmonitzadora, en la qual el cos és treballat mitjançant la pressió controlada i distribuïda dels peus del terapeuta. Aquesta tècnica ancestral permet una connexió més àmplia amb el cos, proporcionant una sensació de calma intensa, lleugeresa i renovació energètica.\n\nGràcies a la distribució uniforme del pes i la pressió moderada, el massatge actua de forma envoltant, afavorint la relaxació profunda i els processos naturals de desintoxicació de l'organisme.\n\n**Com funciona?**\n• Pressió moderada i constant aplicada amb els peus, de forma controlada i segura\n• Força distribuïda que permet treballar zones àmplies sense generar tensió puntual\n• Moviments lents, rítmics i fluids que indueixen un estat profund de relaxació\n• Adaptació personalitzada de la pressió segons les necessitats del client\n\n**Per a què es recomana?**\n• Alliberar tensions físiques i mentals profundes\n• Afavorir la relaxació del sistema nerviós\n• Estimular la circulació i el drenatge natural del cos\n• Donar suport a processos de desintoxicació i equilibri energètic\n• Induir una sensació de calma, estabilitat i benestar integral\n\n**Zones que es treballen**\n• Esquena completa\n• Braços i mans\n• Cames i peus\n• Zona lumbar\n• Rostre (opcional, sota petició)\n\n**Com es sent?**\n• Profundament calmant i envoltant\n• Sensació de descàrrega física i mental\n• Pressió ferma però agradable, sense dolor\n• Sensació de lleugeresa, fluïdesa i equilibri corporal\n\n**Nota important:** Aquest massatge està dissenyat per a qui busquen una experiència profunda de relaxació, equilibri i benestar general. La pressió és moderada i sempre adaptada a la comoditat del client, oferint una experiència segura, respectuosa i altament revitalitzant.",
       benefits: [
-        "Pressió extra profunda",
-        "Cops amplis i fluids",
-        "Cobertura de cos complet",
-        "Experiència única",
-        "Alleujament durador"
+        "Relaxació profunda del cos i la ment",
+        "Reducció de l'estrès i la tensió acumulada",
+        "Millora de la circulació i l'energia corporal",
+        "Sensació de neteja interna i renovació",
+        "Major connexió corporal i estat de serenitat"
       ],
       features: ["Tècnica descalç", "Pressió profunda", "Experiència única"]
     },
