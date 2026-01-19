@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useLanguage } from '../context/LanguageContext'
+import { servicesData, serviceTranslations } from '../data/services'
 import './Footer.css'
 
 const Footer = ({ setCursorVariant }) => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const currentYear = new Date().getFullYear()
-
-  const serviceNames = t.services.items.map(item => item.name).slice(0, 4)
+  
+  const serviceTexts = serviceTranslations[language]
+  const serviceNames = servicesData.slice(0, 4).map(service => serviceTexts[service.id]?.name || service.id)
 
   return (
     <footer className="footer">

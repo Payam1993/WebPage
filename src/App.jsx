@@ -13,6 +13,9 @@ import Footer from './components/Footer'
 import Cursor from './components/Cursor'
 import Loader from './components/Loader'
 import ServiceDetail from './components/ServiceDetail'
+import StaffLogin from './components/StaffLogin'
+import WorkWithUs from './components/WorkWithUs'
+import OurTeam from './components/OurTeam'
 import './App.css'
 
 function HomePage({ setCursorVariant }) {
@@ -60,6 +63,9 @@ function App() {
                   <Routes>
                     <Route path="/" element={<HomePage setCursorVariant={setCursorVariant} />} />
                     <Route path="/service/:serviceId" element={<ServiceDetail setCursorVariant={setCursorVariant} />} />
+                    <Route path="/staff-login" element={<StaffLogin setCursorVariant={setCursorVariant} />} />
+                    <Route path="/work-with-us" element={<WorkWithUs setCursorVariant={setCursorVariant} />} />
+                    <Route path="/our-team" element={<OurTeam setCursorVariant={setCursorVariant} />} />
                   </Routes>
                 </main>
                 <Footer setCursorVariant={setCursorVariant} />

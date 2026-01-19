@@ -48,6 +48,17 @@ export const servicesData = [
       min60: 90,
       min90: 110
     }
+  },
+  {
+    id: 'corporate',
+    image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80",
+    detailImage: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&q=80",
+    prices: {
+      min30: null,
+      min60: null,
+      min90: null
+    },
+    isCorporate: true
   }
 ]
 
@@ -115,6 +126,20 @@ export const serviceTranslations = {
       ],
       features: ["Barefoot technique", "Deep pressure", "Unique experience"]
     },
+    'corporate': {
+      name: "Corporate Wellness",
+      shortDesc: "Exclusive wellness programs for hotels, businesses and organizations. Gift cards and special packages for your employees and clients.",
+      longDesc: "Elevate your company's employee benefits with our Corporate Wellness Program. We partner with hotels, businesses, and organizations to provide exclusive wellness experiences that boost employee satisfaction, reduce stress, and promote a healthy work-life balance.\n\n**What We Offer**\n• Customized gift card programs for employee rewards and incentives\n• Special corporate rates for bulk purchases\n• Branded gift cards for your hotel guests or clients\n• Flexible redemption options for all our massage services\n• Corporate wellness events at your location\n\n**Perfect For**\n• Hotels looking to offer premium spa experiences to guests\n• Companies wanting to reward and motivate employees\n• HR departments seeking wellness benefits\n• Event organizers needing unique gift experiences\n• Client appreciation and loyalty programs\n\n**How It Works**\n• Contact us to discuss your specific needs\n• We create a customized proposal for your organization\n• Choose from gift cards, packages, or on-site services\n• Enjoy preferential corporate pricing\n• Simple invoicing and administration\n\n**Why Choose Confession Barcelona?**\n• Premium wellness experience in the heart of Barcelona\n• Professional, certified therapists\n• Flexible scheduling and services\n• Dedicated corporate account management\n• Customizable packages to fit any budget",
+      benefits: [
+        "Boost employee satisfaction and retention",
+        "Reduce workplace stress and burnout",
+        "Unique reward and incentive options",
+        "Special corporate rates",
+        "Customized wellness solutions"
+      ],
+      features: ["Gift Cards", "Corporate Rates", "Custom Packages"],
+      contactUs: "Contact Us for Corporate Pricing"
+    },
     consultMore: "For sessions over 90 min, please contact us",
     duration: "Duration",
     price: "Price",
@@ -122,7 +147,32 @@ export const serviceTranslations = {
     askQuestion: "Ask a Question",
     benefits: "Benefits",
     backToServices: "Back to Services",
-    selectDuration: "Select Duration"
+    selectDuration: "Select Duration",
+    // Reservation Form
+    reservation: {
+      title: "Book Your Session",
+      subtitle: "Fill in your details to check availability",
+      name: "Name",
+      namePlaceholder: "Your name",
+      surname: "Surname",
+      surnamePlaceholder: "Your surname",
+      phone: "Phone Number",
+      phonePlaceholder: "+34 XXX XXX XXX",
+      email: "Email",
+      emailPlaceholder: "your@email.com",
+      emailOptional: "(Optional)",
+      therapist: "Preferred Therapist",
+      therapistPlaceholder: "Select a therapist",
+      noPreference: "No preference / Random",
+      viewTherapists: "View our therapists",
+      service: "Service",
+      servicePlaceholder: "Select a service",
+      duration: "Duration",
+      checkAvailability: "Check Availability",
+      successTitle: "Request Received!",
+      successMessage: "We will contact you shortly to confirm your booking.",
+      close: "Close"
+    }
   },
   es: {
     'deep-tissue': {
@@ -187,6 +237,20 @@ export const serviceTranslations = {
       ],
       features: ["Técnica descalzo", "Presión profunda", "Experiencia única"]
     },
+    'corporate': {
+      name: "Bienestar Corporativo",
+      shortDesc: "Programas exclusivos de bienestar para hoteles, empresas y organizaciones. Tarjetas regalo y paquetes especiales para sus empleados y clientes.",
+      longDesc: "Eleve los beneficios de sus empleados con nuestro Programa de Bienestar Corporativo. Colaboramos con hoteles, empresas y organizaciones para ofrecer experiencias de bienestar exclusivas que aumentan la satisfacción de los empleados, reducen el estrés y promueven un equilibrio saludable entre trabajo y vida personal.\n\n**Lo Que Ofrecemos**\n• Programas de tarjetas regalo personalizadas para recompensas e incentivos de empleados\n• Tarifas corporativas especiales para compras al por mayor\n• Tarjetas regalo personalizadas para huéspedes de hotel o clientes\n• Opciones de canje flexibles para todos nuestros servicios de masaje\n• Eventos de bienestar corporativo en su ubicación\n\n**Perfecto Para**\n• Hoteles que buscan ofrecer experiencias spa premium a sus huéspedes\n• Empresas que desean recompensar y motivar a sus empleados\n• Departamentos de RRHH que buscan beneficios de bienestar\n• Organizadores de eventos que necesitan experiencias de regalo únicas\n• Programas de fidelización y agradecimiento a clientes\n\n**Cómo Funciona**\n• Contáctenos para discutir sus necesidades específicas\n• Creamos una propuesta personalizada para su organización\n• Elija entre tarjetas regalo, paquetes o servicios en su ubicación\n• Disfrute de precios corporativos preferenciales\n• Facturación y administración sencillas\n\n**¿Por Qué Elegir Confession Barcelona?**\n• Experiencia de bienestar premium en el corazón de Barcelona\n• Terapeutas profesionales y certificados\n• Horarios y servicios flexibles\n• Gestión dedicada de cuentas corporativas\n• Paquetes personalizables para cualquier presupuesto",
+      benefits: [
+        "Aumenta la satisfacción y retención de empleados",
+        "Reduce el estrés y el agotamiento laboral",
+        "Opciones únicas de recompensa e incentivos",
+        "Tarifas corporativas especiales",
+        "Soluciones de bienestar personalizadas"
+      ],
+      features: ["Tarjetas Regalo", "Tarifas Corporativas", "Paquetes Personalizados"],
+      contactUs: "Contáctenos para Precios Corporativos"
+    },
     consultMore: "Para sesiones de más de 90 min, contáctenos",
     duration: "Duración",
     price: "Precio",
@@ -194,7 +258,32 @@ export const serviceTranslations = {
     askQuestion: "Hacer una Pregunta",
     benefits: "Beneficios",
     backToServices: "Volver a Servicios",
-    selectDuration: "Seleccionar Duración"
+    selectDuration: "Seleccionar Duración",
+    // Reservation Form
+    reservation: {
+      title: "Reserva Tu Sesión",
+      subtitle: "Completa tus datos para verificar disponibilidad",
+      name: "Nombre",
+      namePlaceholder: "Tu nombre",
+      surname: "Apellido",
+      surnamePlaceholder: "Tu apellido",
+      phone: "Teléfono",
+      phonePlaceholder: "+34 XXX XXX XXX",
+      email: "Correo Electrónico",
+      emailPlaceholder: "tu@email.com",
+      emailOptional: "(Opcional)",
+      therapist: "Terapeuta Preferido",
+      therapistPlaceholder: "Selecciona un terapeuta",
+      noPreference: "Sin preferencia / Aleatorio",
+      viewTherapists: "Ver nuestros terapeutas",
+      service: "Servicio",
+      servicePlaceholder: "Selecciona un servicio",
+      duration: "Duración",
+      checkAvailability: "Comprobar Disponibilidad",
+      successTitle: "¡Solicitud Recibida!",
+      successMessage: "Nos pondremos en contacto contigo pronto para confirmar tu reserva.",
+      close: "Cerrar"
+    }
   },
   ca: {
     'deep-tissue': {
@@ -259,6 +348,20 @@ export const serviceTranslations = {
       ],
       features: ["Tècnica descalç", "Pressió profunda", "Experiència única"]
     },
+    'corporate': {
+      name: "Benestar Corporatiu",
+      shortDesc: "Programes exclusius de benestar per a hotels, empreses i organitzacions. Targetes regal i paquets especials per als seus empleats i clients.",
+      longDesc: "Elevi els beneficis dels seus empleats amb el nostre Programa de Benestar Corporatiu. Col·laborem amb hotels, empreses i organitzacions per oferir experiències de benestar exclusives que augmenten la satisfacció dels empleats, redueixen l'estrès i promouen un equilibri saludable entre treball i vida personal.\n\n**El Que Oferim**\n• Programes de targetes regal personalitzades per a recompenses i incentius d'empleats\n• Tarifes corporatives especials per a compres a l'engròs\n• Targetes regal personalitzades per a hostes d'hotel o clients\n• Opcions de bescanvi flexibles per a tots els nostres serveis de massatge\n• Esdeveniments de benestar corporatiu a la seva ubicació\n\n**Perfecte Per A**\n• Hotels que busquen oferir experiències spa premium als seus hostes\n• Empreses que desitgen recompensar i motivar els seus empleats\n• Departaments de RRHH que busquen beneficis de benestar\n• Organitzadors d'esdeveniments que necessiten experiències de regal úniques\n• Programes de fidelització i agraïment a clients\n\n**Com Funciona**\n• Contacteu-nos per discutir les seves necessitats específiques\n• Creem una proposta personalitzada per a la seva organització\n• Triï entre targetes regal, paquets o serveis a la seva ubicació\n• Gaudeixi de preus corporatius preferencials\n• Facturació i administració senzilles\n\n**Per Què Triar Confession Barcelona?**\n• Experiència de benestar premium al cor de Barcelona\n• Terapeutes professionals i certificats\n• Horaris i serveis flexibles\n• Gestió dedicada de comptes corporatius\n• Paquets personalitzables per a qualsevol pressupost",
+      benefits: [
+        "Augmenta la satisfacció i retenció d'empleats",
+        "Redueix l'estrès i l'esgotament laboral",
+        "Opcions úniques de recompensa i incentius",
+        "Tarifes corporatives especials",
+        "Solucions de benestar personalitzades"
+      ],
+      features: ["Targetes Regal", "Tarifes Corporatives", "Paquets Personalitzats"],
+      contactUs: "Contacteu-nos per a Preus Corporatius"
+    },
     consultMore: "Per a sessions de més de 90 min, contacteu-nos",
     duration: "Durada",
     price: "Preu",
@@ -266,7 +369,32 @@ export const serviceTranslations = {
     askQuestion: "Fer una Pregunta",
     benefits: "Beneficis",
     backToServices: "Tornar a Serveis",
-    selectDuration: "Seleccionar Durada"
+    selectDuration: "Seleccionar Durada",
+    // Reservation Form
+    reservation: {
+      title: "Reserva la Teva Sessió",
+      subtitle: "Completa les teves dades per verificar disponibilitat",
+      name: "Nom",
+      namePlaceholder: "El teu nom",
+      surname: "Cognom",
+      surnamePlaceholder: "El teu cognom",
+      phone: "Telèfon",
+      phonePlaceholder: "+34 XXX XXX XXX",
+      email: "Correu Electrònic",
+      emailPlaceholder: "el_teu@email.com",
+      emailOptional: "(Opcional)",
+      therapist: "Terapeuta Preferit",
+      therapistPlaceholder: "Selecciona un terapeuta",
+      noPreference: "Sense preferència / Aleatori",
+      viewTherapists: "Veure els nostres terapeutes",
+      service: "Servei",
+      servicePlaceholder: "Selecciona un servei",
+      duration: "Durada",
+      checkAvailability: "Comprovar Disponibilitat",
+      successTitle: "Sol·licitud Rebuda!",
+      successMessage: "Ens posarem en contacte amb tu aviat per confirmar la teva reserva.",
+      close: "Tancar"
+    }
   }
 }
 

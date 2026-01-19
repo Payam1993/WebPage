@@ -125,24 +125,6 @@ const Hero = ({ setCursorVariant }) => {
             </a>
           </motion.div>
         </div>
-
-        <motion.div 
-          className="hero-scroll-indicator"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-        >
-          <span>{t.hero.scroll}</span>
-          <motion.div 
-            className="scroll-line"
-            animate={{ scaleY: [0, 1, 0] }}
-            transition={{ 
-              duration: 2, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
-            }}
-          />
-        </motion.div>
       </motion.div>
 
       <div className="corner-ornament top-left" />

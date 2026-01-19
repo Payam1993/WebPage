@@ -11,6 +11,9 @@ export const translations = {
       experience: "Experience",
       testimonials: "Testimonials",
       bookNow: "Book Now",
+      workWithUs: "Work With Us",
+      ourTeam: "Our Therapists",
+      staffSignIn: "Staff Sign In",
       location: "Barcelona, Spain",
     },
     // Hero
@@ -31,38 +34,24 @@ export const translations = {
       bookThis: "Book This Service",
       customCta: "Looking for something special?",
       customBtn: "Request Custom Treatment",
-      items: [
-        {
-          name: "Signature Confession",
-          description: "Our signature full-body massage combining Swedish, deep tissue, and aromatherapy techniques for complete relaxation.",
-          features: ["Hot stones", "Essential oils", "Scalp massage"]
-        },
-        {
-          name: "Deep Tissue Revival",
-          description: "Targeted pressure therapy to release chronic muscle tension and restore natural body alignment.",
-          features: ["Muscle release", "Posture correction", "Pain relief"]
-        },
-        {
-          name: "Mediterranean Ritual",
-          description: "A luxurious journey inspired by ancient Mediterranean wellness traditions with olive oil and sea salt.",
-          features: ["Body scrub", "Warm wrap", "Facial massage"]
-        },
-        {
-          name: "Couples Harmony",
-          description: "Share the experience of relaxation with your partner in our exclusive couples suite.",
-          features: ["Private suite", "Champagne", "Synchronized massage"]
-        },
-        {
-          name: "Hot Stone Therapy",
-          description: "Heated basalt stones melt away tension while promoting deep muscle relaxation and energy flow.",
-          features: ["Volcanic stones", "Heat therapy", "Energy balance"]
-        },
-        {
-          name: "Aromatherapy Bliss",
-          description: "Custom-blended essential oils paired with gentle Swedish techniques for sensory harmony.",
-          features: ["Custom blends", "Mood enhancement", "Gentle touch"]
-        }
-      ]
+    },
+    // Corporate
+    corporate: {
+      agreementBased: "Agreement Based",
+      contactUs: "Contact Us",
+      formSubtitle: "Fill out the form and we will contact you shortly.",
+      name: "Name",
+      namePlaceholder: "Your name",
+      surname: "Surname",
+      surnamePlaceholder: "Your surname",
+      phone: "Phone Number",
+      email: "Email",
+      company: "Company Name",
+      companyPlaceholder: "Your company name",
+      submit: "Submit",
+      successTitle: "Thank You!",
+      successMessage: "We will get in contact with you as soon as possible.",
+      close: "Close"
     },
     // About
     about: {
@@ -139,6 +128,77 @@ export const translations = {
         message: "Your booking request has been received. We'll contact you shortly to confirm your appointment."
       }
     },
+    // Work With Us
+    workWithUs: {
+      title: "Join Our Team",
+      subtitle: "Become part of the Confession Barcelona family",
+      intro: "Are you a professional massage therapist looking for an exceptional work environment? At Confession Barcelona, we offer qualified professionals the opportunity to practice in our premium wellness center.",
+      offer: "What We Offer",
+      offerItems: [
+        "Private, fully-equipped treatment rooms available for rent",
+        "Premium location in the heart of Barcelona",
+        "Flexible scheduling options",
+        "Professional and welcoming environment",
+        "Access to our client base and booking system"
+      ],
+      requirements: "Requirements",
+      requirementsItems: [
+        "Professional massage therapy certification",
+        "Minimum 2 years of experience",
+        "Excellent communication skills",
+        "Passion for wellness and client care"
+      ],
+      formTitle: "Apply Now",
+      formSubtitle: "Fill out the form below and attach your CV. We will contact you shortly.",
+      form: {
+        name: "First Name",
+        namePlaceholder: "Your first name",
+        surname: "Surname",
+        surnamePlaceholder: "Your surname",
+        phone: "Phone Number",
+        phonePlaceholder: "+34 XXX XXX XXX",
+        email: "Email Address",
+        emailPlaceholder: "your@email.com",
+        emailOptional: "(Optional)",
+        cv: "Upload CV",
+        cvNote: "PDF or Word document (with photo recommended)",
+        cvButton: "Choose File",
+        cvNoFile: "No file selected",
+        submit: "Submit Application"
+      },
+      success: {
+        title: "Application Received!",
+        message: "Thank you for your interest in joining our team. We will review your application and contact you soon."
+      },
+      backToHome: "Back to Home"
+    },
+    // Our Team Page
+    ourTeam: {
+      title: "Our Professional Therapists",
+      subtitle: "Meet the skilled hands behind your wellness journey",
+      intro: "At Confession Barcelona, we take pride in our exceptional team of certified massage therapists. Each member brings unique expertise, years of experience, and a genuine passion for helping you achieve optimal well-being.",
+      experience: "years experience",
+      languages: "Languages",
+      specialties: "Specialties",
+      certifications: "Certifications",
+      bookWith: "Book with",
+      backToHome: "Back to Home"
+    },
+    // Staff Login
+    staffLogin: {
+      title: "Staff Portal",
+      subtitle: "Sign in to access the staff dashboard",
+      email: "Email",
+      emailPlaceholder: "your@email.com",
+      password: "Password",
+      rememberMe: "Remember me",
+      forgotPassword: "Forgot password?",
+      signIn: "Sign In",
+      invalidCredentials: "Invalid credentials. Please try again.",
+      needHelp: "Need help?",
+      contactAdmin: "Contact admin",
+      backToHome: "Back to Home"
+    },
     // Footer
     footer: {
       tagline: "Where healing becomes art. Experience the finest massage therapy in the heart of Barcelona.",
@@ -161,6 +221,9 @@ export const translations = {
       experience: "Experiencia",
       testimonials: "Testimonios",
       bookNow: "Reservar",
+      workWithUs: "Trabaja con Nosotros",
+      ourTeam: "Nuestros Terapeutas",
+      staffSignIn: "Acceso Personal",
       location: "Barcelona, España",
     },
     // Hero
@@ -181,38 +244,24 @@ export const translations = {
       bookThis: "Reservar Este Servicio",
       customCta: "¿Buscas algo especial?",
       customBtn: "Solicitar Tratamiento Personalizado",
-      items: [
-        {
-          name: "Signature Confession",
-          description: "Nuestro masaje corporal completo característico que combina técnicas suecas, de tejido profundo y aromaterapia para una relajación completa.",
-          features: ["Piedras calientes", "Aceites esenciales", "Masaje capilar"]
-        },
-        {
-          name: "Deep Tissue Revival",
-          description: "Terapia de presión dirigida para liberar la tensión muscular crónica y restaurar la alineación natural del cuerpo.",
-          features: ["Liberación muscular", "Corrección postural", "Alivio del dolor"]
-        },
-        {
-          name: "Ritual Mediterráneo",
-          description: "Un viaje lujoso inspirado en las antiguas tradiciones de bienestar mediterráneas con aceite de oliva y sal marina.",
-          features: ["Exfoliación corporal", "Envoltura cálida", "Masaje facial"]
-        },
-        {
-          name: "Armonía en Pareja",
-          description: "Comparte la experiencia de relajación con tu pareja en nuestra exclusiva suite para parejas.",
-          features: ["Suite privada", "Champagne", "Masaje sincronizado"]
-        },
-        {
-          name: "Terapia de Piedras Calientes",
-          description: "Las piedras de basalto calentadas derriten la tensión mientras promueven la relajación muscular profunda y el flujo de energía.",
-          features: ["Piedras volcánicas", "Terapia de calor", "Equilibrio energético"]
-        },
-        {
-          name: "Aromaterapia Bliss",
-          description: "Aceites esenciales mezclados a medida combinados con técnicas suecas suaves para la armonía sensorial.",
-          features: ["Mezclas personalizadas", "Mejora del ánimo", "Toque suave"]
-        }
-      ]
+    },
+    // Corporate
+    corporate: {
+      agreementBased: "Según Acuerdo",
+      contactUs: "Contáctenos",
+      formSubtitle: "Complete el formulario y nos pondremos en contacto pronto.",
+      name: "Nombre",
+      namePlaceholder: "Tu nombre",
+      surname: "Apellido",
+      surnamePlaceholder: "Tu apellido",
+      phone: "Teléfono",
+      email: "Correo Electrónico",
+      company: "Nombre de Empresa",
+      companyPlaceholder: "Nombre de tu empresa",
+      submit: "Enviar",
+      successTitle: "¡Gracias!",
+      successMessage: "Nos pondremos en contacto contigo lo antes posible.",
+      close: "Cerrar"
     },
     // About
     about: {
@@ -289,6 +338,77 @@ export const translations = {
         message: "Hemos recibido tu solicitud de reserva. Nos pondremos en contacto contigo pronto para confirmar tu cita."
       }
     },
+    // Work With Us
+    workWithUs: {
+      title: "Únete a Nuestro Equipo",
+      subtitle: "Forma parte de la familia Confession Barcelona",
+      intro: "¿Eres un terapeuta de masajes profesional buscando un entorno de trabajo excepcional? En Confession Barcelona, ofrecemos a profesionales cualificados la oportunidad de ejercer en nuestro centro de bienestar premium.",
+      offer: "Lo Que Ofrecemos",
+      offerItems: [
+        "Salas de tratamiento privadas y completamente equipadas disponibles para alquiler",
+        "Ubicación premium en el corazón de Barcelona",
+        "Opciones de horarios flexibles",
+        "Ambiente profesional y acogedor",
+        "Acceso a nuestra base de clientes y sistema de reservas"
+      ],
+      requirements: "Requisitos",
+      requirementsItems: [
+        "Certificación profesional en terapia de masajes",
+        "Mínimo 2 años de experiencia",
+        "Excelentes habilidades de comunicación",
+        "Pasión por el bienestar y la atención al cliente"
+      ],
+      formTitle: "Aplica Ahora",
+      formSubtitle: "Completa el formulario a continuación y adjunta tu CV. Nos pondremos en contacto contigo pronto.",
+      form: {
+        name: "Nombre",
+        namePlaceholder: "Tu nombre",
+        surname: "Apellido",
+        surnamePlaceholder: "Tu apellido",
+        phone: "Número de Teléfono",
+        phonePlaceholder: "+34 XXX XXX XXX",
+        email: "Correo Electrónico",
+        emailPlaceholder: "tu@correo.com",
+        emailOptional: "(Opcional)",
+        cv: "Subir CV",
+        cvNote: "Documento PDF o Word (con foto recomendado)",
+        cvButton: "Elegir Archivo",
+        cvNoFile: "Ningún archivo seleccionado",
+        submit: "Enviar Solicitud"
+      },
+      success: {
+        title: "¡Solicitud Recibida!",
+        message: "Gracias por tu interés en unirte a nuestro equipo. Revisaremos tu solicitud y te contactaremos pronto."
+      },
+      backToHome: "Volver al Inicio"
+    },
+    // Our Team Page
+    ourTeam: {
+      title: "Nuestros Terapeutas Profesionales",
+      subtitle: "Conoce las manos expertas detrás de tu viaje de bienestar",
+      intro: "En Confession Barcelona, nos enorgullecemos de nuestro excepcional equipo de terapeutas de masaje certificados. Cada miembro aporta experiencia única, años de práctica y una pasión genuina por ayudarte a alcanzar un bienestar óptimo.",
+      experience: "años de experiencia",
+      languages: "Idiomas",
+      specialties: "Especialidades",
+      certifications: "Certificaciones",
+      bookWith: "Reservar con",
+      backToHome: "Volver al Inicio"
+    },
+    // Staff Login
+    staffLogin: {
+      title: "Portal del Personal",
+      subtitle: "Inicia sesión para acceder al panel de personal",
+      email: "Correo Electrónico",
+      emailPlaceholder: "tu@correo.com",
+      password: "Contraseña",
+      rememberMe: "Recordarme",
+      forgotPassword: "¿Olvidaste tu contraseña?",
+      signIn: "Iniciar Sesión",
+      invalidCredentials: "Credenciales inválidas. Inténtalo de nuevo.",
+      needHelp: "¿Necesitas ayuda?",
+      contactAdmin: "Contacta al administrador",
+      backToHome: "Volver al Inicio"
+    },
     // Footer
     footer: {
       tagline: "Donde la curación se convierte en arte. Experimenta la mejor terapia de masajes en el corazón de Barcelona.",
@@ -311,6 +431,9 @@ export const translations = {
       experience: "Experiència",
       testimonials: "Testimonis",
       bookNow: "Reservar",
+      workWithUs: "Treballa amb Nosaltres",
+      ourTeam: "Els Nostres Terapeutes",
+      staffSignIn: "Accés Personal",
       location: "Barcelona, Catalunya",
     },
     // Hero
@@ -331,38 +454,24 @@ export const translations = {
       bookThis: "Reservar Aquest Servei",
       customCta: "Busques alguna cosa especial?",
       customBtn: "Sol·licitar Tractament Personalitzat",
-      items: [
-        {
-          name: "Signature Confession",
-          description: "El nostre massatge corporal complet característic que combina tècniques sueques, de teixit profund i aromateràpia per a una relaxació completa.",
-          features: ["Pedres calentes", "Olis essencials", "Massatge capil·lar"]
-        },
-        {
-          name: "Deep Tissue Revival",
-          description: "Teràpia de pressió dirigida per alliberar la tensió muscular crònica i restaurar l'alineació natural del cos.",
-          features: ["Alliberament muscular", "Correcció postural", "Alleujament del dolor"]
-        },
-        {
-          name: "Ritual Mediterrani",
-          description: "Un viatge luxós inspirat en les antigues tradicions de benestar mediterrànies amb oli d'oliva i sal marina.",
-          features: ["Exfoliació corporal", "Embolcall càlid", "Massatge facial"]
-        },
-        {
-          name: "Harmonia en Parella",
-          description: "Comparteix l'experiència de relaxació amb la teva parella a la nostra exclusiva suite per a parelles.",
-          features: ["Suite privada", "Xampany", "Massatge sincronitzat"]
-        },
-        {
-          name: "Teràpia de Pedres Calentes",
-          description: "Les pedres de basalt escalfades fonen la tensió mentre promouen la relaxació muscular profunda i el flux d'energia.",
-          features: ["Pedres volcàniques", "Teràpia de calor", "Equilibri energètic"]
-        },
-        {
-          name: "Aromateràpia Bliss",
-          description: "Olis essencials barrejats a mida combinats amb tècniques sueques suaus per a l'harmonia sensorial.",
-          features: ["Barreges personalitzades", "Millora de l'ànim", "Toc suau"]
-        }
-      ]
+    },
+    // Corporate
+    corporate: {
+      agreementBased: "Segons Acord",
+      contactUs: "Contacteu-nos",
+      formSubtitle: "Completa el formulari i ens posarem en contacte aviat.",
+      name: "Nom",
+      namePlaceholder: "El teu nom",
+      surname: "Cognom",
+      surnamePlaceholder: "El teu cognom",
+      phone: "Telèfon",
+      email: "Correu Electrònic",
+      company: "Nom de l'Empresa",
+      companyPlaceholder: "Nom de la teva empresa",
+      submit: "Enviar",
+      successTitle: "Gràcies!",
+      successMessage: "Ens posarem en contacte amb tu el més aviat possible.",
+      close: "Tancar"
     },
     // About
     about: {
@@ -438,6 +547,77 @@ export const translations = {
         title: "Gràcies!",
         message: "Hem rebut la teva sol·licitud de reserva. Ens posarem en contacte amb tu aviat per confirmar la teva cita."
       }
+    },
+    // Work With Us
+    workWithUs: {
+      title: "Uneix-te al Nostre Equip",
+      subtitle: "Forma part de la família Confession Barcelona",
+      intro: "Ets un terapeuta de massatges professional buscant un entorn de treball excepcional? A Confession Barcelona, oferim a professionals qualificats l'oportunitat d'exercir al nostre centre de benestar premium.",
+      offer: "El Que Oferim",
+      offerItems: [
+        "Sales de tractament privades i completament equipades disponibles per a lloguer",
+        "Ubicació premium al cor de Barcelona",
+        "Opcions d'horaris flexibles",
+        "Ambient professional i acollidor",
+        "Accés a la nostra base de clients i sistema de reserves"
+      ],
+      requirements: "Requisits",
+      requirementsItems: [
+        "Certificació professional en teràpia de massatges",
+        "Mínim 2 anys d'experiència",
+        "Excel·lents habilitats de comunicació",
+        "Passió pel benestar i l'atenció al client"
+      ],
+      formTitle: "Aplica Ara",
+      formSubtitle: "Completa el formulari a continuació i adjunta el teu CV. Ens posarem en contacte amb tu aviat.",
+      form: {
+        name: "Nom",
+        namePlaceholder: "El teu nom",
+        surname: "Cognom",
+        surnamePlaceholder: "El teu cognom",
+        phone: "Número de Telèfon",
+        phonePlaceholder: "+34 XXX XXX XXX",
+        email: "Correu Electrònic",
+        emailPlaceholder: "el.teu@correu.com",
+        emailOptional: "(Opcional)",
+        cv: "Pujar CV",
+        cvNote: "Document PDF o Word (amb foto recomanat)",
+        cvButton: "Triar Arxiu",
+        cvNoFile: "Cap arxiu seleccionat",
+        submit: "Enviar Sol·licitud"
+      },
+      success: {
+        title: "Sol·licitud Rebuda!",
+        message: "Gràcies pel teu interès en unir-te al nostre equip. Revisarem la teva sol·licitud i et contactarem aviat."
+      },
+      backToHome: "Tornar a l'Inici"
+    },
+    // Our Team Page
+    ourTeam: {
+      title: "Els Nostres Terapeutes Professionals",
+      subtitle: "Coneix les mans expertes darrere del teu viatge de benestar",
+      intro: "A Confession Barcelona, ens enorgullim del nostre excepcional equip de terapeutes de massatge certificats. Cada membre aporta experiència única, anys de pràctica i una passió genuïna per ajudar-te a aconseguir un benestar òptim.",
+      experience: "anys d'experiència",
+      languages: "Idiomes",
+      specialties: "Especialitats",
+      certifications: "Certificacions",
+      bookWith: "Reservar amb",
+      backToHome: "Tornar a l'Inici"
+    },
+    // Staff Login
+    staffLogin: {
+      title: "Portal del Personal",
+      subtitle: "Inicia sessió per accedir al panell de personal",
+      email: "Correu Electrònic",
+      emailPlaceholder: "el.teu@correu.com",
+      password: "Contrasenya",
+      rememberMe: "Recorda'm",
+      forgotPassword: "Has oblidat la contrasenya?",
+      signIn: "Iniciar Sessió",
+      invalidCredentials: "Credencials invàlides. Torna-ho a provar.",
+      needHelp: "Necessites ajuda?",
+      contactAdmin: "Contacta l'administrador",
+      backToHome: "Tornar a l'Inici"
     },
     // Footer
     footer: {

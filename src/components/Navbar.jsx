@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '../context/LanguageContext'
 import './Navbar.css'
@@ -9,6 +9,8 @@ const Navbar = ({ setCursorVariant }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
   const { language, changeLanguage, t } = useLanguage()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +19,28 @@ const Navbar = ({ setCursorVariant }) => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const handleNavClick = (e, sectionId) => {
+    e.preventDefault()
+    
+    if (location.pathname !== '/') {
+      // Navigate to home page first, then scroll to section
+      navigate('/')
+      // Wait for navigation and then scroll
+      setTimeout(() => {
+        const element = document.getElementById(sectionId)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    } else {
+      // Already on home page, just scroll
+      const element = document.getElementById(sectionId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }
 
   const navLinks = [
     { name: t.nav.services, href: '#services' },
@@ -105,11 +129,50 @@ const Navbar = ({ setCursorVariant }) => {
           </Link>
 
           <ul className="navbar-links">
-            {navLinks.map((link, index) => (
-              <li key={index}>
+            {/* Services link */}
+            <li>
+              <a 
+                href={navLinks[0].href}
+                className="nav-link animated-underline"
+                onClick={(e) => handleNavClick(e, navLinks[0].href.replace('#', ''))}
+                onMouseEnter={() => setCursorVariant('hover')}
+                onMouseLeave={() => setCursorVariant('default')}
+              >
+                {navLinks[0].name}
+              </a>
+            </li>
+
+            {/* Work With Us - right after Services */}
+            <li>
+              <Link 
+                to="/work-with-us"
+                className="nav-link animated-underline"
+                onMouseEnter={() => setCursorVariant('hover')}
+                onMouseLeave={() => setCursorVariant('default')}
+              >
+                {t.nav.workWithUs}
+              </Link>
+            </li>
+
+            {/* Our Team */}
+            <li>
+              <Link 
+                to="/our-team"
+                className="nav-link animated-underline"
+                onMouseEnter={() => setCursorVariant('hover')}
+                onMouseLeave={() => setCursorVariant('default')}
+              >
+                {t.nav.ourTeam}
+              </Link>
+            </li>
+
+            {/* Rest of nav links */}
+            {navLinks.slice(1).map((link, index) => (
+              <li key={index + 1}>
                 <a 
                   href={link.href}
                   className="nav-link animated-underline"
+                  onClick={(e) => handleNavClick(e, link.href.replace('#', ''))}
                   onMouseEnter={() => setCursorVariant('hover')}
                   onMouseLeave={() => setCursorVariant('default')}
                 >
@@ -169,6 +232,18 @@ const Navbar = ({ setCursorVariant }) => {
                 )}
               </AnimatePresence>
             </li>
+
+            {/* Staff Sign In Button */}
+            <li>
+              <Link 
+                to="/staff-login"
+                className="btn btn-staff"
+                onMouseEnter={() => setCursorVariant('hover')}
+                onMouseLeave={() => setCursorVariant('default')}
+              >
+                {t.nav.staffSignIn}
+              </Link>
+            </li>
           </ul>
 
           <button 
@@ -218,17 +293,75 @@ const Navbar = ({ setCursorVariant }) => {
                 </div>
 
                 <ul className="mobile-menu-links">
-                  {navLinks.map((link, i) => (
+                  {/* Services */}
+                  <motion.li 
+                    variants={linkVariants}
+                    custom={0}
+                    initial="closed"
+                    animate="open"
+                  >
+                    <a 
+                      href={navLinks[0].href}
+                      onClick={(e) => {
+                        handleNavClick(e, navLinks[0].href.replace('#', ''))
+                        setIsMenuOpen(false)
+                      }}
+                      onMouseEnter={() => setCursorVariant('hover')}
+                      onMouseLeave={() => setCursorVariant('default')}
+                    >
+                      {navLinks[0].name}
+                    </a>
+                  </motion.li>
+
+                  {/* Work With Us - right after Services */}
+                  <motion.li 
+                    variants={linkVariants}
+                    custom={1}
+                    initial="closed"
+                    animate="open"
+                  >
+                    <Link 
+                      to="/work-with-us"
+                      onClick={() => setIsMenuOpen(false)}
+                      onMouseEnter={() => setCursorVariant('hover')}
+                      onMouseLeave={() => setCursorVariant('default')}
+                    >
+                      {t.nav.workWithUs}
+                    </Link>
+                  </motion.li>
+
+                  {/* Our Team */}
+                  <motion.li 
+                    variants={linkVariants}
+                    custom={2}
+                    initial="closed"
+                    animate="open"
+                  >
+                    <Link 
+                      to="/our-team"
+                      onClick={() => setIsMenuOpen(false)}
+                      onMouseEnter={() => setCursorVariant('hover')}
+                      onMouseLeave={() => setCursorVariant('default')}
+                    >
+                      {t.nav.ourTeam}
+                    </Link>
+                  </motion.li>
+
+                  {/* Rest of nav links */}
+                  {navLinks.slice(1).map((link, i) => (
                     <motion.li 
-                      key={i}
+                      key={i + 2}
                       variants={linkVariants}
-                      custom={i}
+                      custom={i + 2}
                       initial="closed"
                       animate="open"
                     >
                       <a 
                         href={link.href}
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={(e) => {
+                          handleNavClick(e, link.href.replace('#', ''))
+                          setIsMenuOpen(false)
+                        }}
                         onMouseEnter={() => setCursorVariant('hover')}
                         onMouseLeave={() => setCursorVariant('default')}
                       >
@@ -236,6 +369,24 @@ const Navbar = ({ setCursorVariant }) => {
                       </a>
                     </motion.li>
                   ))}
+
+                  {/* Staff Sign In */}
+                  <motion.li 
+                    variants={linkVariants}
+                    custom={navLinks.length + 1}
+                    initial="closed"
+                    animate="open"
+                  >
+                    <Link 
+                      to="/staff-login"
+                      className="mobile-staff-link"
+                      onClick={() => setIsMenuOpen(false)}
+                      onMouseEnter={() => setCursorVariant('hover')}
+                      onMouseLeave={() => setCursorVariant('default')}
+                    >
+                      {t.nav.staffSignIn}
+                    </Link>
+                  </motion.li>
                 </ul>
                 
                 <motion.div 
