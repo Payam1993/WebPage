@@ -63,16 +63,18 @@ function App() {
               <Loader key="loader" />
             ) : (
               <Routes>
+                {/* Staff Login Route */}
+                <Route path="/staff" element={<StaffLogin setCursorVariant={setCursorVariant} />} />
+
                 {/* Staff Admin Routes - No Navbar/Footer, uses AdminLayout */}
-                <Route 
-                  path="/staff" 
+                <Route
+                  path="/staff/*"
                   element={
                     <ProtectedRoute>
                       <AdminLayout />
                     </ProtectedRoute>
                   }
                 >
-                  <Route index element={<Navigate to="/staff/reports" replace />} />
                   <Route path="reports" element={<Reports />} />
                   <Route path="costs" element={<CostsManagement />} />
                   <Route path="reservations" element={<Reservations />} />
@@ -95,7 +97,6 @@ function App() {
                         <Routes>
                           <Route path="/" element={<HomePage setCursorVariant={setCursorVariant} />} />
                           <Route path="/service/:serviceId" element={<ServiceDetail setCursorVariant={setCursorVariant} />} />
-                          <Route path="/staff-login" element={<StaffLogin setCursorVariant={setCursorVariant} />} />
                           <Route path="/work-with-us" element={<WorkWithUs setCursorVariant={setCursorVariant} />} />
                           <Route path="/our-team" element={<OurTeam setCursorVariant={setCursorVariant} />} />
                         </Routes>

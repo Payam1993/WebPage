@@ -35,7 +35,7 @@ const AdminLayout = () => {
     setIsSigningOut(true)
     try {
       await signOut()
-      navigate('/staff-login')
+      navigate('/staff')
     } catch (error) {
       console.error('Error signing out:', error)
       setIsSigningOut(false)
@@ -55,7 +55,7 @@ const AdminLayout = () => {
     },
     {
       path: '/staff/costs',
-      label: 'Costs Management',
+      label: 'Costs management',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10"/>
@@ -122,8 +122,8 @@ const AdminLayout = () => {
         {/* Logo area */}
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <span className="logo-main">Confession</span>
-            <span className="logo-sub">Barcelona</span>
+            <span className="logo-main">Staff Portal</span>
+            <span className="logo-sub">Confession Barcelona</span>
           </div>
           <button 
             className="sidebar-toggle desktop-only"

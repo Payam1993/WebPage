@@ -236,7 +236,7 @@ const Navbar = ({ setCursorVariant }) => {
             {/* Staff Sign In Button */}
             <li>
               <Link 
-                to="/staff-login"
+                to="/staff"
                 className="btn btn-staff"
                 onMouseEnter={() => setCursorVariant('hover')}
                 onMouseLeave={() => setCursorVariant('default')}
@@ -378,7 +378,7 @@ const Navbar = ({ setCursorVariant }) => {
                     animate="open"
                   >
                     <Link 
-                      to="/staff-login"
+                      to="/staff"
                       className="mobile-staff-link"
                       onClick={() => setIsMenuOpen(false)}
                       onMouseEnter={() => setCursorVariant('hover')}

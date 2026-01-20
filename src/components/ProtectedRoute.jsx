@@ -7,7 +7,7 @@ import { getCurrentUser } from 'aws-amplify/auth'
  * 
  * Usage: Wrap any route that requires authentication
  * - Shows a loading placeholder while checking auth status
- * - Redirects to /staff-login if not authenticated
+ * - Redirects to /staff if not authenticated
  * - Renders children if authenticated
  */
 const ProtectedRoute = ({ children }) => {
@@ -70,7 +70,7 @@ const ProtectedRoute = ({ children }) => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/staff-login" replace />
+    return <Navigate to="/staff" replace />
   }
 
   // Render protected content if authenticated
