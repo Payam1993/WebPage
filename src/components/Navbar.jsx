@@ -47,7 +47,7 @@ const Navbar = ({ setCursorVariant }) => {
     { name: t.nav.about, href: '#about' },
     { name: t.nav.experience, href: '#experience' },
     { name: t.nav.testimonials, href: '#testimonials' },
-    { name: t.nav.bookNow, href: '#booking' },
+    { name: t.nav.address, href: '#booking' },
   ]
 
   const languages = [

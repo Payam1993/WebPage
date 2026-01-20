@@ -278,3 +278,63 @@
   }
 }
 
+/* ================================
+   Contact Only Layout (No Form)
+   ================================ */
+.booking.contact-only {
+  padding: var(--space-xl) 0;
+}
+
+.contact-section {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.contact-section .section-overline {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.contact-section h2 {
+  margin-bottom: var(--space-sm);
+}
+
+.contact-section .booking-description {
+  max-width: 600px;
+  margin: 0 auto var(--space-lg);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: var(--space-lg);
+  text-align: left;
+}
+
+.contact-grid .detail-item {
+  background: var(--color-sand);
+  padding: 1.5rem;
+  border-radius: 0;
+}
+
+.contact-grid .detail-icon {
+  width: 50px;
+  height: 50px;
+  background: white;
+}
+
+.contact-section .booking-social {
+  justify-content: center;
+  border-top: 1px solid rgba(42, 42, 42, 0.1);
+  padding-top: var(--space-md);
+}
+
+@media (max-width: 768px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
