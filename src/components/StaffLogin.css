@@ -141,6 +141,11 @@
   font-size: 0.85rem;
 }
 
+.login-notice + .login-error,
+.login-error + .login-notice {
+  margin-top: -0.5rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

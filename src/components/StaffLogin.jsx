@@ -29,6 +29,9 @@ const StaffLogin = ({ setCursorVariant }) => {
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [challengeNotice, setChallengeNotice] = useState('')
+  const [requiresMfa, setRequiresMfa] = useState(false)
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaType, setMfaType] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -61,7 +64,13 @@ const StaffLogin = ({ setCursorVariant }) => {
             break
           case 'CONFIRM_SIGN_IN_WITH_TOTP_CODE':
           case 'CONFIRM_SIGN_IN_WITH_SMS_CODE':
-            setError(t.staffLogin?.mfaRequired || 'MFA verification required. Please contact admin.')
+            setRequiresMfa(true)
+            setMfaType(nextStep.signInStep)
+            setChallengeNotice(
+              t.staffLogin?.mfaNotice ||
+                'Multi-factor authentication is required. Enter the verification code.'
+            )
+            setError('')
             break
           default:
             setError(t.staffLogin?.additionalStepsRequired || 'Additional verification required.')
@@ -79,6 +88,8 @@ const StaffLogin = ({ setCursorVariant }) => {
     e.preventDefault()
     setError('')
     setChallengeNotice('')
+    setRequiresMfa(false)
+    setMfaCode('')
 
     // Validate passwords match
     if (newPassword !== confirmNewPassword) {
@@ -148,6 +159,136 @@ const StaffLogin = ({ setCursorVariant }) => {
     setConfirmNewPassword('')
     setError('')
     setChallengeNotice('')
+    setRequiresMfa(false)
+    setMfaCode('')
+    setMfaType('')
+
+  const handleMfaSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setChallengeNotice('')
+
+    if (!mfaCode.trim()) {
+      setError(t.staffLogin?.mfaCodeRequired || 'Please enter the verification code.')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const { isSignedIn, nextStep } = await confirmSignIn({
+        challengeResponse: mfaCode.trim(),
+      })
+
+      if (isSignedIn) {
+        navigate('/staff/reports')
+      } else if (nextStep) {
+        setError(t.staffLogin?.additionalStepsRequired || 'Additional verification required.')
+      }
+    } catch (err) {
+      console.error('MFA confirm error:', err)
+      handleAuthError(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  }
+
+  // MFA Verification Form
+  if (requiresMfa) {
+    return (
+      <section className="staff-login">
+        <div className="staff-login-bg">
+          <div className="login-gradient" />
+          <div className="login-pattern" />
+        </div>
+
+        <motion.div 
+          className="login-container"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <button 
+            onClick={handleBackToLogin}
+            className="back-link"
+            onMouseEnter={() => setCursorVariant?.('hover')}
+            onMouseLeave={() => setCursorVariant?.('default')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            {t.staffLogin?.backToLogin || 'Back to Login'}
+          </button>
+
+          <div className="login-card">
+            <div className="login-header">
+              <div className="login-logo">
+                <span className="logo-main">Confession</span>
+                <span className="logo-sub">Barcelona</span>
+              </div>
+              <h1>{t.staffLogin?.mfaTitle || 'Verification Required'}</h1>
+              <p>
+                {mfaType === 'CONFIRM_SIGN_IN_WITH_TOTP_CODE'
+                  ? (t.staffLogin?.mfaTotpSubtitle || 'Enter the code from your authenticator app')
+                  : (t.staffLogin?.mfaSmsSubtitle || 'Enter the code sent to your phone')}
+              </p>
+            </div>
+
+            <form className="login-form" onSubmit={handleMfaSubmit}>
+              {challengeNotice && (
+                <div className="login-notice">
+                  {challengeNotice}
+                </div>
+              )}
+              {error && (
+                <div className="login-error">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label htmlFor="mfaCode">{t.staffLogin?.mfaCodeLabel || 'Verification Code'}</label>
+                <div className="input-wrapper">
+                  <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 1v22"/>
+                    <path d="M5 5h14v14H5z"/>
+                  </svg>
+                  <input
+                    type="text"
+                    id="mfaCode"
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value)}
+                    placeholder={t.staffLogin?.mfaCodePlaceholder || '123456'}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    onFocus={() => setCursorVariant?.('text')}
+                    onBlur={() => setCursorVariant?.('default')}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className={`login-btn ${isLoading ? 'loading' : ''}`}
+                disabled={isLoading}
+                onMouseEnter={() => setCursorVariant?.('hover')}
+                onMouseLeave={() => setCursorVariant?.('default')}
+              >
+                {isLoading ? <span className="loader-spinner" /> : null}
+                {t.staffLogin?.verifyCode || 'Verify'}
+              </button>
+            </form>
+          </div>
+        </motion.div>
+      </section>
+    )
   }
 
   // New Password Form
