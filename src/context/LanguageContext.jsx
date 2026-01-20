@@ -191,13 +191,20 @@ export const translations = {
       email: "Email",
       emailPlaceholder: "your@email.com",
       password: "Password",
+      confirmPassword: "Confirm Password",
       rememberMe: "Remember me",
       forgotPassword: "Forgot password?",
       signIn: "Sign In",
+      signOut: "Sign Out",
       invalidCredentials: "Invalid credentials. Please try again.",
       needHelp: "Need help?",
       contactAdmin: "Contact admin",
-      backToHome: "Back to Home"
+      backToHome: "Back to Home",
+      welcomeBack: "Welcome Back",
+      todayBookings: "Today's Bookings",
+      pendingRequests: "Pending Requests",
+      viewSchedule: "View Schedule",
+      manageBookings: "Manage Bookings"
     },
     // Footer
     footer: {
@@ -401,13 +408,20 @@ export const translations = {
       email: "Correo Electrónico",
       emailPlaceholder: "tu@correo.com",
       password: "Contraseña",
+      confirmPassword: "Confirmar Contraseña",
       rememberMe: "Recordarme",
       forgotPassword: "¿Olvidaste tu contraseña?",
       signIn: "Iniciar Sesión",
+      signOut: "Cerrar Sesión",
       invalidCredentials: "Credenciales inválidas. Inténtalo de nuevo.",
       needHelp: "¿Necesitas ayuda?",
       contactAdmin: "Contacta al administrador",
-      backToHome: "Volver al Inicio"
+      backToHome: "Volver al Inicio",
+      welcomeBack: "Bienvenido de Nuevo",
+      todayBookings: "Reservas de Hoy",
+      pendingRequests: "Solicitudes Pendientes",
+      viewSchedule: "Ver Horario",
+      manageBookings: "Gestionar Reservas"
     },
     // Footer
     footer: {
@@ -611,13 +625,20 @@ export const translations = {
       email: "Correu Electrònic",
       emailPlaceholder: "el.teu@correu.com",
       password: "Contrasenya",
+      confirmPassword: "Confirmar Contrasenya",
       rememberMe: "Recorda'm",
       forgotPassword: "Has oblidat la contrasenya?",
       signIn: "Iniciar Sessió",
+      signOut: "Tancar Sessió",
       invalidCredentials: "Credencials invàlides. Torna-ho a provar.",
       needHelp: "Necessites ajuda?",
       contactAdmin: "Contacta l'administrador",
-      backToHome: "Tornar a l'Inici"
+      backToHome: "Tornar a l'Inici",
+      welcomeBack: "Benvingut de Nou",
+      todayBookings: "Reserves d'Avui",
+      pendingRequests: "Sol·licituds Pendents",
+      viewSchedule: "Veure Horari",
+      manageBookings: "Gestionar Reserves"
     },
     // Footer
     footer: {

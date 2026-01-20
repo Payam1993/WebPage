@@ -295,6 +295,54 @@
   text-decoration: underline;
 }
 
+/* Password Requirements */
+.password-requirements {
+  padding: 1rem;
+  background: var(--color-sand, #f5f0eb);
+  border-radius: 4px;
+}
+
+.password-requirements p {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-charcoal);
+  margin-bottom: 0.5rem;
+}
+
+.password-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.password-requirements li {
+  font-size: 0.75rem;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  padding: 0.25rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.password-requirements li::before {
+  content: '○';
+  position: absolute;
+  left: 0;
+  color: var(--color-charcoal);
+  opacity: 0.4;
+}
+
+.password-requirements li.met {
+  opacity: 1;
+  color: var(--color-olive, #5c6b54);
+}
+
+.password-requirements li.met::before {
+  content: '●';
+  color: var(--color-olive, #5c6b54);
+  opacity: 1;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 2rem 1.5rem;
@@ -304,6 +352,247 @@
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
+  }
+}
+
+/* ================================
+   Amplify Authenticator Styles
+   ================================ */
+.amplify-container {
+  max-width: 500px;
+}
+
+.amplify-header {
+  text-align: center;
+  padding: 2rem 2rem 1rem;
+  background: white;
+  border-radius: 0;
+}
+
+.amplify-header .login-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.amplify-header .logo-main {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--color-charcoal);
+  letter-spacing: 0.1em;
+}
+
+.amplify-header .logo-sub {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  color: var(--color-terracotta);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.amplify-header h1 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--color-charcoal);
+  margin-bottom: 0.5rem;
+}
+
+.amplify-header p {
+  font-size: 0.9rem;
+  color: var(--color-charcoal);
+  opacity: 0.7;
+}
+
+.amplify-footer {
+  text-align: center;
+  padding: 1rem 2rem 2rem;
+  background: white;
+}
+
+.amplify-back-link {
+  font-size: 0.85rem;
+  color: var(--color-terracotta);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.amplify-back-link:hover {
+  color: var(--color-sage);
+}
+
+/* Override Amplify UI default styles */
+[data-amplify-authenticator] {
+  --amplify-components-authenticator-router-box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  --amplify-components-authenticator-router-border-width: 0;
+  --amplify-components-button-primary-background-color: var(--color-charcoal);
+  --amplify-components-button-primary-hover-background-color: var(--color-terracotta);
+  --amplify-components-button-link-color: var(--color-terracotta);
+  --amplify-components-fieldcontrol-focus-border-color: var(--color-terracotta);
+  --amplify-components-tabs-item-active-color: var(--color-terracotta);
+  --amplify-components-tabs-item-active-border-color: var(--color-terracotta);
+  --amplify-fonts-default-variable: var(--font-body);
+  --amplify-fonts-default-static: var(--font-body);
+}
+
+[data-amplify-authenticator] [data-amplify-router] {
+  background: white;
+  border-radius: 0;
+}
+
+[data-amplify-authenticator] .amplify-button--primary {
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.875rem 2rem;
+}
+
+[data-amplify-authenticator] .amplify-input,
+[data-amplify-authenticator] .amplify-field-group__control {
+  font-family: var(--font-body);
+  border-radius: 0;
+}
+
+[data-amplify-authenticator] .amplify-label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-charcoal);
+}
+
+/* ================================
+   Staff Dashboard Styles
+   ================================ */
+.dashboard-card {
+  min-height: 450px;
+}
+
+.dashboard-content {
+  padding: 1.5rem 0;
+}
+
+.user-email {
+  color: var(--color-terracotta) !important;
+  font-weight: 500;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--color-sand);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--color-charcoal);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-charcoal);
+  opacity: 0.7;
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dashboard-btn {
+  width: 100%;
+  padding: 1rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dashboard-btn.primary {
+  background: var(--color-charcoal);
+  color: var(--color-cream);
+  border: 1px solid var(--color-charcoal);
+}
+
+.dashboard-btn.primary:hover {
+  background: var(--color-terracotta);
+  border-color: var(--color-terracotta);
+}
+
+.dashboard-btn.secondary {
+  background: transparent;
+  color: var(--color-charcoal);
+  border: 1px solid var(--color-charcoal);
+}
+
+.dashboard-btn.secondary:hover {
+  background: var(--color-charcoal);
+  color: var(--color-cream);
+}
+
+.sign-out-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--color-terracotta);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.sign-out-btn:hover {
+  color: var(--color-charcoal);
+}
+
+.sign-out-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sign-out-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(196, 120, 90, 0.3);
+  border-top-color: var(--color-terracotta);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@media (max-width: 480px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
   }
 }
 

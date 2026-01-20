@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageProvider } from './context/LanguageContext'
 import Navbar from './components/Navbar'
@@ -14,8 +14,18 @@ import Cursor from './components/Cursor'
 import Loader from './components/Loader'
 import ServiceDetail from './components/ServiceDetail'
 import StaffLogin from './components/StaffLogin'
+import ProtectedRoute from './components/ProtectedRoute'
 import WorkWithUs from './components/WorkWithUs'
 import OurTeam from './components/OurTeam'
+
+// Staff Admin Pages
+import AdminLayout from './pages/staff/AdminLayout'
+import Reports from './pages/staff/Reports'
+import CostsManagement from './pages/staff/CostsManagement'
+import Reservations from './pages/staff/Reservations'
+import Calendar from './pages/staff/Calendar'
+import ProfileSettings from './pages/staff/ProfileSettings'
+
 import './App.css'
 
 function HomePage({ setCursorVariant }) {
@@ -52,24 +62,49 @@ function App() {
             {loading ? (
               <Loader key="loader" />
             ) : (
-              <motion.div
-                key="main"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8 }}
-              >
-                <Navbar setCursorVariant={setCursorVariant} />
-                <main>
-                  <Routes>
-                    <Route path="/" element={<HomePage setCursorVariant={setCursorVariant} />} />
-                    <Route path="/service/:serviceId" element={<ServiceDetail setCursorVariant={setCursorVariant} />} />
-                    <Route path="/staff-login" element={<StaffLogin setCursorVariant={setCursorVariant} />} />
-                    <Route path="/work-with-us" element={<WorkWithUs setCursorVariant={setCursorVariant} />} />
-                    <Route path="/our-team" element={<OurTeam setCursorVariant={setCursorVariant} />} />
-                  </Routes>
-                </main>
-                <Footer setCursorVariant={setCursorVariant} />
-              </motion.div>
+              <Routes>
+                {/* Staff Admin Routes - No Navbar/Footer, uses AdminLayout */}
+                <Route 
+                  path="/staff" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Navigate to="/staff/reports" replace />} />
+                  <Route path="reports" element={<Reports />} />
+                  <Route path="costs" element={<CostsManagement />} />
+                  <Route path="reservations" element={<Reservations />} />
+                  <Route path="calendar" element={<Calendar />} />
+                  <Route path="profile" element={<ProfileSettings />} />
+                </Route>
+
+                {/* Public Routes - With Navbar/Footer */}
+                <Route 
+                  path="/*" 
+                  element={
+                    <motion.div
+                      key="main"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8 }}
+                    >
+                      <Navbar setCursorVariant={setCursorVariant} />
+                      <main>
+                        <Routes>
+                          <Route path="/" element={<HomePage setCursorVariant={setCursorVariant} />} />
+                          <Route path="/service/:serviceId" element={<ServiceDetail setCursorVariant={setCursorVariant} />} />
+                          <Route path="/staff-login" element={<StaffLogin setCursorVariant={setCursorVariant} />} />
+                          <Route path="/work-with-us" element={<WorkWithUs setCursorVariant={setCursorVariant} />} />
+                          <Route path="/our-team" element={<OurTeam setCursorVariant={setCursorVariant} />} />
+                        </Routes>
+                      </main>
+                      <Footer setCursorVariant={setCursorVariant} />
+                    </motion.div>
+                  }
+                />
+              </Routes>
             )}
           </AnimatePresence>
         </div>
