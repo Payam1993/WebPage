@@ -28,6 +28,7 @@ const StaffLogin = ({ setCursorVariant }) => {
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
+  const [challengeNotice, setChallengeNotice] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -47,8 +48,12 @@ const StaffLogin = ({ setCursorVariant }) => {
         // Handle additional steps
         switch (nextStep.signInStep) {
           case 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED':
-            // Show the new password form
+            // FORCE_CHANGE_PASSWORD -> prompt for a new password
             setRequiresNewPassword(true)
+            setChallengeNotice(
+              t.staffLogin?.temporaryPasswordNotice ||
+                'This account requires a new password. Please set one to continue.'
+            )
             setError('')
             break
           case 'CONFIRM_SIGN_UP':
@@ -73,6 +78,7 @@ const StaffLogin = ({ setCursorVariant }) => {
   const handleNewPasswordSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setChallengeNotice('')
 
     // Validate passwords match
     if (newPassword !== confirmNewPassword) {
@@ -141,6 +147,7 @@ const StaffLogin = ({ setCursorVariant }) => {
     setNewPassword('')
     setConfirmNewPassword('')
     setError('')
+    setChallengeNotice('')
   }
 
   // New Password Form
@@ -181,6 +188,11 @@ const StaffLogin = ({ setCursorVariant }) => {
             </div>
 
             <form className="login-form" onSubmit={handleNewPasswordSubmit}>
+              {challengeNotice && (
+                <div className="login-notice">
+                  {challengeNotice}
+                </div>
+              )}
               {error && (
                 <div className="login-error">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -133,6 +133,14 @@
   flex-shrink: 0;
 }
 
+.login-notice {
+  padding: 1rem;
+  background: rgba(92, 107, 84, 0.08);
+  border: 1px solid rgba(92, 107, 84, 0.25);
+  color: var(--color-olive);
+  font-size: 0.85rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
