@@ -64,13 +64,13 @@
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-charcoal);
+  color: var(--color-charcoal, #2A2A2A) !important;
   transition: color 0.3s ease;
   white-space: nowrap;
 }
 
 .nav-link:hover {
-  color: var(--color-terracotta);
+  color: var(--color-terracotta, #C4785A) !important;
 }
 
 /* Language Selector */

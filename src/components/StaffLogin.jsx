@@ -30,12 +30,21 @@ const StaffLogin = ({ setCursorVariant }) => {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [challengeNotice, setChallengeNotice] = useState('')
   const [requiresMfa, setRequiresMfa] = useState(false)
+  const [requiresMfaSelection, setRequiresMfaSelection] = useState(false)
   const [mfaCode, setMfaCode] = useState('')
   const [mfaType, setMfaType] = useState('')
+  const [allowedMfaTypes, setAllowedMfaTypes] = useState([])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setChallengeNotice('')
+    setRequiresNewPassword(false)
+    setRequiresMfa(false)
+    setRequiresMfaSelection(false)
+    setMfaType('')
+    setMfaCode('')
+    setAllowedMfaTypes([])
     setIsLoading(true)
 
     try {
@@ -62,8 +71,19 @@ const StaffLogin = ({ setCursorVariant }) => {
           case 'CONFIRM_SIGN_UP':
             setError(t.staffLogin?.confirmSignUp || 'Please confirm your account first.')
             break
+          case 'SELECT_MFA_TYPE':
+            setRequiresMfaSelection(true)
+            setAllowedMfaTypes(nextStep.allowedMFATypes || [])
+            setChallengeNotice(
+              t.staffLogin?.selectMfaNotice ||
+                'Select how you want to receive your verification code.'
+            )
+            setError('')
+            break
           case 'CONFIRM_SIGN_IN_WITH_TOTP_CODE':
           case 'CONFIRM_SIGN_IN_WITH_SMS_CODE':
+          case 'CONFIRM_SIGN_IN_WITH_EMAIL_CODE':
+          case 'CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE':
             setRequiresMfa(true)
             setMfaType(nextStep.signInStep)
             setChallengeNotice(
@@ -73,7 +93,10 @@ const StaffLogin = ({ setCursorVariant }) => {
             setError('')
             break
           default:
-            setError(t.staffLogin?.additionalStepsRequired || 'Additional verification required.')
+            setError(
+              t.staffLogin?.additionalStepsRequired ||
+                `Additional verification required (${nextStep.signInStep}).`
+            )
         }
       }
     } catch (err) {
@@ -89,6 +112,7 @@ const StaffLogin = ({ setCursorVariant }) => {
     setError('')
     setChallengeNotice('')
     setRequiresMfa(false)
+    setRequiresMfaSelection(false)
     setMfaCode('')
 
     // Validate passwords match
@@ -160,8 +184,52 @@ const StaffLogin = ({ setCursorVariant }) => {
     setError('')
     setChallengeNotice('')
     setRequiresMfa(false)
+    setRequiresMfaSelection(false)
     setMfaCode('')
     setMfaType('')
+    setAllowedMfaTypes([])
+  }
+
+  const handleSelectMfaType = async (type) => {
+    setError('')
+    setChallengeNotice('')
+    setIsLoading(true)
+
+    try {
+      const { isSignedIn, nextStep } = await confirmSignIn({
+        challengeResponse: type,
+      })
+
+      if (isSignedIn) {
+        navigate('/staff/reports')
+      } else if (nextStep) {
+        if (
+          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_TOTP_CODE' ||
+          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_SMS_CODE' ||
+          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_EMAIL_CODE' ||
+          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE'
+        ) {
+          setRequiresMfa(true)
+          setRequiresMfaSelection(false)
+          setMfaType(nextStep.signInStep)
+          setChallengeNotice(
+            t.staffLogin?.mfaNotice ||
+              'Multi-factor authentication is required. Enter the verification code.'
+          )
+        } else {
+          setError(
+            t.staffLogin?.additionalStepsRequired ||
+              `Additional verification required (${nextStep.signInStep}).`
+          )
+        }
+      }
+    } catch (err) {
+      console.error('MFA selection error:', err)
+      handleAuthError(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleMfaSubmit = async (e) => {
     e.preventDefault()
@@ -183,7 +251,10 @@ const StaffLogin = ({ setCursorVariant }) => {
       if (isSignedIn) {
         navigate('/staff/reports')
       } else if (nextStep) {
-        setError(t.staffLogin?.additionalStepsRequired || 'Additional verification required.')
+        setError(
+          t.staffLogin?.additionalStepsRequired ||
+            `Additional verification required (${nextStep.signInStep}).`
+        )
       }
     } catch (err) {
       console.error('MFA confirm error:', err)
@@ -192,6 +263,108 @@ const StaffLogin = ({ setCursorVariant }) => {
       setIsLoading(false)
     }
   }
+
+  // MFA Selection Form
+  if (requiresMfaSelection) {
+    const mfaOptions = allowedMfaTypes.length
+      ? allowedMfaTypes
+      : ['TOTP', 'SMS']
+
+    return (
+      <section className="staff-login">
+        <div className="staff-login-bg">
+          <div className="login-gradient" />
+          <div className="login-pattern" />
+        </div>
+
+        <motion.div 
+          className="login-container"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <button 
+            onClick={handleBackToLogin}
+            className="back-link"
+            onMouseEnter={() => setCursorVariant?.('hover')}
+            onMouseLeave={() => setCursorVariant?.('default')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            {t.staffLogin?.backToLogin || 'Back to Login'}
+          </button>
+
+          <div className="login-card">
+            <div className="login-header">
+              <div className="login-logo">
+                <span className="logo-main">Confession</span>
+                <span className="logo-sub">Barcelona</span>
+              </div>
+              <h1>{t.staffLogin?.mfaSelectTitle || 'Choose Verification Method'}</h1>
+              <p>{t.staffLogin?.mfaSelectSubtitle || 'Select how you want to verify your sign-in.'}</p>
+            </div>
+
+            <div className="login-form">
+              {challengeNotice && (
+                <div className="login-notice">
+                  {challengeNotice}
+                </div>
+              )}
+              {error && (
+                <div className="login-error">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="login-options">
+                {mfaOptions.includes('TOTP') && (
+                  <button
+                    type="button"
+                    className="login-option-btn"
+                    disabled={isLoading}
+                    onClick={() => handleSelectMfaType('TOTP')}
+                    onMouseEnter={() => setCursorVariant?.('hover')}
+                    onMouseLeave={() => setCursorVariant?.('default')}
+                  >
+                    {t.staffLogin?.mfaTotpOption || 'Authenticator App'}
+                  </button>
+                )}
+                {mfaOptions.includes('SMS') && (
+                  <button
+                    type="button"
+                    className="login-option-btn"
+                    disabled={isLoading}
+                    onClick={() => handleSelectMfaType('SMS')}
+                    onMouseEnter={() => setCursorVariant?.('hover')}
+                    onMouseLeave={() => setCursorVariant?.('default')}
+                  >
+                    {t.staffLogin?.mfaSmsOption || 'SMS Code'}
+                  </button>
+                )}
+                {mfaOptions.includes('EMAIL') && (
+                  <button
+                    type="button"
+                    className="login-option-btn"
+                    disabled={isLoading}
+                    onClick={() => handleSelectMfaType('EMAIL')}
+                    onMouseEnter={() => setCursorVariant?.('hover')}
+                    onMouseLeave={() => setCursorVariant?.('default')}
+                  >
+                    {t.staffLogin?.mfaEmailOption || 'Email Code'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+    )
   }
 
   // MFA Verification Form
@@ -231,7 +404,11 @@ const StaffLogin = ({ setCursorVariant }) => {
               <p>
                 {mfaType === 'CONFIRM_SIGN_IN_WITH_TOTP_CODE'
                   ? (t.staffLogin?.mfaTotpSubtitle || 'Enter the code from your authenticator app')
-                  : (t.staffLogin?.mfaSmsSubtitle || 'Enter the code sent to your phone')}
+                  : mfaType === 'CONFIRM_SIGN_IN_WITH_EMAIL_CODE'
+                    ? (t.staffLogin?.mfaEmailSubtitle || 'Enter the code sent to your email')
+                    : mfaType === 'CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE'
+                      ? (t.staffLogin?.mfaCustomSubtitle || 'Enter the verification code to continue')
+                      : (t.staffLogin?.mfaSmsSubtitle || 'Enter the code sent to your phone')}
               </p>
             </div>
 
@@ -494,10 +671,6 @@ const StaffLogin = ({ setCursorVariant }) => {
             <div className="form-group">
               <label htmlFor="email">{t.staffLogin?.email || 'Email'}</label>
               <div className="input-wrapper">
-                <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
                 <input
                   type="email"
                   id="email"
@@ -515,10 +688,6 @@ const StaffLogin = ({ setCursorVariant }) => {
             <div className="form-group">
               <label htmlFor="password">{t.staffLogin?.password || 'Password'}</label>
               <div className="input-wrapper">
-                <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
