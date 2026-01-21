@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
-import { signIn, confirmSignIn } from 'aws-amplify/auth'
+import { signIn, confirmSignIn, setUpTOTP } from 'aws-amplify/auth'
 import { useLanguage } from '../context/LanguageContext'
 import './StaffLogin.css'
 
@@ -34,6 +34,11 @@ const StaffLogin = ({ setCursorVariant }) => {
   const [mfaCode, setMfaCode] = useState('')
   const [mfaType, setMfaType] = useState('')
   const [allowedMfaTypes, setAllowedMfaTypes] = useState([])
+  
+  // TOTP Setup state
+  const [requiresTotpSetup, setRequiresTotpSetup] = useState(false)
+  const [totpSetupUri, setTotpSetupUri] = useState('')
+  const [totpSecretKey, setTotpSecretKey] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -42,9 +47,12 @@ const StaffLogin = ({ setCursorVariant }) => {
     setRequiresNewPassword(false)
     setRequiresMfa(false)
     setRequiresMfaSelection(false)
+    setRequiresTotpSetup(false)
     setMfaType('')
     setMfaCode('')
     setAllowedMfaTypes([])
+    setTotpSetupUri('')
+    setTotpSecretKey('')
     setIsLoading(true)
 
     try {
@@ -92,6 +100,32 @@ const StaffLogin = ({ setCursorVariant }) => {
             )
             setError('')
             break
+          case 'CONTINUE_SIGN_IN_WITH_TOTP_SETUP': {
+            // User needs to set up TOTP (authenticator app) for the first time
+            console.log('TOTP Setup Required - nextStep:', nextStep)
+            const totpSetupDetails = nextStep.totpSetupDetails
+            if (totpSetupDetails) {
+              try {
+                // Get the setup URI for QR code generation
+                const appName = 'Confession Barcelona'
+                const setupUri = totpSetupDetails.getSetupUri(appName)
+                setTotpSetupUri(setupUri.toString())
+                setTotpSecretKey(totpSetupDetails.sharedSecret)
+                console.log('TOTP Secret Key:', totpSetupDetails.sharedSecret)
+              } catch (uriErr) {
+                console.error('Error generating setup URI:', uriErr)
+                // Even if URI generation fails, we can still show the secret key
+                setTotpSecretKey(totpSetupDetails.sharedSecret || '')
+              }
+            }
+            setRequiresTotpSetup(true)
+            setChallengeNotice(
+              t.staffLogin?.totpSetupNotice ||
+                'Set up your authenticator app to secure your account.'
+            )
+            setError('')
+            break
+          }
           default:
             setError(
               t.staffLogin?.additionalStepsRequired ||
@@ -185,9 +219,12 @@ const StaffLogin = ({ setCursorVariant }) => {
     setChallengeNotice('')
     setRequiresMfa(false)
     setRequiresMfaSelection(false)
+    setRequiresTotpSetup(false)
     setMfaCode('')
     setMfaType('')
     setAllowedMfaTypes([])
+    setTotpSetupUri('')
+    setTotpSecretKey('')
   }
 
   const handleSelectMfaType = async (type) => {
@@ -262,6 +299,161 @@ const StaffLogin = ({ setCursorVariant }) => {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleTotpSetupSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setChallengeNotice('')
+
+    if (!mfaCode.trim()) {
+      setError(t.staffLogin?.mfaCodeRequired || 'Please enter the verification code from your authenticator app.')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const { isSignedIn, nextStep } = await confirmSignIn({
+        challengeResponse: mfaCode.trim(),
+      })
+
+      if (isSignedIn) {
+        navigate('/staff/reports')
+      } else if (nextStep) {
+        setError(
+          t.staffLogin?.additionalStepsRequired ||
+            `Additional verification required (${nextStep.signInStep}).`
+        )
+      }
+    } catch (err) {
+      console.error('TOTP setup confirm error:', err)
+      if (err.name === 'InvalidParameterException' || err.message?.includes('Code mismatch')) {
+        setError(t.staffLogin?.invalidCode || 'Invalid verification code. Please try again.')
+      } else {
+        handleAuthError(err)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // TOTP Setup Form
+  if (requiresTotpSetup) {
+    return (
+      <section className="staff-login">
+        <div className="staff-login-bg">
+          <div className="login-gradient" />
+          <div className="login-pattern" />
+        </div>
+
+        <motion.div 
+          className="login-container"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <button 
+            onClick={handleBackToLogin}
+            className="back-link"
+            onMouseEnter={() => setCursorVariant?.('hover')}
+            onMouseLeave={() => setCursorVariant?.('default')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            {t.staffLogin?.backToLogin || 'Back to Login'}
+          </button>
+
+          <div className="login-card">
+            <div className="login-header">
+              <div className="login-logo">
+                <span className="logo-main">Confession</span>
+                <span className="logo-sub">Barcelona</span>
+              </div>
+              <h1>{t.staffLogin?.totpSetupTitle || 'Set Up Authenticator'}</h1>
+              <p>{t.staffLogin?.totpSetupSubtitle || 'Scan the QR code with your authenticator app'}</p>
+            </div>
+
+            <form className="login-form" onSubmit={handleTotpSetupSubmit}>
+              {challengeNotice && (
+                <div className="login-notice">
+                  {challengeNotice}
+                </div>
+              )}
+              {error && (
+                <div className="login-error">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="totp-setup-container">
+                <div className="totp-instructions">
+                  <p><strong>Step 1:</strong> {t.staffLogin?.totpStep1 || 'Download an authenticator app like Google Authenticator, Microsoft Authenticator, or Authy.'}</p>
+                  <p><strong>Step 2:</strong> {t.staffLogin?.totpStep2 || 'Add a new account and enter the secret key below manually.'}</p>
+                  <p><strong>Step 3:</strong> {t.staffLogin?.totpStep3 || 'Enter the 6-digit code from your app to verify.'}</p>
+                </div>
+
+                {totpSecretKey && (
+                  <div className="totp-secret-container">
+                    <p className="totp-secret-label">{t.staffLogin?.secretKeyLabel || 'Secret Key (enter this in your authenticator app):'}</p>
+                    <code className="totp-secret-key">{totpSecretKey}</code>
+                    <p className="totp-secret-hint">{t.staffLogin?.secretKeyHint || 'Account name: Confession Barcelona'}</p>
+                  </div>
+                )}
+
+                {totpSetupUri && (
+                  <div className="totp-qr-container">
+                    <p className="totp-qr-label">{t.staffLogin?.qrCodeLabel || 'Or scan this QR code:'}</p>
+                    <img 
+                      src={`https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(totpSetupUri)}&choe=UTF-8`}
+                      alt="TOTP QR Code"
+                      className="totp-qr-code"
+                      onError={(e) => { e.target.style.display = 'none' }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="totpCode">{t.staffLogin?.totpCodeLabel || 'Verification Code'}</label>
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    id="totpCode"
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value)}
+                    placeholder={t.staffLogin?.totpCodePlaceholder || '123456'}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    required
+                    onFocus={() => setCursorVariant?.('text')}
+                    onBlur={() => setCursorVariant?.('default')}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className={`login-btn ${isLoading ? 'loading' : ''}`}
+                disabled={isLoading}
+                onMouseEnter={() => setCursorVariant?.('hover')}
+                onMouseLeave={() => setCursorVariant?.('default')}
+              >
+                {isLoading ? <span className="loader-spinner" /> : null}
+                {t.staffLogin?.verifyAndComplete || 'Verify & Complete Setup'}
+              </button>
+            </form>
+          </div>
+        </motion.div>
+      </section>
+    )
   }
 
   // MFA Selection Form

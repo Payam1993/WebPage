@@ -176,6 +176,87 @@
   cursor: not-allowed;
 }
 
+/* TOTP Setup Styles */
+.totp-setup-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--color-sand, #f5f0eb);
+  border-radius: 4px;
+}
+
+.totp-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.totp-instructions p {
+  font-size: 0.85rem;
+  color: var(--color-charcoal);
+  margin: 0;
+}
+
+.totp-instructions strong {
+  color: var(--color-terracotta, #c4785a);
+}
+
+.totp-qr-container {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 4px;
+}
+
+.totp-qr-code {
+  width: 180px;
+  height: 180px;
+  border-radius: 4px;
+}
+
+.totp-secret-container {
+  text-align: center;
+}
+
+.totp-secret-label {
+  font-size: 0.8rem;
+  color: var(--color-charcoal);
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+
+.totp-secret-key {
+  display: block;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid rgba(42, 42, 42, 0.1);
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--color-charcoal);
+  word-break: break-all;
+  user-select: all;
+  text-align: center;
+}
+
+.totp-secret-hint {
+  font-size: 0.75rem;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 0.5rem;
+}
+
+.totp-qr-label {
+  font-size: 0.8rem;
+  color: var(--color-charcoal);
+  margin-bottom: 0.75rem;
+  opacity: 0.7;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
