@@ -268,6 +268,122 @@ export const Grid = ({ children, cols = 4, gap = 'default', className = '', ...p
 // ============================================
 // Icon Components (commonly used icons)
 // ============================================
+// ============================================
+// Modal Component
+// ============================================
+export const Modal = ({ 
+  isOpen, 
+  onClose, 
+  title, 
+  subtitle,
+  children, 
+  size = 'default',
+  className = '' 
+}) => {
+  if (!isOpen) return null
+
+  return (
+    <div className="ui-modal-overlay" onClick={onClose}>
+      <div 
+        className={`ui-modal ui-modal-${size} ${className}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="ui-modal-header">
+          <div className="ui-modal-title-wrapper">
+            <h2 className="ui-modal-title">{title}</h2>
+            {subtitle && <p className="ui-modal-subtitle">{subtitle}</p>}
+          </div>
+          <button className="ui-modal-close" onClick={onClose}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div className="ui-modal-content">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// Confirm Dialog Component
+// ============================================
+export const ConfirmDialog = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title = 'Confirm Action',
+  message = 'Are you sure you want to proceed?',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  variant = 'danger',
+  loading = false,
+}) => {
+  if (!isOpen) return null
+
+  return (
+    <div className="ui-modal-overlay" onClick={onClose}>
+      <div 
+        className="ui-modal ui-modal-small ui-confirm-dialog"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="ui-confirm-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h3 className="ui-confirm-title">{title}</h3>
+        <p className="ui-confirm-message">{message}</p>
+        <div className="ui-confirm-actions">
+          <Button variant="secondary" onClick={onClose} disabled={loading}>
+            {cancelText}
+          </Button>
+          <Button variant={variant} onClick={onConfirm} loading={loading}>
+            {confirmText}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// Clickable Card Component (for navigation/selection)
+// ============================================
+export const ClickableCard = ({
+  title,
+  subtitle,
+  icon,
+  onClick,
+  className = '',
+  ...props
+}) => (
+  <button 
+    className={`ui-clickable-card ${className}`}
+    onClick={onClick}
+    {...props}
+  >
+    {icon && <div className="ui-clickable-card-icon">{icon}</div>}
+    <div className="ui-clickable-card-content">
+      <h4 className="ui-clickable-card-title">{title}</h4>
+      {subtitle && <p className="ui-clickable-card-subtitle">{subtitle}</p>}
+    </div>
+    <div className="ui-clickable-card-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </div>
+  </button>
+)
+
+// ============================================
+// Icons
+// ============================================
 export const Icons = {
   Calendar: (props) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>

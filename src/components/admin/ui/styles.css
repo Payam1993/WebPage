@@ -664,3 +664,220 @@
     font-size: 1.5rem;
   }
 }
+
+/* ============================================
+   Modal Component
+   ============================================ */
+.ui-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--ui-space-lg);
+  animation: ui-fade-in 0.15s ease;
+}
+
+@keyframes ui-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ui-modal {
+  background: var(--ui-bg-card);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: ui-slide-up 0.2s ease;
+}
+
+@keyframes ui-slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-modal-small {
+  width: 100%;
+  max-width: 400px;
+}
+
+.ui-modal-default {
+  width: 100%;
+  max-width: 600px;
+}
+
+.ui-modal-large {
+  width: 100%;
+  max-width: 900px;
+}
+
+.ui-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--ui-space-lg);
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.ui-modal-title-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-modal-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ui-text);
+  margin: 0;
+}
+
+.ui-modal-subtitle {
+  font-size: 0.875rem;
+  color: var(--ui-text-muted);
+  margin: 4px 0 0 0;
+}
+
+.ui-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+  border-radius: var(--ui-radius);
+  transition: all 0.15s;
+  margin: -4px -4px 0 0;
+}
+
+.ui-modal-close:hover {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+}
+
+.ui-modal-content {
+  padding: var(--ui-space-lg);
+  overflow-y: auto;
+}
+
+/* ============================================
+   Confirm Dialog
+   ============================================ */
+.ui-confirm-dialog {
+  text-align: center;
+  padding: var(--ui-space-xl);
+}
+
+.ui-confirm-dialog .ui-modal-header {
+  display: none;
+}
+
+.ui-confirm-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--ui-danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--ui-space-md);
+}
+
+.ui-confirm-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ui-text);
+  margin: 0 0 var(--ui-space-sm) 0;
+}
+
+.ui-confirm-message {
+  font-size: 0.875rem;
+  color: var(--ui-text-muted);
+  margin: 0 0 var(--ui-space-lg) 0;
+}
+
+.ui-confirm-actions {
+  display: flex;
+  gap: var(--ui-space-sm);
+  justify-content: center;
+}
+
+/* ============================================
+   Clickable Card Component
+   ============================================ */
+.ui-clickable-card {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-md);
+  width: 100%;
+  padding: var(--ui-space-lg);
+  background: var(--ui-bg-card);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: inherit;
+}
+
+.ui-clickable-card:hover {
+  border-color: var(--ui-primary);
+  box-shadow: var(--ui-shadow-md);
+  transform: translateY(-2px);
+}
+
+.ui-clickable-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--ui-radius);
+  background: var(--ui-bg);
+  color: var(--ui-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ui-clickable-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-clickable-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ui-text);
+  margin: 0;
+}
+
+.ui-clickable-card-subtitle {
+  font-size: 0.8125rem;
+  color: var(--ui-text-muted);
+  margin: 4px 0 0 0;
+}
+
+.ui-clickable-card-arrow {
+  color: var(--ui-text-light);
+  transition: transform 0.2s;
+}
+
+.ui-clickable-card:hover .ui-clickable-card-arrow {
+  color: var(--ui-primary);
+  transform: translateX(4px);
+}

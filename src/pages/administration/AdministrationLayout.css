@@ -66,13 +66,16 @@
 }
 
 .admin-sidebar--admin .nav-link.active {
-  color: white;
-  background: var(--admin-accent-light);
-  background: rgba(124, 58, 237, 0.3);
+  color: #ffffff !important;
+  background: rgba(124, 58, 237, 0.4);
 }
 
 .admin-sidebar--admin .nav-link.active .nav-icon {
-  color: white;
+  color: #ffffff !important;
+}
+
+.admin-sidebar--admin .nav-link.active .nav-label {
+  color: #ffffff !important;
 }
 
 .admin-sidebar--admin .nav-icon {
