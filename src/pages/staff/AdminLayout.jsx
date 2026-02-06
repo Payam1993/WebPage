@@ -58,6 +58,7 @@ const AdminLayout = () => {
     if (path.includes('/costs')) return 'Costs Management'
     if (path.includes('/reservations')) return 'Reservations'
     if (path.includes('/calendar')) return 'Calendar'
+    if (path.includes('/assigned-task')) return 'Assigned Task'
     if (path.includes('/profile')) return 'Profile Settings'
     return 'Dashboard'
   }
@@ -106,6 +107,16 @@ const AdminLayout = () => {
           <line x1="16" y1="2" x2="16" y2="6"/>
           <line x1="8" y1="2" x2="8" y2="6"/>
           <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      ),
+    },
+    {
+      path: '/staff/assigned-task',
+      label: 'Assigned Task',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
         </svg>
       ),
     },

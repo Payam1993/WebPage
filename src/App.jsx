@@ -26,6 +26,7 @@ import Reports from './pages/staff/Reports'
 import CostsManagement from './pages/staff/CostsManagement'
 import Reservations from './pages/staff/Reservations'
 import Calendar from './pages/staff/Calendar'
+import AssignedTask from './pages/staff/AssignedTask'
 import ProfileSettings from './pages/staff/ProfileSettings'
 
 // Administration Pages (Admin-only)
@@ -100,6 +101,7 @@ function AppContent() {
               <Route path="costs" element={<CostsManagement />} />
               <Route path="reservations" element={<Reservations />} />
               <Route path="calendar" element={<Calendar />} />
+              <Route path="assigned-task" element={<AssignedTask />} />
               <Route path="profile" element={<ProfileSettings />} />
             </Route>
 

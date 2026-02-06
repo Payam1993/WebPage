@@ -400,6 +400,143 @@ export const dailyCostAPI = {
 }
 
 // ============================================
+// Booking CRUD (Staff Portal)
+// ============================================
+export const bookingAPI = {
+  /**
+   * List bookings, optionally filtered by date range
+   * @param {string} fromDate - Start date (YYYY-MM-DD)
+   * @param {string} toDate - End date (YYYY-MM-DD)
+   */
+  async list(fromDate = null, toDate = null) {
+    try {
+      const client = getClient()
+      let result
+      
+      if (fromDate && toDate) {
+        // Filter by date range
+        result = await client.models.Booking.list({
+          filter: {
+            date: {
+              between: [fromDate, toDate]
+            }
+          }
+        })
+      } else if (fromDate) {
+        // Filter by single date
+        result = await client.models.Booking.list({
+          filter: {
+            date: { eq: fromDate }
+          }
+        })
+      } else {
+        // No filter - get all
+        result = await client.models.Booking.list()
+      }
+      
+      const { data, errors } = result
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error listing bookings:', error)
+      throw error
+    }
+  },
+
+  /**
+   * List confirmed bookings (status = Done) for calendar display
+   * @param {string} fromDate - Start date (YYYY-MM-DD)
+   * @param {string} toDate - End date (YYYY-MM-DD)
+   */
+  async listConfirmed(fromDate = null, toDate = null) {
+    try {
+      const client = getClient()
+      let filter = { status: { eq: 'Done' } }
+      
+      if (fromDate && toDate) {
+        filter = {
+          and: [
+            { status: { eq: 'Done' } },
+            { date: { between: [fromDate, toDate] } }
+          ]
+        }
+      } else if (fromDate) {
+        filter = {
+          and: [
+            { status: { eq: 'Done' } },
+            { date: { eq: fromDate } }
+          ]
+        }
+      }
+      
+      const { data, errors } = await client.models.Booking.list({ filter })
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error listing confirmed bookings:', error)
+      throw error
+    }
+  },
+
+  async create(bookingData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.Booking.create({
+        clientName: bookingData.clientName,
+        clientPhone: bookingData.clientPhone,
+        therapistId: bookingData.therapistId || null,
+        therapistName: bookingData.therapistName || null,
+        date: bookingData.date,
+        reservedTime: bookingData.reservedTime,
+        durationMinutes: bookingData.durationMinutes,
+        priceAgreement: bookingData.priceAgreement,
+        status: bookingData.status || 'Pending',
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating booking:', error)
+      throw error
+    }
+  },
+
+  async update(id, bookingData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.Booking.update({
+        id,
+        clientName: bookingData.clientName,
+        clientPhone: bookingData.clientPhone,
+        therapistId: bookingData.therapistId || null,
+        therapistName: bookingData.therapistName || null,
+        date: bookingData.date,
+        reservedTime: bookingData.reservedTime,
+        durationMinutes: bookingData.durationMinutes,
+        priceAgreement: bookingData.priceAgreement,
+        status: bookingData.status,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error updating booking:', error)
+      throw error
+    }
+  },
+
+  async delete(id) {
+    try {
+      const client = getClient()
+      const { errors } = await client.models.Booking.delete({ id })
+      if (errors) throw new Error(errors[0].message)
+      return true
+    } catch (error) {
+      console.error('Error deleting booking:', error)
+      throw error
+    }
+  },
+}
+
+// ============================================
 // Utility Functions
 // ============================================
 

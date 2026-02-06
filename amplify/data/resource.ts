@@ -9,12 +9,15 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * - Staff: staff members with name (static data)
  * - DailyService: daily service records with full details
  * - DailyCost: daily cost records
+ * - Booking: client reservations/bookings
  * 
- * Access: Admin_Confession group only
+ * Access: 
+ * - Admin_Confession group: full access to all models
+ * - Authenticated users: access to Booking model (staff portal)
  */
 const schema = a.schema({
   // ============================================
-  // Static Data Models
+  // Static Data Models (Admin only)
   // ============================================
   
   // Service model - massage services
@@ -26,6 +29,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),
+      allow.authenticated().to(["read"]), // Staff can read for dropdowns
     ]),
 
   // Cost model - expense categories
@@ -45,10 +49,11 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),
+      allow.authenticated().to(["read"]), // Staff can read for dropdowns
     ]),
 
   // ============================================
-  // Daily Data Models
+  // Daily Data Models (Admin only)
   // ============================================
 
   // DailyService model - daily service records
@@ -89,6 +94,32 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),
+    ]),
+
+  // ============================================
+  // Booking/Reservation Model (Staff Portal)
+  // ============================================
+
+  // Booking model - client reservations
+  Booking: a
+    .model({
+      // Client information
+      clientName: a.string().required(),
+      clientPhone: a.string().required(),
+      // Therapist (optional - ID reference or name)
+      therapistId: a.string(),
+      therapistName: a.string(),
+      // Date and time
+      date: a.date().required(),
+      reservedTime: a.time().required(),
+      durationMinutes: a.integer().required(),
+      // Financial
+      priceAgreement: a.float().required(),
+      // Status: Done | Pending | Canceled
+      status: a.enum(["Done", "Pending", "Canceled"]),
+    })
+    .authorization((allow) => [
+      allow.authenticated(), // All authenticated staff can CRUD bookings
     ]),
 });
 

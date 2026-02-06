@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Card,
   CardHeader,
@@ -6,26 +6,88 @@ import {
   Button,
   PageHeader,
   Icons,
+  LoadingState,
 } from '../../components/admin/ui'
+import { bookingAPI } from '../../services/dataService'
 
 /**
- * Calendar - Visual calendar view of bookings and schedule
+ * Calendar - Visual calendar view of confirmed bookings
+ * Shows bookings with status "Done" from the Booking model
  */
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState('week') // 'day', 'week', 'month'
-
-  // Sample events - replace with real data from your API
-  const events = [
-    { id: 1, title: 'Deep Tissue - Maria', time: '10:00', duration: 60, therapist: 'Luciana', date: '2026-01-20', color: '#2563eb' },
-    { id: 2, title: 'Swedish - John', time: '14:00', duration: 90, therapist: 'Sadey', date: '2026-01-20', color: '#10b981' },
-    { id: 3, title: 'Hot Stone - Anna', time: '11:00', duration: 75, therapist: 'Luciana', date: '2026-01-21', color: '#2563eb' },
-    { id: 4, title: 'Aromatherapy - Carlos', time: '16:00', duration: 60, therapist: 'Sadey', date: '2026-01-21', color: '#10b981' },
-    { id: 5, title: 'Couples - Emma', time: '15:00', duration: 90, therapist: 'Both', date: '2026-01-22', color: '#f59e0b' },
-  ]
+  const [events, setEvents] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   const hours = Array.from({ length: 12 }, (_, i) => i + 9) // 9 AM to 8 PM
+
+  // Load confirmed bookings when date/view changes
+  useEffect(() => {
+    loadEvents()
+  }, [currentDate, viewMode])
+
+  const loadEvents = async () => {
+    setIsLoading(true)
+    try {
+      const dateRange = getDateRange()
+      const bookings = await bookingAPI.listConfirmed(dateRange.from, dateRange.to)
+      
+      // Transform bookings to calendar events
+      const calendarEvents = bookings.map(booking => ({
+        id: booking.id,
+        title: `${booking.clientName}`,
+        time: booking.reservedTime?.substring(0, 5) || '00:00',
+        duration: booking.durationMinutes || 60,
+        therapist: booking.therapistName || 'Unassigned',
+        date: booking.date,
+        color: getTherapistColor(booking.therapistName),
+        clientPhone: booking.clientPhone,
+        price: booking.priceAgreement,
+      }))
+      
+      setEvents(calendarEvents)
+    } catch (error) {
+      console.error('Error loading calendar events:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Get date range based on current view
+  const getDateRange = () => {
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth()
+    
+    if (viewMode === 'month') {
+      const firstDay = new Date(year, month, 1)
+      const lastDay = new Date(year, month + 1, 0)
+      return {
+        from: formatDateKey(firstDay),
+        to: formatDateKey(lastDay)
+      }
+    } else if (viewMode === 'week') {
+      const weekDays = getWeekDays()
+      return {
+        from: formatDateKey(weekDays[0]),
+        to: formatDateKey(weekDays[6])
+      }
+    } else {
+      return {
+        from: formatDateKey(currentDate),
+        to: formatDateKey(currentDate)
+      }
+    }
+  }
+
+  // Assign colors based on therapist name
+  const getTherapistColor = (therapistName) => {
+    if (!therapistName) return '#6b7280'
+    const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+    const hash = therapistName.split('').reduce((a, b) => a + b.charCodeAt(0), 0)
+    return colors[hash % colors.length]
+  }
 
   const getMonthDays = () => {
     const year = currentDate.getFullYear()
@@ -94,14 +156,24 @@ const Calendar = () => {
     return events.filter(event => event.date === dateKey)
   }
 
+  // Calculate end time for display
+  const getEndTime = (startTime, durationMinutes) => {
+    if (!startTime) return ''
+    const [hours, minutes] = startTime.split(':').map(Number)
+    const totalMinutes = hours * 60 + minutes + durationMinutes
+    const endHours = Math.floor(totalMinutes / 60) % 24
+    const endMinutes = totalMinutes % 60
+    return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
+  }
+
   return (
     <div>
       <PageHeader 
         title="Calendar"
-        subtitle="View and manage your schedule"
+        subtitle="View confirmed appointments (Done status)"
         actions={
-          <Button icon={<Icons.Plus />}>
-            Add Event
+          <Button variant="secondary" onClick={loadEvents}>
+            <Icons.Search /> Refresh
           </Button>
         }
       />
@@ -164,7 +236,11 @@ const Calendar = () => {
 
       {/* Calendar View */}
       <Card padding={false}>
-        {viewMode === 'month' ? (
+        {isLoading ? (
+          <div style={{ padding: '48px' }}>
+            <LoadingState text="Loading calendar..." />
+          </div>
+        ) : viewMode === 'month' ? (
           /* Month View */
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', background: 'var(--ui-border)' }}>
             {/* Day Headers */}
@@ -313,11 +389,15 @@ const Calendar = () => {
                               background: event.color,
                               color: 'white',
                               borderRadius: '6px',
-                              fontSize: '0.75rem'
+                              fontSize: '0.75rem',
+                              cursor: 'pointer'
                             }}
+                            title={`${event.title}\n${event.time} - ${getEndTime(event.time, event.duration)}\nTherapist: ${event.therapist}\nPrice: €${event.price?.toFixed(2) || '0.00'}`}
                           >
                             <div style={{ fontWeight: 500 }}>{event.title}</div>
-                            <div style={{ opacity: 0.85, fontSize: '0.6875rem' }}>{event.duration} min</div>
+                            <div style={{ opacity: 0.85, fontSize: '0.6875rem' }}>
+                              {event.duration} min • {event.therapist}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -330,6 +410,11 @@ const Calendar = () => {
         ) : (
           /* Day View */
           <div>
+            {events.length === 0 && !isLoading && (
+              <div style={{ padding: '48px', textAlign: 'center', color: 'var(--ui-text-muted)' }}>
+                No confirmed appointments for this day
+              </div>
+            )}
             {hours.map((hour) => {
               const hourEvents = events.filter(e => e.date === formatDateKey(currentDate) && parseInt(e.time) === hour)
               return (
@@ -360,11 +445,20 @@ const Calendar = () => {
                           background: event.color,
                           color: 'white',
                           borderRadius: '8px',
-                          minWidth: '200px'
+                          minWidth: '200px',
+                          cursor: 'pointer'
                         }}
                       >
                         <div style={{ fontWeight: 500, marginBottom: '4px' }}>{event.title}</div>
-                        <div style={{ fontSize: '0.8125rem', opacity: 0.9 }}>{event.duration} min • {event.therapist}</div>
+                        <div style={{ fontSize: '0.8125rem', opacity: 0.9 }}>
+                          {event.time} - {getEndTime(event.time, event.duration)}
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', opacity: 0.9 }}>
+                          {event.duration} min • {event.therapist}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '4px' }}>
+                          €{event.price?.toFixed(2) || '0.00'}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -373,6 +467,21 @@ const Calendar = () => {
             })}
           </div>
         )}
+      </Card>
+
+      {/* Legend */}
+      <Card style={{ marginTop: '24px' }}>
+        <CardHeader>
+          <CardTitle>Calendar Info</CardTitle>
+        </CardHeader>
+        <div style={{ fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
+          <p style={{ margin: '0 0 8px 0' }}>
+            <strong>Note:</strong> Only bookings with status "Done" are displayed on the calendar.
+          </p>
+          <p style={{ margin: 0 }}>
+            To add or edit appointments, go to the <strong>Reservations</strong> page and set the status to "Done" to confirm them.
+          </p>
+        </div>
       </Card>
     </div>
   )
