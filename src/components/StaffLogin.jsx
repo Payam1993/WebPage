@@ -40,6 +40,84 @@ const StaffLogin = ({ setCursorVariant }) => {
   const [totpSetupUri, setTotpSetupUri] = useState('')
   const [totpSecretKey, setTotpSecretKey] = useState('')
 
+  // Reusable function to handle all authentication next steps
+  const handleNextStep = (nextStep) => {
+    console.log('Handling next step:', nextStep.signInStep)
+    
+    switch (nextStep.signInStep) {
+      case 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED':
+        // FORCE_CHANGE_PASSWORD -> prompt for a new password
+        setRequiresNewPassword(true)
+        setChallengeNotice(
+          t.staffLogin?.temporaryPasswordNotice ||
+            'This account requires a new password. Please set one to continue.'
+        )
+        setError('')
+        break
+        
+      case 'CONFIRM_SIGN_UP':
+        setError(t.staffLogin?.confirmSignUp || 'Please confirm your account first.')
+        break
+        
+      case 'SELECT_MFA_TYPE':
+        setRequiresMfaSelection(true)
+        setAllowedMfaTypes(nextStep.allowedMFATypes || [])
+        setChallengeNotice(
+          t.staffLogin?.selectMfaNotice ||
+            'Select how you want to receive your verification code.'
+        )
+        setError('')
+        break
+        
+      case 'CONFIRM_SIGN_IN_WITH_TOTP_CODE':
+      case 'CONFIRM_SIGN_IN_WITH_SMS_CODE':
+      case 'CONFIRM_SIGN_IN_WITH_EMAIL_CODE':
+      case 'CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE':
+        setRequiresMfa(true)
+        setMfaType(nextStep.signInStep)
+        setChallengeNotice(
+          t.staffLogin?.mfaNotice ||
+            'Multi-factor authentication is required. Enter the verification code from your authenticator app.'
+        )
+        setError('')
+        break
+        
+      case 'CONTINUE_SIGN_IN_WITH_TOTP_SETUP': {
+        // User needs to set up TOTP (authenticator app) for the first time
+        console.log('TOTP Setup Required - nextStep:', nextStep)
+        const totpSetupDetails = nextStep.totpSetupDetails
+        if (totpSetupDetails) {
+          try {
+            // Get the setup URI for QR code generation
+            const appName = 'Confession Barcelona'
+            const setupUri = totpSetupDetails.getSetupUri(appName)
+            setTotpSetupUri(setupUri.toString())
+            setTotpSecretKey(totpSetupDetails.sharedSecret)
+            console.log('TOTP Secret Key:', totpSetupDetails.sharedSecret)
+          } catch (uriErr) {
+            console.error('Error generating setup URI:', uriErr)
+            // Even if URI generation fails, we can still show the secret key
+            setTotpSecretKey(totpSetupDetails.sharedSecret || '')
+          }
+        }
+        setRequiresTotpSetup(true)
+        setChallengeNotice(
+          t.staffLogin?.totpSetupNotice ||
+            'Set up your authenticator app to secure your account.'
+        )
+        setError('')
+        break
+      }
+        
+      default:
+        console.warn('Unhandled sign-in step:', nextStep.signInStep)
+        setError(
+          t.staffLogin?.additionalStepsRequired ||
+            `Additional verification required (${nextStep.signInStep}).`
+        )
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -65,73 +143,8 @@ const StaffLogin = ({ setCursorVariant }) => {
         // Successfully signed in, redirect to staff reports (default page)
         navigate('/staff/reports')
       } else if (nextStep) {
-        // Handle additional steps
-        switch (nextStep.signInStep) {
-          case 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED':
-            // FORCE_CHANGE_PASSWORD -> prompt for a new password
-            setRequiresNewPassword(true)
-            setChallengeNotice(
-              t.staffLogin?.temporaryPasswordNotice ||
-                'This account requires a new password. Please set one to continue.'
-            )
-            setError('')
-            break
-          case 'CONFIRM_SIGN_UP':
-            setError(t.staffLogin?.confirmSignUp || 'Please confirm your account first.')
-            break
-          case 'SELECT_MFA_TYPE':
-            setRequiresMfaSelection(true)
-            setAllowedMfaTypes(nextStep.allowedMFATypes || [])
-            setChallengeNotice(
-              t.staffLogin?.selectMfaNotice ||
-                'Select how you want to receive your verification code.'
-            )
-            setError('')
-            break
-          case 'CONFIRM_SIGN_IN_WITH_TOTP_CODE':
-          case 'CONFIRM_SIGN_IN_WITH_SMS_CODE':
-          case 'CONFIRM_SIGN_IN_WITH_EMAIL_CODE':
-          case 'CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE':
-            setRequiresMfa(true)
-            setMfaType(nextStep.signInStep)
-            setChallengeNotice(
-              t.staffLogin?.mfaNotice ||
-                'Multi-factor authentication is required. Enter the verification code.'
-            )
-            setError('')
-            break
-          case 'CONTINUE_SIGN_IN_WITH_TOTP_SETUP': {
-            // User needs to set up TOTP (authenticator app) for the first time
-            console.log('TOTP Setup Required - nextStep:', nextStep)
-            const totpSetupDetails = nextStep.totpSetupDetails
-            if (totpSetupDetails) {
-              try {
-                // Get the setup URI for QR code generation
-                const appName = 'Confession Barcelona'
-                const setupUri = totpSetupDetails.getSetupUri(appName)
-                setTotpSetupUri(setupUri.toString())
-                setTotpSecretKey(totpSetupDetails.sharedSecret)
-                console.log('TOTP Secret Key:', totpSetupDetails.sharedSecret)
-              } catch (uriErr) {
-                console.error('Error generating setup URI:', uriErr)
-                // Even if URI generation fails, we can still show the secret key
-                setTotpSecretKey(totpSetupDetails.sharedSecret || '')
-              }
-            }
-            setRequiresTotpSetup(true)
-            setChallengeNotice(
-              t.staffLogin?.totpSetupNotice ||
-                'Set up your authenticator app to secure your account.'
-            )
-            setError('')
-            break
-          }
-          default:
-            setError(
-              t.staffLogin?.additionalStepsRequired ||
-                `Additional verification required (${nextStep.signInStep}).`
-            )
-        }
+        // Handle additional steps using the reusable function
+        handleNextStep(nextStep)
       }
     } catch (err) {
       console.error('Sign in error:', err)
@@ -172,8 +185,9 @@ const StaffLogin = ({ setCursorVariant }) => {
         // Successfully set new password and signed in
         navigate('/staff/reports')
       } else if (nextStep) {
-        // Handle any additional steps after password change
-        setError(t.staffLogin?.additionalStepsRequired || 'Additional verification required.')
+        // Handle additional steps after password change (like MFA setup)
+        setRequiresNewPassword(false)
+        handleNextStep(nextStep)
       }
     } catch (err) {
       console.error('Confirm sign in error:', err)
@@ -240,25 +254,8 @@ const StaffLogin = ({ setCursorVariant }) => {
       if (isSignedIn) {
         navigate('/staff/reports')
       } else if (nextStep) {
-        if (
-          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_TOTP_CODE' ||
-          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_SMS_CODE' ||
-          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_EMAIL_CODE' ||
-          nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE'
-        ) {
-          setRequiresMfa(true)
-          setRequiresMfaSelection(false)
-          setMfaType(nextStep.signInStep)
-          setChallengeNotice(
-            t.staffLogin?.mfaNotice ||
-              'Multi-factor authentication is required. Enter the verification code.'
-          )
-        } else {
-          setError(
-            t.staffLogin?.additionalStepsRequired ||
-              `Additional verification required (${nextStep.signInStep}).`
-          )
-        }
+        setRequiresMfaSelection(false)
+        handleNextStep(nextStep)
       }
     } catch (err) {
       console.error('MFA selection error:', err)
@@ -288,14 +285,17 @@ const StaffLogin = ({ setCursorVariant }) => {
       if (isSignedIn) {
         navigate('/staff/reports')
       } else if (nextStep) {
-        setError(
-          t.staffLogin?.additionalStepsRequired ||
-            `Additional verification required (${nextStep.signInStep}).`
-        )
+        setRequiresMfa(false)
+        setMfaCode('')
+        handleNextStep(nextStep)
       }
     } catch (err) {
       console.error('MFA confirm error:', err)
-      handleAuthError(err)
+      if (err.name === 'CodeMismatchException' || err.message?.includes('Code mismatch')) {
+        setError(t.staffLogin?.invalidCode || 'Invalid verification code. Please try again.')
+      } else {
+        handleAuthError(err)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -321,15 +321,14 @@ const StaffLogin = ({ setCursorVariant }) => {
       if (isSignedIn) {
         navigate('/staff/reports')
       } else if (nextStep) {
-        setError(
-          t.staffLogin?.additionalStepsRequired ||
-            `Additional verification required (${nextStep.signInStep}).`
-        )
+        setRequiresTotpSetup(false)
+        setMfaCode('')
+        handleNextStep(nextStep)
       }
     } catch (err) {
       console.error('TOTP setup confirm error:', err)
-      if (err.name === 'InvalidParameterException' || err.message?.includes('Code mismatch')) {
-        setError(t.staffLogin?.invalidCode || 'Invalid verification code. Please try again.')
+      if (err.name === 'CodeMismatchException' || err.name === 'InvalidParameterException' || err.message?.includes('Code mismatch') || err.message?.includes('invalid')) {
+        setError(t.staffLogin?.invalidCode || 'Invalid verification code. Please check your authenticator app and try again.')
       } else {
         handleAuthError(err)
       }
