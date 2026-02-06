@@ -444,26 +444,27 @@ export const bookingAPI = {
   },
 
   /**
-   * List confirmed bookings (status = Done) for calendar display
+   * List pending bookings (status = Pending) for calendar display
+   * Only Pending reservations appear in the calendar
    * @param {string} fromDate - Start date (YYYY-MM-DD)
    * @param {string} toDate - End date (YYYY-MM-DD)
    */
-  async listConfirmed(fromDate = null, toDate = null) {
+  async listPending(fromDate = null, toDate = null) {
     try {
       const client = getClient()
-      let filter = { status: { eq: 'Done' } }
+      let filter = { status: { eq: 'Pending' } }
       
       if (fromDate && toDate) {
         filter = {
           and: [
-            { status: { eq: 'Done' } },
+            { status: { eq: 'Pending' } },
             { date: { between: [fromDate, toDate] } }
           ]
         }
       } else if (fromDate) {
         filter = {
           and: [
-            { status: { eq: 'Done' } },
+            { status: { eq: 'Pending' } },
             { date: { eq: fromDate } }
           ]
         }
@@ -473,7 +474,7 @@ export const bookingAPI = {
       if (errors) throw new Error(errors[0].message)
       return data || []
     } catch (error) {
-      console.error('Error listing confirmed bookings:', error)
+      console.error('Error listing pending bookings:', error)
       throw error
     }
   },

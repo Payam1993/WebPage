@@ -11,8 +11,9 @@ import {
 import { bookingAPI } from '../../services/dataService'
 
 /**
- * Calendar - Visual calendar view of confirmed bookings
- * Shows bookings with status "Done" from the Booking model
+ * Calendar - Visual calendar view of pending bookings
+ * Shows bookings with status "Pending" from the Booking model
+ * Done and Canceled bookings do not appear in the calendar
  */
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -32,7 +33,7 @@ const Calendar = () => {
     setIsLoading(true)
     try {
       const dateRange = getDateRange()
-      const bookings = await bookingAPI.listConfirmed(dateRange.from, dateRange.to)
+      const bookings = await bookingAPI.listPending(dateRange.from, dateRange.to)
       
       // Transform bookings to calendar events
       const calendarEvents = bookings.map(booking => ({
@@ -170,7 +171,7 @@ const Calendar = () => {
     <div>
       <PageHeader 
         title="Calendar"
-        subtitle="View confirmed appointments (Done status)"
+        subtitle="View pending appointments awaiting completion"
         actions={
           <Button variant="secondary" onClick={loadEvents}>
             <Icons.Search /> Refresh
@@ -412,7 +413,7 @@ const Calendar = () => {
           <div>
             {events.length === 0 && !isLoading && (
               <div style={{ padding: '48px', textAlign: 'center', color: 'var(--ui-text-muted)' }}>
-                No confirmed appointments for this day
+                No pending appointments for this day
               </div>
             )}
             {hours.map((hour) => {
@@ -476,10 +477,10 @@ const Calendar = () => {
         </CardHeader>
         <div style={{ fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
           <p style={{ margin: '0 0 8px 0' }}>
-            <strong>Note:</strong> Only bookings with status "Done" are displayed on the calendar.
+            <strong>Note:</strong> Only bookings with status "Pending" are displayed on the calendar.
           </p>
           <p style={{ margin: 0 }}>
-            To add or edit appointments, go to the <strong>Reservations</strong> page and set the status to "Done" to confirm them.
+            When a reservation is marked as "Done" or "Canceled", it will disappear from the calendar.
           </p>
         </div>
       </Card>
