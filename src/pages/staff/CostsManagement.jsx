@@ -1,10 +1,38 @@
 import { useState } from 'react'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Badge,
+  StatCard,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  PageHeader,
+  Grid,
+  Input,
+  Select,
+  Icons,
+  EmptyState,
+  Divider,
+} from '../../components/admin/ui'
 
 /**
  * CostsManagement - Manage business costs and expenses
  */
 const CostsManagement = () => {
   const [showAddForm, setShowAddForm] = useState(false)
+  const [newCost, setNewCost] = useState({
+    category: '',
+    description: '',
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+  })
 
   // Sample data - replace with real data from your API
   const costs = [
@@ -22,140 +50,236 @@ const CostsManagement = () => {
     return acc
   }, {})
 
+  const categoryOptions = [
+    { value: 'Supplies', label: 'Supplies' },
+    { value: 'Utilities', label: 'Utilities' },
+    { value: 'Staff', label: 'Staff' },
+    { value: 'Maintenance', label: 'Maintenance' },
+    { value: 'Marketing', label: 'Marketing' },
+    { value: 'Other', label: 'Other' },
+  ]
+
+  const getCategoryColor = (category) => {
+    const colors = {
+      'Supplies': 'info',
+      'Utilities': 'warning',
+      'Staff': 'success',
+      'Maintenance': 'danger',
+      'Marketing': 'neutral',
+      'Other': 'neutral',
+    }
+    return colors[category] || 'neutral'
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // Handle form submission
+    console.log('New cost:', newCost)
+    setShowAddForm(false)
+    setNewCost({
+      category: '',
+      description: '',
+      amount: '',
+      date: new Date().toISOString().split('T')[0],
+    })
+  }
+
   return (
-    <div className="admin-page">
-      <div className="admin-page-header">
-        <h1>Costs Management</h1>
-        <p>Track and manage your business expenses</p>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon orange">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
-              <path d="M12 18V6"/>
-            </svg>
-          </div>
-          <div className="stat-value">€{totalCosts.toFixed(2)}</div>
-          <div className="stat-label">Total This Month</div>
-        </div>
-        {Object.entries(costsByCategory).slice(0, 3).map(([category, amount], index) => (
-          <div key={category} className="stat-card">
-            <div className={`stat-icon ${['blue', 'green', 'purple'][index]}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 21H4.6c-.56 0-.84 0-1.054-.109a1 1 0 0 1-.437-.437C3 20.24 3 19.96 3 19.4V3"/>
-                <path d="M7 14l4-4 4 4 6-6"/>
-              </svg>
-            </div>
-            <div className="stat-value">€{amount.toFixed(2)}</div>
-            <div className="stat-label">{category}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Costs Table */}
-      <div className="admin-card">
-        <div className="admin-card-header">
-          <h2>Expense Records</h2>
-          <button 
-            className="admin-btn primary" 
-            style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+    <div>
+      <PageHeader 
+        title="Costs Management"
+        subtitle="Track and manage your business expenses"
+        actions={
+          <Button 
+            icon={<Icons.Plus />}
             onClick={() => setShowAddForm(!showAddForm)}
           >
-            + Add Expense
-          </button>
-        </div>
+            Add Expense
+          </Button>
+        }
+      />
 
-        {/* Add Expense Form */}
-        {showAddForm && (
+      {/* Add Expense Form */}
+      {showAddForm && (
+        <Card style={{ marginBottom: '24px' }}>
+          <CardHeader>
+            <CardTitle subtitle="Enter the expense details below">
+              New Expense
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <Grid cols={4} gap="default">
+                <Select
+                  label="Category"
+                  options={categoryOptions}
+                  placeholder="Select category"
+                  value={newCost.category}
+                  onChange={(e) => setNewCost({ ...newCost, category: e.target.value })}
+                  required
+                />
+                <Input
+                  label="Description"
+                  type="text"
+                  placeholder="Enter description"
+                  value={newCost.description}
+                  onChange={(e) => setNewCost({ ...newCost, description: e.target.value })}
+                  required
+                />
+                <Input
+                  label="Amount (€)"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={newCost.amount}
+                  onChange={(e) => setNewCost({ ...newCost, amount: e.target.value })}
+                  required
+                />
+                <Input
+                  label="Date"
+                  type="date"
+                  value={newCost.date}
+                  onChange={(e) => setNewCost({ ...newCost, date: e.target.value })}
+                  required
+                />
+              </Grid>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={() => setShowAddForm(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Save Expense
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Summary Cards */}
+      <Grid cols={4} gap="default" style={{ marginBottom: '24px' }}>
+        <StatCard
+          title="Total This Month"
+          value={`€${totalCosts.toFixed(2)}`}
+          icon={<Icons.DollarSign />}
+          trend="-5%"
+          trendDirection="down"
+          subtitle="vs last month"
+        />
+        {Object.entries(costsByCategory).slice(0, 3).map(([category, amount]) => (
+          <StatCard
+            key={category}
+            title={category}
+            value={`€${amount.toFixed(2)}`}
+            icon={<Icons.TrendingUp />}
+          />
+        ))}
+      </Grid>
+
+      {/* Costs Table */}
+      <Card padding={false}>
+        <CardHeader
+          actions={
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Button variant="ghost" size="small">
+                Export
+              </Button>
+              <Button variant="ghost" size="small">
+                Filter
+              </Button>
+            </div>
+          }
+        >
+          <CardTitle subtitle={`${costs.length} expenses recorded`}>
+            Expense Records
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {costs.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>Amount</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {costs.map((cost) => (
+                  <TableRow key={cost.id}>
+                    <TableCell>
+                      <span style={{ color: 'var(--ui-text-muted)' }}>
+                        {new Date(cost.date).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getCategoryColor(cost.category)}>
+                        {cost.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span style={{ fontWeight: 500 }}>{cost.description}</span>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <span style={{ fontWeight: 600 }}>€{cost.amount.toFixed(2)}</span>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+                        <Button variant="ghost" size="small">
+                          <Icons.Edit />
+                        </Button>
+                        <Button variant="ghost" size="small">
+                          <Icons.Trash />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <EmptyState
+              icon={<Icons.FileText />}
+              title="No expenses recorded"
+              description="Start tracking your business expenses by adding your first entry."
+              action={
+                <Button onClick={() => setShowAddForm(true)} icon={<Icons.Plus />}>
+                  Add Expense
+                </Button>
+              }
+            />
+          )}
+        </CardContent>
+
+        {/* Table Footer with Total */}
+        {costs.length > 0 && (
           <div style={{ 
-            padding: '1.5rem', 
-            marginBottom: '1.5rem', 
-            background: 'var(--color-cream, #f5f0eb)', 
-            borderRadius: '8px' 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            alignItems: 'center',
+            padding: '16px 24px',
+            borderTop: '1px solid var(--ui-border)',
+            background: 'var(--ui-bg)',
           }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-              <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                <label>Category</label>
-                <select>
-                  <option>Supplies</option>
-                  <option>Utilities</option>
-                  <option>Staff</option>
-                  <option>Maintenance</option>
-                  <option>Marketing</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                <label>Description</label>
-                <input type="text" placeholder="Enter description" />
-              </div>
-              <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                <label>Amount (€)</label>
-                <input type="number" step="0.01" placeholder="0.00" />
-              </div>
-              <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                <label>Date</label>
-                <input type="date" />
-              </div>
-            </div>
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-              <button className="admin-btn primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-                Save Expense
-              </button>
-              <button 
-                className="admin-btn secondary" 
-                style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
-                onClick={() => setShowAddForm(false)}
-              >
-                Cancel
-              </button>
-            </div>
+            <span style={{ marginRight: '24px', color: 'var(--ui-text-muted)' }}>
+              Total Expenses:
+            </span>
+            <span style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+              €{totalCosts.toFixed(2)}
+            </span>
           </div>
         )}
-
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {costs.map((cost) => (
-                <tr key={cost.id}>
-                  <td>{new Date(cost.date).toLocaleDateString()}</td>
-                  <td>
-                    <span className={`status-badge confirmed`} style={{ background: 'rgba(42, 42, 42, 0.08)', color: 'var(--color-charcoal)' }}>
-                      {cost.category}
-                    </span>
-                  </td>
-                  <td>{cost.description}</td>
-                  <td style={{ fontWeight: 500 }}>€{cost.amount.toFixed(2)}</td>
-                  <td>
-                    <button style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      color: 'var(--color-terracotta)', 
-                      cursor: 'pointer',
-                      padding: '0.25rem'
-                    }}>
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </Card>
     </div>
   )
 }

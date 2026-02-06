@@ -1,4 +1,22 @@
 import { useState } from 'react'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Badge,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  PageHeader,
+  Input,
+  Icons,
+  EmptyState,
+} from '../../components/admin/ui'
 
 /**
  * Reservations - Manage client bookings and reservations
@@ -90,138 +108,132 @@ const Reservations = () => {
     cancelled: reservations.filter(r => r.status === 'cancelled').length,
   }
 
+  const getStatusVariant = (status) => {
+    switch (status) {
+      case 'confirmed': return 'success'
+      case 'pending': return 'warning'
+      case 'cancelled': return 'danger'
+      default: return 'neutral'
+    }
+  }
+
   return (
-    <div className="admin-page">
-      <div className="admin-page-header">
-        <h1>Reservations</h1>
-        <p>Manage and view all client bookings</p>
-      </div>
+    <div>
+      <PageHeader 
+        title="Reservations"
+        subtitle="Manage and view all client bookings"
+        actions={
+          <Button icon={<Icons.Plus />}>
+            New Booking
+          </Button>
+        }
+      />
 
       {/* Filters */}
-      <div className="admin-card" style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <Card style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Status Filters */}
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             {Object.entries(statusCounts).map(([status, count]) => (
-              <button
+              <Button
                 key={status}
+                variant={filterStatus === status ? 'primary' : 'secondary'}
+                size="small"
                 onClick={() => setFilterStatus(status)}
-                className={`admin-btn ${filterStatus === status ? 'primary' : 'secondary'}`}
-                style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
-              </button>
+              </Button>
             ))}
           </div>
           
           {/* Search */}
           <div style={{ flex: 1, minWidth: '200px' }}>
-            <input
+            <Input
               type="text"
               placeholder="Search by client or service..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem 1rem',
-                border: '1px solid rgba(42, 42, 42, 0.12)',
-                borderRadius: '8px',
-                background: 'var(--color-cream, #f5f0eb)',
-                fontSize: '0.9rem'
-              }}
+              containerClassName="ui-mb-0"
             />
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Reservations List */}
-      <div className="admin-card">
-        <div className="admin-card-header">
-          <h2>Booking List</h2>
-          <button className="admin-btn primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-            + New Booking
-          </button>
-        </div>
-
-        {filteredReservations.length === 0 ? (
-          <div className="empty-state">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <p>No reservations found matching your criteria</p>
-          </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Service</th>
-                  <th>Therapist</th>
-                  <th>Date & Time</th>
-                  <th>Duration</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+      <Card padding={false}>
+        <CardHeader
+          actions={
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Button variant="ghost" size="small">
+                Export
+              </Button>
+            </div>
+          }
+        >
+          <CardTitle subtitle={`${filteredReservations.length} bookings found`}>
+            Booking List
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {filteredReservations.length === 0 ? (
+            <EmptyState
+              icon={<Icons.Calendar />}
+              title="No reservations found"
+              description="No bookings match your current filters"
+            />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Therapist</TableHead>
+                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredReservations.map((res) => (
-                  <tr key={res.id}>
-                    <td>
+                  <TableRow key={res.id}>
+                    <TableCell>
                       <div>
                         <div style={{ fontWeight: 500 }}>{res.client}</div>
-                        <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>{res.email}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>{res.email}</div>
                       </div>
-                    </td>
-                    <td>{res.service}</td>
-                    <td>{res.therapist}</td>
-                    <td>
+                    </TableCell>
+                    <TableCell>{res.service}</TableCell>
+                    <TableCell>{res.therapist}</TableCell>
+                    <TableCell>
                       <div>
-                        <div>{new Date(res.date).toLocaleDateString()}</div>
-                        <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>{res.time}</div>
+                        <div>{new Date(res.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>{res.time}</div>
                       </div>
-                    </td>
-                    <td>{res.duration}</td>
-                    <td>
-                      <span className={`status-badge ${res.status}`}>
+                    </TableCell>
+                    <TableCell>{res.duration}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(res.status)}>
                         {res.status.charAt(0).toUpperCase() + res.status.slice(1)}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button style={{ 
-                          background: 'none', 
-                          border: 'none', 
-                          color: 'var(--color-terracotta)', 
-                          cursor: 'pointer',
-                          padding: '0.25rem',
-                          fontSize: '0.85rem'
-                        }}>
+                      </Badge>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+                        <Button variant="ghost" size="small">
                           View
-                        </button>
-                        <button style={{ 
-                          background: 'none', 
-                          border: 'none', 
-                          color: 'var(--color-charcoal)', 
-                          cursor: 'pointer',
-                          padding: '0.25rem',
-                          fontSize: '0.85rem',
-                          opacity: 0.6
-                        }}>
-                          Edit
-                        </button>
+                        </Button>
+                        <Button variant="ghost" size="small">
+                          <Icons.Edit />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
