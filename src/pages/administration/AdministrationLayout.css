@@ -1,0 +1,153 @@
+/* ================================
+   Administration Layout
+   Uses shared styles from AdminLayout with admin-specific overrides
+   ================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --admin-accent: #7c3aed;
+  --admin-accent-light: rgba(124, 58, 237, 0.1);
+  --admin-accent-hover: #6d28d9;
+}
+
+/* Admin-specific sidebar styling */
+.admin-sidebar--admin {
+  background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+  border-right: none;
+}
+
+.admin-sidebar--admin .sidebar-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar--admin .logo-icon--admin {
+  background: var(--admin-accent);
+}
+
+.admin-sidebar--admin .logo-main {
+  color: white;
+}
+
+.admin-sidebar--admin .logo-sub {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-sidebar--admin .sidebar-toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-sidebar--admin .sidebar-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.admin-sidebar--admin .nav-section-title {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.admin-sidebar--admin .nav-link {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.admin-sidebar--admin .nav-link:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar--admin .nav-link.active {
+  color: white;
+  background: var(--admin-accent-light);
+  background: rgba(124, 58, 237, 0.3);
+}
+
+.admin-sidebar--admin .nav-link.active .nav-icon {
+  color: white;
+}
+
+.admin-sidebar--admin .nav-icon {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.admin-sidebar--admin .nav-link:hover .nav-icon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.admin-sidebar--admin .sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar--admin .back-to-staff {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.admin-sidebar--admin .back-to-staff:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-sidebar--admin .logout-btn {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.admin-sidebar--admin .logout-btn:hover:not(:disabled) {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.15);
+}
+
+/* Header breadcrumb styling */
+.header-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumb-admin {
+  font-size: 0.8125rem;
+  color: var(--admin-accent);
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: #d1d5db;
+}
+
+/* Admin user avatar */
+.user-avatar--admin {
+  background: var(--admin-accent) !important;
+}
+
+/* Collapsed state overrides */
+.admin-layout.sidebar-collapsed .admin-sidebar--admin .sidebar-toggle-btn {
+  position: absolute;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+.admin-layout.sidebar-collapsed .admin-sidebar--admin .back-to-staff .nav-label {
+  display: none;
+}
+
+.admin-layout.sidebar-collapsed .admin-sidebar--admin .back-to-staff {
+  justify-content: center;
+  border: none;
+}
+
+/* Responsive overrides */
+@media (max-width: 1024px) {
+  .admin-sidebar--admin .sidebar-toggle-btn {
+    display: none;
+  }
+}

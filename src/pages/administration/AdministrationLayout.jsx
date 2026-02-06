@@ -1,23 +1,20 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { signOut, getCurrentUser } from 'aws-amplify/auth'
-import { useAuth } from '../../context/AuthContext'
-import './AdminLayout.css'
+import './AdministrationLayout.css'
 
 /**
- * AdminLayout - Modern dashboard layout for the staff admin area
+ * AdministrationLayout - Layout for Admin-only area
  * 
- * Features:
- * - Clean, minimal sidebar with navigation
- * - Top header bar with search and user menu
- * - Main content area with max-width container
- * - Responsive design with collapsible sidebar
- * - Admin-only "Administration" nav item
+ * Has different sidebar options than the regular staff panel:
+ * - Reporting
+ * - Static Data Registration
+ * - Daily Data Registration
+ * - Daily Confirmation
  */
-const AdminLayout = () => {
+const AdministrationLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAdmin } = useAuth()
   const [user, setUser] = useState(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -27,7 +24,6 @@ const AdminLayout = () => {
     fetchUserInfo()
   }, [])
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [location.pathname])
@@ -54,96 +50,68 @@ const AdminLayout = () => {
 
   const getPageTitle = () => {
     const path = location.pathname
-    if (path.includes('/reports')) return 'Dashboard'
-    if (path.includes('/costs')) return 'Costs Management'
-    if (path.includes('/reservations')) return 'Reservations'
-    if (path.includes('/calendar')) return 'Calendar'
-    if (path.includes('/profile')) return 'Profile Settings'
-    return 'Dashboard'
+    if (path.includes('/reporting')) return 'Reporting'
+    if (path.includes('/static-data')) return 'Static Data Registration'
+    if (path.includes('/daily-data')) return 'Daily Data Registration'
+    if (path.includes('/daily-confirmation')) return 'Daily Confirmation'
+    return 'Administration'
   }
 
   const navItems = [
     {
-      path: '/staff/reports',
-      label: 'Dashboard',
+      path: '/administration/reporting',
+      label: 'Reporting',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
+          <path d="M21 21H4.6c-.56 0-.84 0-1.054-.109a1 1 0 0 1-.437-.437C3 20.24 3 19.96 3 19.4V3"/>
+          <path d="M7 14l4-4 4 4 6-6"/>
         </svg>
       ),
     },
     {
-      path: '/staff/costs',
-      label: 'Costs',
+      path: '/administration/static-data',
+      label: 'Static Data Registration',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
-          <path d="M12 18V6"/>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
         </svg>
       ),
     },
     {
-      path: '/staff/reservations',
-      label: 'Reservations',
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-          <path d="M9 14l2 2 4-4"/>
-        </svg>
-      ),
-    },
-    {
-      path: '/staff/calendar',
-      label: 'Calendar',
+      path: '/administration/daily-data',
+      label: 'Daily Data Registration',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
           <line x1="16" y1="2" x2="16" y2="6"/>
           <line x1="8" y1="2" x2="8" y2="6"/>
           <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="9" y1="16" x2="15" y2="16"/>
         </svg>
       ),
     },
-  ]
-
-  const bottomNavItems = [
-    // Administration link - only shown to admins
-    ...(isAdmin ? [{
-      path: '/administration',
-      label: 'Administration',
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-          <path d="M2 17l10 5 10-5"/>
-          <path d="M2 12l10 5 10-5"/>
-        </svg>
-      ),
-      isAdmin: true,
-    }] : []),
     {
-      path: '/staff/profile',
-      label: 'Settings',
+      path: '/administration/daily-confirmation',
+      label: 'Daily Confirmation',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
       ),
     },
   ]
 
   const userInitial = user?.signInDetails?.loginId?.charAt(0)?.toUpperCase() || 
-                      user?.username?.charAt(0)?.toUpperCase() || 'S'
-  const userEmail = user?.signInDetails?.loginId || user?.username || 'Staff Member'
+                      user?.username?.charAt(0)?.toUpperCase() || 'A'
+  const userEmail = user?.signInDetails?.loginId || user?.username || 'Admin'
 
   return (
     <div className={`admin-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-      {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div 
           className="mobile-overlay" 
@@ -152,11 +120,10 @@ const AdminLayout = () => {
       )}
 
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-        {/* Logo area with toggle */}
+      <aside className={`admin-sidebar admin-sidebar--admin ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <div className="logo-icon">
+            <div className="logo-icon logo-icon--admin">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                 <path d="M2 17l10 5 10-5"/>
@@ -164,11 +131,10 @@ const AdminLayout = () => {
               </svg>
             </div>
             <div className="logo-text">
-              <span className="logo-main">Confession</span>
-              <span className="logo-sub">Staff Portal</span>
+              <span className="logo-main">Administration</span>
+              <span className="logo-sub">Admin Portal</span>
             </div>
           </div>
-          {/* Sidebar toggle button - moved here next to logo */}
           <button 
             className="sidebar-toggle-btn"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -184,10 +150,9 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        {/* Main navigation */}
         <nav className="sidebar-nav">
           <div className="nav-section">
-            <span className="nav-section-title">Menu</span>
+            <span className="nav-section-title">Administration</span>
             <ul className="nav-list">
               {navItems.map((item) => (
                 <li key={item.path}>
@@ -204,22 +169,20 @@ const AdminLayout = () => {
           </div>
         </nav>
 
-        {/* Bottom section */}
         <div className="sidebar-footer">
-          <ul className="nav-list">
-            {bottomNavItems.map((item) => (
-              <li key={item.path}>
-                <NavLink 
-                  to={item.path}
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''} ${item.isAdmin ? 'nav-link--admin' : ''}`}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-label">{item.label}</span>
-                  {item.isAdmin && <span className="nav-badge">Admin</span>}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+          {/* Back to Staff Portal link */}
+          <NavLink 
+            to="/staff/reports"
+            className="nav-link back-to-staff"
+          >
+            <span className="nav-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M19 12H5"/>
+                <polyline points="12 19 5 12 12 5"/>
+              </svg>
+            </span>
+            <span className="nav-label">Back to Staff Portal</span>
+          </NavLink>
 
           <button 
             onClick={handleSignOut}
@@ -242,7 +205,6 @@ const AdminLayout = () => {
 
       {/* Main content area */}
       <div className="admin-main">
-        {/* Top Header */}
         <header className="admin-header">
           <div className="header-left">
             <button 
@@ -256,21 +218,24 @@ const AdminLayout = () => {
                 <line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </button>
-            <h1 className="header-title">{getPageTitle()}</h1>
+            <div className="header-breadcrumb">
+              <span className="breadcrumb-admin">Administration</span>
+              <span className="breadcrumb-separator">/</span>
+              <h1 className="header-title">{getPageTitle()}</h1>
+            </div>
           </div>
           
           <div className="header-right">
             <div className="header-user">
-              <div className="user-avatar">{userInitial}</div>
+              <div className="user-avatar user-avatar--admin">{userInitial}</div>
               <div className="user-info">
                 <span className="user-name">{userEmail.split('@')[0]}</span>
-                <span className="user-role">{isAdmin ? 'Admin' : 'Staff'}</span>
+                <span className="user-role">Admin</span>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Page content */}
         <main className="admin-content">
           <div className="content-container">
             <Outlet />
@@ -281,4 +246,4 @@ const AdminLayout = () => {
   )
 }
 
-export default AdminLayout
+export default AdministrationLayout
