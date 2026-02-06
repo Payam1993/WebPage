@@ -51,9 +51,9 @@ const AdministrationLayout = () => {
   const getPageTitle = () => {
     const path = location.pathname
     if (path.includes('/reporting')) return 'Reporting'
-    if (path.includes('/static-data')) return 'Static Data Registration'
-    if (path.includes('/daily-data')) return 'Daily Data Registration'
-    if (path.includes('/daily-confirmation')) return 'Daily Confirmation'
+    if (path.includes('/static-data')) return 'Master Data'
+    if (path.includes('/daily-data')) return 'Daily Entry'
+    if (path.includes('/daily-confirmation')) return 'Confirmation'
     return 'Administration'
   }
 
@@ -70,7 +70,7 @@ const AdministrationLayout = () => {
     },
     {
       path: '/administration/static-data',
-      label: 'Static Data Registration',
+      label: 'Master Data',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -83,7 +83,7 @@ const AdministrationLayout = () => {
     },
     {
       path: '/administration/daily-data',
-      label: 'Daily Data Registration',
+      label: 'Daily Entry',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -96,7 +96,7 @@ const AdministrationLayout = () => {
     },
     {
       path: '/administration/daily-confirmation',
-      label: 'Daily Confirmation',
+      label: 'Confirmation',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
