@@ -394,26 +394,23 @@ const StaffLogin = ({ setCursorVariant }) => {
               <div className="totp-setup-container">
                 <div className="totp-instructions">
                   <p><strong>Step 1:</strong> {t.staffLogin?.totpStep1 || 'Download an authenticator app like Google Authenticator, Microsoft Authenticator, or Authy.'}</p>
-                  <p><strong>Step 2:</strong> {t.staffLogin?.totpStep2 || 'Add a new account and enter the secret key below manually.'}</p>
+                  <p><strong>Step 2:</strong> {t.staffLogin?.totpStep2 || 'Scan the QR code below with your authenticator app.'}</p>
                   <p><strong>Step 3:</strong> {t.staffLogin?.totpStep3 || 'Enter the 6-digit code from your app to verify.'}</p>
                 </div>
 
-                {totpSecretKey && (
-                  <div className="totp-secret-container">
-                    <p className="totp-secret-label">{t.staffLogin?.secretKeyLabel || 'Secret Key (enter this in your authenticator app):'}</p>
-                    <code className="totp-secret-key">{totpSecretKey}</code>
-                    <p className="totp-secret-hint">{t.staffLogin?.secretKeyHint || 'Account name: Confession Barcelona'}</p>
-                  </div>
-                )}
-
                 {totpSetupUri && (
                   <div className="totp-qr-container">
-                    <p className="totp-qr-label">{t.staffLogin?.qrCodeLabel || 'Or scan this QR code:'}</p>
                     <img 
-                      src={`https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(totpSetupUri)}&choe=UTF-8`}
-                      alt="TOTP QR Code"
+                      src={`https://quickchart.io/qr?text=${encodeURIComponent(totpSetupUri)}&size=200&margin=2`}
+                      alt="Scan this QR code with your authenticator app"
                       className="totp-qr-code"
-                      onError={(e) => { e.target.style.display = 'none' }}
+                      loading="eager"
+                      crossOrigin="anonymous"
+                      onError={(e) => {
+                        // Fallback to another QR service if first fails
+                        e.target.onerror = null
+                        e.target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpSetupUri)}`
+                      }}
                     />
                   </div>
                 )}
