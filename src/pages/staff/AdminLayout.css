@@ -194,11 +194,13 @@
   font-weight: 500;
   border-radius: var(--admin-radius);
   transition: all var(--admin-transition);
+  cursor: pointer;
 }
 
 .nav-link:hover {
   color: var(--admin-text);
   background: var(--admin-bg);
+  transform: translateX(4px);
 }
 
 .nav-link.active {
@@ -292,6 +294,7 @@
 .logout-btn:hover:not(:disabled) {
   color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
+  transform: translateX(4px);
 }
 
 .logout-btn:disabled {

@@ -8,10 +8,36 @@ section {
   position: relative;
 }
 
-/* Interactive elements cursor change */
+/* Interactive elements cursor change - for custom cursor on public pages */
 a:hover,
 button:hover {
   cursor: none;
+}
+
+/* Admin/Staff areas - force normal pointer cursor (overrides above) */
+.admin-layout,
+.admin-layout * {
+  cursor: default;
+}
+
+.admin-layout a,
+.admin-layout button,
+.admin-layout [role="button"],
+.admin-layout .nav-link,
+.admin-layout .ui-btn,
+.admin-layout .ui-clickable-card,
+.admin-layout input,
+.admin-layout select,
+.admin-layout textarea {
+  cursor: pointer !important;
+}
+
+.admin-layout input[type="text"],
+.admin-layout input[type="number"],
+.admin-layout input[type="email"],
+.admin-layout input[type="password"],
+.admin-layout textarea {
+  cursor: text !important;
 }
 
 /* Text highlight on dark backgrounds */
