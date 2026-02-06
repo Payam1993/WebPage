@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { signIn, confirmSignIn, setUpTOTP } from 'aws-amplify/auth'
+import { QRCodeSVG } from 'qrcode.react'
 import { useLanguage } from '../context/LanguageContext'
 import './StaffLogin.css'
 
@@ -400,17 +401,13 @@ const StaffLogin = ({ setCursorVariant }) => {
 
                 {totpSetupUri && (
                   <div className="totp-qr-container">
-                    <img 
-                      src={`https://quickchart.io/qr?text=${encodeURIComponent(totpSetupUri)}&size=200&margin=2`}
-                      alt="Scan this QR code with your authenticator app"
-                      className="totp-qr-code"
-                      loading="eager"
-                      crossOrigin="anonymous"
-                      onError={(e) => {
-                        // Fallback to another QR service if first fails
-                        e.target.onerror = null
-                        e.target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpSetupUri)}`
-                      }}
+                    <QRCodeSVG 
+                      value={totpSetupUri}
+                      size={200}
+                      level="M"
+                      includeMargin={true}
+                      bgColor="#ffffff"
+                      fgColor="#2a2a2a"
                     />
                   </div>
                 )}
