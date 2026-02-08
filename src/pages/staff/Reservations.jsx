@@ -550,11 +550,11 @@ const Reservations = () => {
                         </Badge>
                       </TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                          <Button variant="ghost" size="small" onClick={() => handleOpenModal(booking)}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+                          <Button variant="icon" size="small" onClick={() => handleOpenModal(booking)} title="Edit booking">
                             <Icons.Edit />
                           </Button>
-                          <Button variant="ghost" size="small" onClick={() => handleDeleteClick(booking)}>
+                          <Button variant="icon" size="small" className="ui-btn-icon-danger" onClick={() => handleDeleteClick(booking)} title="Delete booking">
                             <Icons.Trash />
                           </Button>
                         </div>
@@ -730,7 +730,7 @@ const Reservations = () => {
                       </TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <Button 
-                          variant="primary" 
+                          variant="success" 
                           size="small" 
                           onClick={() => handleOpenConfirmModal(reservation)}
                         >
