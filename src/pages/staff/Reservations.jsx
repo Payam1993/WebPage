@@ -73,7 +73,17 @@ const Reservations = () => {
 
   useEffect(() => {
     loadBookings()
-  }, [appliedFilter])
+    // Dependency uses specific values to ensure proper comparison
+  }, [appliedFilter.fromDate, appliedFilter.toDate])
+
+  // Auto-refresh not confirmed reservations every 30 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      loadNotConfirmedReservations()
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   const loadStaticData = async () => {
     try {
@@ -205,20 +215,34 @@ const Reservations = () => {
     try {
       const bookingDate = confirmModal.item.date
       
+      // Confirm the reservation (creates Booking, deletes NotConfirmedReservation)
       await notConfirmedReservationAPI.confirm(confirmModal.item, {
         therapistId: confirmFormData.therapistId,
         therapistName: confirmFormData.therapistName,
         priceAgreement: confirmFormData.priceAgreement || 0,
       })
       
-      // Update the filter to show the booking's date so the user can see the confirmed booking
-      setDateFilter({ fromDate: bookingDate, toDate: bookingDate })
-      setAppliedFilter({ fromDate: bookingDate, toDate: bookingDate })
+      // Remove from not confirmed list immediately (optimistic update)
+      setNotConfirmedList(prev => prev.filter(item => item.id !== confirmModal.item.id))
       
-      await loadNotConfirmedReservations()
+      // Update the filter to show the booking's date
+      const newFilter = { fromDate: bookingDate, toDate: bookingDate }
+      setDateFilter(newFilter)
+      
+      // Check if filter is changing - if same, manually reload
+      if (appliedFilter.fromDate === bookingDate && appliedFilter.toDate === bookingDate) {
+        // Filter is the same, manually reload bookings from database
+        await loadBookings()
+      } else {
+        // Filter is different, update it (useEffect will trigger loadBookings)
+        setAppliedFilter(newFilter)
+      }
+      
       handleCloseConfirmModal()
     } catch (err) {
       setError(err.message || 'Failed to confirm reservation')
+      // Reload to ensure state is consistent
+      await loadNotConfirmedReservations()
     } finally {
       setIsConfirming(false)
     }
@@ -429,9 +453,19 @@ const Reservations = () => {
       {/* Bookings List */}
       <Card padding={false}>
         <CardHeader>
-          <CardTitle subtitle={`${filteredBookings.length} bookings found`}>
-            Booking List
-          </CardTitle>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+            <CardTitle subtitle={`${filteredBookings.length} bookings found`}>
+              Booking List
+            </CardTitle>
+            <Button 
+              variant="secondary" 
+              size="small" 
+              onClick={loadBookings}
+              loading={isLoading}
+            >
+              <Icons.Refresh /> Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -613,9 +647,19 @@ const Reservations = () => {
       {/* Not Confirmed Reservations Section */}
       <Card style={{ marginTop: '32px' }}>
         <CardHeader>
-          <CardTitle subtitle={`${notConfirmedList.length} pending requests from public website`}>
-            Not Confirmed Reservations
-          </CardTitle>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+            <CardTitle subtitle={`${notConfirmedList.length} pending requests from public website (auto-refreshes every 30s)`}>
+              Not Confirmed Reservations
+            </CardTitle>
+            <Button 
+              variant="secondary" 
+              size="small" 
+              onClick={loadNotConfirmedReservations}
+              loading={isLoadingNotConfirmed}
+            >
+              <Icons.Refresh /> Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoadingNotConfirmed ? (
