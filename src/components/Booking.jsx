@@ -13,6 +13,7 @@ const Booking = ({ setCursorVariant }) => {
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [services, setServices] = useState([])
   const [isLoadingServices, setIsLoadingServices] = useState(false)
+  const [servicesError, setServicesError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState(null)
@@ -37,11 +38,13 @@ const Booking = ({ setCursorVariant }) => {
 
   const loadServices = async () => {
     setIsLoadingServices(true)
+    setServicesError(null)
     try {
       const data = await publicAPI.getServices()
       setServices(data)
     } catch (err) {
       console.error('Error loading services:', err)
+      setServicesError('Unable to load services. Please try again later.')
     } finally {
       setIsLoadingServices(false)
     }
@@ -306,6 +309,13 @@ const Booking = ({ setCursorVariant }) => {
                       <label>{bookingFormText.service || 'Service'} *</label>
                       {isLoadingServices ? (
                         <div className="loading-services">Loading services...</div>
+                      ) : servicesError ? (
+                        <div className="services-error">
+                          {servicesError}
+                          <button type="button" className="retry-btn" onClick={loadServices}>
+                            Retry
+                          </button>
+                        </div>
                       ) : (
                         <select
                           value={formData.serviceId}

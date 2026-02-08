@@ -32,7 +32,7 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.group("Admin_Confession"),
       allow.authenticated().to(["read"]), // Staff can read for dropdowns
-      allow.guest().to(["read"]), // Public can read for booking form
+      allow.publicApiKey().to(["read"]), // Public can read for booking form (API key auth)
     ]),
 
   // Cost model - expense categories
@@ -149,7 +149,7 @@ const schema = a.schema({
       status: a.enum(["NotConfirmed", "Confirmed"]),
     })
     .authorization((allow) => [
-      allow.guest().to(["create"]), // Public can create booking requests
+      allow.publicApiKey().to(["create"]), // Public can create booking requests (API key auth)
       allow.authenticated(), // Staff can read, update, delete
     ]),
 });
