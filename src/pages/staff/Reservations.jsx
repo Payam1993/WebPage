@@ -22,7 +22,7 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { bookingAPI, staffAPI, serviceAPI, getTodayDate, notConfirmedReservationAPI } from '../../services/dataService'
+import { bookingAPI, staffAPI, serviceAPI, getTodayDate, getDateFromToday, notConfirmedReservationAPI } from '../../services/dataService'
 
 /**
  * Reservations - Manage client bookings and reservations
@@ -53,16 +53,16 @@ const Reservations = () => {
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, item: null })
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Filter states
+  // Filter states - default to showing today + next 7 days
   const [filterStatus, setFilterStatus] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [dateFilter, setDateFilter] = useState({
     fromDate: getTodayDate(),
-    toDate: getTodayDate(),
+    toDate: getDateFromToday(7), // Show next 7 days by default
   })
   const [appliedFilter, setAppliedFilter] = useState({
     fromDate: getTodayDate(),
-    toDate: getTodayDate(),
+    toDate: getDateFromToday(7), // Show next 7 days by default
   })
 
   // Load data on mount and when filter changes
@@ -140,8 +140,9 @@ const Reservations = () => {
 
   const handleResetFilter = () => {
     const today = getTodayDate()
-    setDateFilter({ fromDate: today, toDate: today })
-    setAppliedFilter({ fromDate: today, toDate: today })
+    const nextWeek = getDateFromToday(7)
+    setDateFilter({ fromDate: today, toDate: nextWeek })
+    setAppliedFilter({ fromDate: today, toDate: nextWeek })
   }
 
   const handleOpenModal = (item = null) => {
@@ -225,17 +226,20 @@ const Reservations = () => {
       // Remove from not confirmed list immediately (optimistic update)
       setNotConfirmedList(prev => prev.filter(item => item.id !== confirmModal.item.id))
       
-      // Update the filter to show the booking's date
-      const newFilter = { fromDate: bookingDate, toDate: bookingDate }
-      setDateFilter(newFilter)
+      // Check if the confirmed booking falls within the current filter range
+      const isInCurrentRange = !appliedFilter.fromDate || !appliedFilter.toDate || 
+        (bookingDate >= appliedFilter.fromDate && bookingDate <= appliedFilter.toDate)
       
-      // Check if filter is changing - if same, manually reload
-      if (appliedFilter.fromDate === bookingDate && appliedFilter.toDate === bookingDate) {
-        // Filter is the same, manually reload bookings from database
+      if (isInCurrentRange) {
+        // Booking is in current filter range, reload to show it
         await loadBookings()
       } else {
-        // Filter is different, update it (useEffect will trigger loadBookings)
-        setAppliedFilter(newFilter)
+        // Booking is outside current filter - expand filter to show the booking
+        const newFromDate = bookingDate < (appliedFilter.fromDate || bookingDate) ? bookingDate : appliedFilter.fromDate
+        const newToDate = bookingDate > (appliedFilter.toDate || bookingDate) ? bookingDate : appliedFilter.toDate
+        setDateFilter({ fromDate: newFromDate, toDate: newToDate })
+        setAppliedFilter({ fromDate: newFromDate, toDate: newToDate })
+        // useEffect will trigger loadBookings
       }
       
       handleCloseConfirmModal()
@@ -408,12 +412,24 @@ const Reservations = () => {
               <Icons.Search /> Search
             </Button>
             <Button variant="secondary" onClick={handleResetFilter} size="small">
-              Today
+              This Week
+            </Button>
+            <Button 
+              variant="secondary" 
+              onClick={() => {
+                setDateFilter({ fromDate: '', toDate: '' })
+                setAppliedFilter({ fromDate: '', toDate: '' })
+              }} 
+              size="small"
+            >
+              Show All
             </Button>
             <div style={{ marginLeft: 'auto', fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
-              Showing: {appliedFilter.fromDate === appliedFilter.toDate 
-                ? formatDate(appliedFilter.fromDate)
-                : `${formatDate(appliedFilter.fromDate)} - ${formatDate(appliedFilter.toDate)}`
+              Showing: {!appliedFilter.fromDate && !appliedFilter.toDate
+                ? 'All bookings'
+                : appliedFilter.fromDate === appliedFilter.toDate 
+                  ? formatDate(appliedFilter.fromDate)
+                  : `${formatDate(appliedFilter.fromDate)} - ${formatDate(appliedFilter.toDate)}`
               }
             </div>
           </div>

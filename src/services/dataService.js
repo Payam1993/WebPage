@@ -746,3 +746,14 @@ export const isWithinLastDays = (dateStr, days = 3) => {
 export const getTodayDate = () => {
   return new Date().toISOString().split('T')[0]
 }
+
+/**
+ * Get a date N days from today as YYYY-MM-DD string
+ * @param {number} days - Number of days to add (can be negative)
+ * @returns {string}
+ */
+export const getDateFromToday = (days) => {
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date.toISOString().split('T')[0]
+}
