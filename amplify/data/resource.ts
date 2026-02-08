@@ -49,6 +49,8 @@ const schema = a.schema({
   Staff: a
     .model({
       staffName: a.string().required(),
+      email: a.string(),
+      phone: a.string(),
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),

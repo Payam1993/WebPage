@@ -203,12 +203,18 @@ const Reservations = () => {
   const handleConfirmReservation = async () => {
     setIsConfirming(true)
     try {
+      const bookingDate = confirmModal.item.date
+      
       await notConfirmedReservationAPI.confirm(confirmModal.item, {
         therapistId: confirmFormData.therapistId,
         therapistName: confirmFormData.therapistName,
         priceAgreement: confirmFormData.priceAgreement || 0,
       })
-      await loadBookings()
+      
+      // Update the filter to show the booking's date so the user can see the confirmed booking
+      setDateFilter({ fromDate: bookingDate, toDate: bookingDate })
+      setAppliedFilter({ fromDate: bookingDate, toDate: bookingDate })
+      
       await loadNotConfirmedReservations()
       handleCloseConfirmModal()
     } catch (err) {

@@ -164,6 +164,8 @@ export const staffAPI = {
       const client = getClient()
       const { data, errors } = await client.models.Staff.create({
         staffName: staffData.staffName,
+        email: staffData.email || null,
+        phone: staffData.phone || null,
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -179,6 +181,8 @@ export const staffAPI = {
       const { data, errors } = await client.models.Staff.update({
         id,
         staffName: staffData.staffName,
+        email: staffData.email || null,
+        phone: staffData.phone || null,
       })
       if (errors) throw new Error(errors[0].message)
       return data

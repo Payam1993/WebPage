@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
+import { BookingProvider } from './context/BookingContext'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Services from './components/Services'
@@ -153,9 +154,11 @@ function App() {
   return (
     <AuthProvider>
       <LanguageProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <BookingProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </BookingProvider>
       </LanguageProvider>
     </AuthProvider>
   )

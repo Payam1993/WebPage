@@ -369,6 +369,25 @@
   z-index: 9999;
   padding: 20px;
   backdrop-filter: blur(4px);
+  cursor: default !important;
+}
+
+.booking-modal-overlay * {
+  cursor: default !important;
+}
+
+.booking-modal-overlay button,
+.booking-modal-overlay select,
+.booking-modal-overlay a {
+  cursor: pointer !important;
+}
+
+.booking-modal-overlay input[type="text"],
+.booking-modal-overlay input[type="tel"],
+.booking-modal-overlay input[type="email"],
+.booking-modal-overlay input[type="date"],
+.booking-modal-overlay input[type="time"] {
+  cursor: text !important;
 }
 
 .booking-modal {
@@ -420,6 +439,64 @@
 .modal-header p {
   color: rgba(42, 42, 42, 0.7);
   font-size: 0.95rem;
+}
+
+.modal-contact-info {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.modal-contact-info .contact-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-sand);
+  color: var(--color-charcoal);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.modal-contact-info .contact-link:hover {
+  background: var(--color-charcoal);
+  color: var(--color-cream);
+}
+
+.modal-contact-info .contact-link.whatsapp:hover {
+  background: #25d366;
+  color: white;
+}
+
+.modal-contact-info .contact-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+.modal-divider {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.modal-divider::before,
+.modal-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(42, 42, 42, 0.15);
+}
+
+.modal-divider span {
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  color: rgba(42, 42, 42, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .booking-modal-form {

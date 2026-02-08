@@ -486,6 +486,22 @@ const StaticData = () => {
               value={formData.staffName || ''}
               onChange={(e) => setFormData({ ...formData, staffName: e.target.value })}
             />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <Input
+                label="Email"
+                type="email"
+                placeholder="e.g., maria@example.com"
+                value={formData.email || ''}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+              <Input
+                label="Phone"
+                type="tel"
+                placeholder="e.g., +34 612 345 678"
+                value={formData.phone || ''}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
               {editingItem && (
                 <Button variant="secondary" onClick={handleCancelEdit}>
@@ -519,6 +535,8 @@ const StaticData = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Staff Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -526,6 +544,12 @@ const StaticData = () => {
                   {staff.map((member) => (
                     <TableRow key={member.id}>
                       <TableCell><span style={{ fontWeight: 500 }}>{member.staffName}</span></TableCell>
+                      <TableCell style={{ fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
+                        {member.email || '-'}
+                      </TableCell>
+                      <TableCell style={{ fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
+                        {member.phone || '-'}
+                      </TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
                           <Button variant="ghost" size="small" onClick={() => handleEdit(member)}>
