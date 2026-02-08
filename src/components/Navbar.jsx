@@ -154,18 +154,6 @@ const Navbar = ({ setCursorVariant }) => {
               </Link>
             </li>
 
-            {/* Our Team */}
-            <li>
-              <Link 
-                to="/our-team"
-                className="nav-link animated-underline"
-                onMouseEnter={() => setCursorVariant('hover')}
-                onMouseLeave={() => setCursorVariant('default')}
-              >
-                {t.nav.ourTeam}
-              </Link>
-            </li>
-
             {/* Rest of nav links */}
             {navLinks.slice(1).map((link, index) => (
               <li key={index + 1}>
@@ -327,23 +315,6 @@ const Navbar = ({ setCursorVariant }) => {
                       onMouseLeave={() => setCursorVariant('default')}
                     >
                       {t.nav.workWithUs}
-                    </Link>
-                  </motion.li>
-
-                  {/* Our Team */}
-                  <motion.li 
-                    variants={linkVariants}
-                    custom={2}
-                    initial="closed"
-                    animate="open"
-                  >
-                    <Link 
-                      to="/our-team"
-                      onClick={() => setIsMenuOpen(false)}
-                      onMouseEnter={() => setCursorVariant('hover')}
-                      onMouseLeave={() => setCursorVariant('default')}
-                    >
-                      {t.nav.ourTeam}
                     </Link>
                   </motion.li>
 

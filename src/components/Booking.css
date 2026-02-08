@@ -337,3 +337,219 @@
     gap: 1rem;
   }
 }
+
+/* ================================
+   Book Now Button
+   ================================ */
+.book-now-container {
+  margin: var(--space-lg) 0;
+}
+
+.book-now-btn {
+  padding: 1rem 3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ================================
+   Booking Modal
+   ================================ */
+.booking-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.booking-modal {
+  background: var(--color-cream);
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.modal-close:hover {
+  opacity: 0.7;
+}
+
+.modal-close svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-charcoal);
+}
+
+.modal-header {
+  margin-bottom: var(--space-md);
+}
+
+.modal-header h3 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-charcoal);
+}
+
+.modal-header p {
+  color: rgba(42, 42, 42, 0.7);
+  font-size: 0.95rem;
+}
+
+.booking-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.booking-modal-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.booking-modal-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.booking-modal-form label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-olive);
+}
+
+.booking-modal-form input,
+.booking-modal-form select {
+  padding: 0.875rem 1rem;
+  background: white;
+  border: 1px solid rgba(42, 42, 42, 0.15);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--color-charcoal);
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.booking-modal-form input:focus,
+.booking-modal-form select:focus {
+  outline: none;
+  border-color: var(--color-terracotta);
+  box-shadow: 0 0 0 3px rgba(196, 120, 90, 0.1);
+}
+
+.booking-modal-form input::placeholder {
+  color: rgba(42, 42, 42, 0.4);
+}
+
+.form-error {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 4px;
+}
+
+.loading-services {
+  padding: 0.875rem 1rem;
+  background: rgba(42, 42, 42, 0.05);
+  color: rgba(42, 42, 42, 0.6);
+  font-size: 0.9rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: var(--space-sm);
+}
+
+.form-actions .btn {
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.booking-success {
+  text-align: center;
+  padding: var(--space-md) 0;
+}
+
+.booking-success .success-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--color-olive);
+  color: var(--color-cream);
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto var(--space-md);
+}
+
+.booking-success h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-charcoal);
+}
+
+.booking-success p {
+  color: rgba(42, 42, 42, 0.7);
+  margin-bottom: var(--space-md);
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.booking-success .btn {
+  margin-top: var(--space-sm);
+}
+
+@media (max-width: 600px) {
+  .booking-modal {
+    padding: var(--space-md);
+  }
+  
+  .booking-modal-form .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+  }
+}

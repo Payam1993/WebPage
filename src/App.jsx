@@ -18,7 +18,6 @@ import StaffLogin from './components/StaffLogin'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
 import WorkWithUs from './components/WorkWithUs'
-import OurTeam from './components/OurTeam'
 
 // Staff Admin Pages
 import AdminLayout from './pages/staff/AdminLayout'
@@ -137,7 +136,6 @@ function AppContent() {
                       <Route path="/" element={<HomePage setCursorVariant={setCursorVariant} />} />
                       <Route path="/service/:serviceId" element={<ServiceDetail setCursorVariant={setCursorVariant} />} />
                       <Route path="/work-with-us" element={<WorkWithUs setCursorVariant={setCursorVariant} />} />
-                      <Route path="/our-team" element={<OurTeam setCursorVariant={setCursorVariant} />} />
                     </Routes>
                   </main>
                   <Footer setCursorVariant={setCursorVariant} />

@@ -22,17 +22,26 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { bookingAPI, staffAPI, getTodayDate } from '../../services/dataService'
+import { bookingAPI, staffAPI, serviceAPI, getTodayDate, notConfirmedReservationAPI } from '../../services/dataService'
 
 /**
  * Reservations - Manage client bookings and reservations
  * Staff Portal feature with modal form for creating/editing bookings
+ * Includes Not Confirmed Reservations section for public booking requests
  */
 const Reservations = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [bookings, setBookings] = useState([])
   const [staffList, setStaffList] = useState([])
+  const [servicesList, setServicesList] = useState([])
+  
+  // Not confirmed reservations
+  const [notConfirmedList, setNotConfirmedList] = useState([])
+  const [isLoadingNotConfirmed, setIsLoadingNotConfirmed] = useState(false)
+  const [confirmModal, setConfirmModal] = useState({ open: false, item: null })
+  const [confirmFormData, setConfirmFormData] = useState({})
+  const [isConfirming, setIsConfirming] = useState(false)
 
   // Modal states
   const [showModal, setShowModal] = useState(false)
@@ -58,19 +67,41 @@ const Reservations = () => {
 
   // Load data on mount and when filter changes
   useEffect(() => {
-    loadStaffList()
+    loadStaticData()
+    loadNotConfirmedReservations()
   }, [])
 
   useEffect(() => {
     loadBookings()
   }, [appliedFilter])
 
-  const loadStaffList = async () => {
+  const loadStaticData = async () => {
     try {
-      const data = await staffAPI.list()
-      setStaffList(data)
+      const [staffData, servicesData] = await Promise.all([
+        staffAPI.list(),
+        serviceAPI.list(),
+      ])
+      setStaffList(staffData)
+      setServicesList(servicesData)
     } catch (err) {
-      console.error('Error loading staff:', err)
+      console.error('Error loading static data:', err)
+    }
+  }
+
+  const loadNotConfirmedReservations = async () => {
+    setIsLoadingNotConfirmed(true)
+    try {
+      const data = await notConfirmedReservationAPI.list()
+      // Sort by date ascending (oldest first)
+      data.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date)
+        return a.reservedTime.localeCompare(b.reservedTime)
+      })
+      setNotConfirmedList(data)
+    } catch (err) {
+      console.error('Error loading not confirmed reservations:', err)
+    } finally {
+      setIsLoadingNotConfirmed(false)
     }
   }
 
@@ -126,6 +157,15 @@ const Reservations = () => {
     setError(null)
   }
 
+  const handleServiceSelect = (serviceId) => {
+    const service = servicesList.find(s => s.id === serviceId)
+    setFormData({
+      ...formData,
+      serviceId,
+      serviceName: service?.serviceName || '',
+    })
+  }
+
   const handleTherapistSelect = (staffId) => {
     const staff = staffList.find(s => s.id === staffId)
     setFormData({
@@ -133,6 +173,49 @@ const Reservations = () => {
       therapistId: staffId,
       therapistName: staff?.staffName || '',
     })
+  }
+
+  // Confirm modal handlers
+  const handleOpenConfirmModal = (item) => {
+    setConfirmModal({ open: true, item })
+    setConfirmFormData({
+      therapistId: '',
+      therapistName: '',
+      priceAgreement: item.serviceName ? 
+        (servicesList.find(s => s.id === item.serviceId)?.fixedPrice || 0) : 0,
+    })
+  }
+
+  const handleCloseConfirmModal = () => {
+    setConfirmModal({ open: false, item: null })
+    setConfirmFormData({})
+  }
+
+  const handleConfirmTherapistSelect = (staffId) => {
+    const staff = staffList.find(s => s.id === staffId)
+    setConfirmFormData({
+      ...confirmFormData,
+      therapistId: staffId,
+      therapistName: staff?.staffName || '',
+    })
+  }
+
+  const handleConfirmReservation = async () => {
+    setIsConfirming(true)
+    try {
+      await notConfirmedReservationAPI.confirm(confirmModal.item, {
+        therapistId: confirmFormData.therapistId,
+        therapistName: confirmFormData.therapistName,
+        priceAgreement: confirmFormData.priceAgreement || 0,
+      })
+      await loadBookings()
+      await loadNotConfirmedReservations()
+      handleCloseConfirmModal()
+    } catch (err) {
+      setError(err.message || 'Failed to confirm reservation')
+    } finally {
+      setIsConfirming(false)
+    }
   }
 
   const handleSave = async () => {
@@ -234,6 +317,12 @@ const Reservations = () => {
   const staffOptions = staffList.map(s => ({
     value: s.id,
     label: s.staffName,
+  }))
+
+  // Service options for dropdown
+  const serviceOptions = servicesList.map(s => ({
+    value: s.id,
+    label: s.serviceName + (s.fixedPrice ? ` - €${s.fixedPrice.toFixed(2)}` : ''),
   }))
 
   // Duration options
@@ -360,6 +449,7 @@ const Reservations = () => {
                     <TableHead>Date</TableHead>
                     <TableHead>Time</TableHead>
                     <TableHead>Client</TableHead>
+                    <TableHead>Service</TableHead>
                     <TableHead>Therapist</TableHead>
                     <TableHead>Duration</TableHead>
                     <TableHead style={{ textAlign: 'right' }}>Price</TableHead>
@@ -387,6 +477,11 @@ const Reservations = () => {
                           <div style={{ fontWeight: 500 }}>{booking.clientName}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>{booking.clientPhone}</div>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {booking.serviceName ? (
+                          <Badge variant="info" size="small">{booking.serviceName}</Badge>
+                        ) : '-'}
                       </TableCell>
                       <TableCell>{booking.therapistName || '-'}</TableCell>
                       <TableCell>{booking.durationMinutes} min</TableCell>
@@ -452,6 +547,13 @@ const Reservations = () => {
             onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
           />
           <Select
+            label="Service"
+            options={serviceOptions}
+            placeholder="Select service (optional)"
+            value={formData.serviceId || ''}
+            onChange={(e) => handleServiceSelect(e.target.value)}
+          />
+          <Select
             label="Therapist"
             options={staffOptions}
             placeholder="Select therapist (optional)"
@@ -500,6 +602,155 @@ const Reservations = () => {
             {editingItem ? 'Update Booking' : 'Create Booking'}
           </Button>
         </div>
+      </Modal>
+
+      {/* Not Confirmed Reservations Section */}
+      <Card style={{ marginTop: '32px' }}>
+        <CardHeader>
+          <CardTitle subtitle={`${notConfirmedList.length} pending requests from public website`}>
+            Not Confirmed Reservations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingNotConfirmed ? (
+            <LoadingState text="Loading booking requests..." />
+          ) : notConfirmedList.length === 0 ? (
+            <EmptyState
+              icon={<Icons.Calendar />}
+              title="No pending booking requests"
+              description="Booking requests from the public website will appear here"
+            />
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {notConfirmedList.map((reservation) => (
+                    <TableRow key={reservation.id}>
+                      <TableCell>
+                        <Badge variant={reservation.date === getTodayDate() ? 'info' : 'neutral'} size="small">
+                          {formatDate(reservation.date)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ fontSize: '0.875rem' }}>
+                          {formatTime(reservation.reservedTime)}
+                          <span style={{ color: 'var(--ui-text-muted)', margin: '0 4px' }}>-</span>
+                          {getEndTime(reservation.reservedTime, reservation.durationMinutes)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div style={{ fontWeight: 500 }}>{reservation.clientName}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>{reservation.clientPhone}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="info" size="small">{reservation.serviceName}</Badge>
+                      </TableCell>
+                      <TableCell>{reservation.durationMinutes} min</TableCell>
+                      <TableCell style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
+                        {reservation.createdAt ? new Date(reservation.createdAt).toLocaleDateString('en-GB') : '-'}
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        <Button 
+                          variant="primary" 
+                          size="small" 
+                          onClick={() => handleOpenConfirmModal(reservation)}
+                        >
+                          <Icons.Check /> Confirm
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Confirm Reservation Modal */}
+      <Modal
+        isOpen={confirmModal.open}
+        onClose={handleCloseConfirmModal}
+        title="Confirm Reservation"
+        subtitle="Assign therapist and set price to create booking"
+        size="default"
+      >
+        {confirmModal.item && (
+          <>
+            <div style={{ 
+              background: 'var(--ui-bg)', 
+              padding: '16px', 
+              borderRadius: '8px', 
+              marginBottom: '20px' 
+            }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.875rem' }}>
+                <div>
+                  <span style={{ color: 'var(--ui-text-muted)' }}>Client:</span>{' '}
+                  <strong>{confirmModal.item.clientName}</strong>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--ui-text-muted)' }}>Phone:</span>{' '}
+                  {confirmModal.item.clientPhone}
+                </div>
+                <div>
+                  <span style={{ color: 'var(--ui-text-muted)' }}>Date:</span>{' '}
+                  {formatDate(confirmModal.item.date)}
+                </div>
+                <div>
+                  <span style={{ color: 'var(--ui-text-muted)' }}>Time:</span>{' '}
+                  {formatTime(confirmModal.item.reservedTime)} ({confirmModal.item.durationMinutes} min)
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <span style={{ color: 'var(--ui-text-muted)' }}>Service:</span>{' '}
+                  <Badge variant="info" size="small">{confirmModal.item.serviceName}</Badge>
+                </div>
+              </div>
+            </div>
+
+            <Grid cols={2} gap="default">
+              <Select
+                label="Assign Therapist"
+                options={staffOptions}
+                placeholder="Select therapist (optional)"
+                value={confirmFormData.therapistId || ''}
+                onChange={(e) => handleConfirmTherapistSelect(e.target.value)}
+              />
+              <Input
+                label="Price Agreement (€) *"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={confirmFormData.priceAgreement || ''}
+                onChange={(e) => setConfirmFormData({ 
+                  ...confirmFormData, 
+                  priceAgreement: e.target.value ? parseFloat(e.target.value) : null 
+                })}
+              />
+            </Grid>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
+              <Button variant="secondary" onClick={handleCloseConfirmModal}>
+                Cancel
+              </Button>
+              <Button onClick={handleConfirmReservation} loading={isConfirming}>
+                <Icons.Check /> Confirm Booking
+              </Button>
+            </div>
+          </>
+        )}
       </Modal>
 
       {/* Delete Confirmation Dialog */}

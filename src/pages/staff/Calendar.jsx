@@ -42,6 +42,7 @@ const Calendar = () => {
         time: booking.reservedTime?.substring(0, 5) || '00:00',
         duration: booking.durationMinutes || 60,
         therapist: booking.therapistName || 'Unassigned',
+        service: booking.serviceName || null,
         date: booking.date,
         color: getTherapistColor(booking.therapistName),
         clientPhone: booking.clientPhone,
@@ -393,10 +394,11 @@ const Calendar = () => {
                               fontSize: '0.75rem',
                               cursor: 'pointer'
                             }}
-                            title={`${event.title}\n${event.time} - ${getEndTime(event.time, event.duration)}\nTherapist: ${event.therapist}\nPrice: €${event.price?.toFixed(2) || '0.00'}`}
+                            title={`${event.title}\n${event.time} - ${getEndTime(event.time, event.duration)}\n${event.service ? `Service: ${event.service}\n` : ''}Therapist: ${event.therapist}\nPrice: €${event.price?.toFixed(2) || '0.00'}`}
                           >
                             <div style={{ fontWeight: 500 }}>{event.title}</div>
                             <div style={{ opacity: 0.85, fontSize: '0.6875rem' }}>
+                              {event.service && <span>{event.service} • </span>}
                               {event.duration} min • {event.therapist}
                             </div>
                           </div>
@@ -451,6 +453,11 @@ const Calendar = () => {
                         }}
                       >
                         <div style={{ fontWeight: 500, marginBottom: '4px' }}>{event.title}</div>
+                        {event.service && (
+                          <div style={{ fontSize: '0.8125rem', opacity: 0.9, fontStyle: 'italic' }}>
+                            {event.service}
+                          </div>
+                        )}
                         <div style={{ fontSize: '0.8125rem', opacity: 0.9 }}>
                           {event.time} - {getEndTime(event.time, event.duration)}
                         </div>

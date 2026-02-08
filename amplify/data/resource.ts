@@ -9,11 +9,13 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * - Staff: staff members with name (static data)
  * - DailyService: daily service records with full details
  * - DailyCost: daily cost records
- * - Booking: client reservations/bookings
+ * - Booking: client reservations/bookings (staff portal)
+ * - NotConfirmedReservation: public booking requests awaiting confirmation
  * 
  * Access: 
  * - Admin_Confession group: full access to all models
  * - Authenticated users: access to Booking model (staff portal)
+ * - Public (guest): can create NotConfirmedReservation
  */
 const schema = a.schema({
   // ============================================
@@ -30,6 +32,7 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.group("Admin_Confession"),
       allow.authenticated().to(["read"]), // Staff can read for dropdowns
+      allow.guest().to(["read"]), // Public can read for booking form
     ]),
 
   // Cost model - expense categories
@@ -100,12 +103,15 @@ const schema = a.schema({
   // Booking/Reservation Model (Staff Portal)
   // ============================================
 
-  // Booking model - client reservations
+  // Booking model - confirmed client reservations
   Booking: a
     .model({
       // Client information
       clientName: a.string().required(),
       clientPhone: a.string().required(),
+      // Service (optional - ID reference and name)
+      serviceId: a.string(),
+      serviceName: a.string(),
       // Therapist (optional - ID reference or name)
       therapistId: a.string(),
       therapistName: a.string(),
@@ -121,6 +127,31 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.authenticated(), // All authenticated staff can CRUD bookings
     ]),
+
+  // ============================================
+  // Public Booking Requests (Not Confirmed)
+  // ============================================
+
+  // NotConfirmedReservation - public booking requests awaiting staff confirmation
+  NotConfirmedReservation: a
+    .model({
+      // Client information
+      clientName: a.string().required(),
+      clientPhone: a.string().required(),
+      // Service
+      serviceId: a.string().required(),
+      serviceName: a.string().required(),
+      // Date and time
+      date: a.date().required(),
+      reservedTime: a.time().required(),
+      durationMinutes: a.integer().required(),
+      // Status for tracking
+      status: a.enum(["NotConfirmed", "Confirmed"]),
+    })
+    .authorization((allow) => [
+      allow.guest().to(["create"]), // Public can create booking requests
+      allow.authenticated(), // Staff can read, update, delete
+    ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -129,5 +160,8 @@ export const data = defineData({
   schema,
   authorizationModes: {
     defaultAuthorizationMode: "userPool",
+    apiKeyAuthorizationMode: {
+      expiresInDays: 365,
+    },
   },
 });

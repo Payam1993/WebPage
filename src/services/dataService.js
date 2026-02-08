@@ -485,6 +485,8 @@ export const bookingAPI = {
       const { data, errors } = await client.models.Booking.create({
         clientName: bookingData.clientName,
         clientPhone: bookingData.clientPhone,
+        serviceId: bookingData.serviceId || null,
+        serviceName: bookingData.serviceName || null,
         therapistId: bookingData.therapistId || null,
         therapistName: bookingData.therapistName || null,
         date: bookingData.date,
@@ -508,6 +510,8 @@ export const bookingAPI = {
         id,
         clientName: bookingData.clientName,
         clientPhone: bookingData.clientPhone,
+        serviceId: bookingData.serviceId || null,
+        serviceName: bookingData.serviceName || null,
         therapistId: bookingData.therapistId || null,
         therapistName: bookingData.therapistName || null,
         date: bookingData.date,
@@ -532,6 +536,178 @@ export const bookingAPI = {
       return true
     } catch (error) {
       console.error('Error deleting booking:', error)
+      throw error
+    }
+  },
+}
+
+// ============================================
+// NotConfirmedReservation CRUD (Public Booking Requests)
+// ============================================
+export const notConfirmedReservationAPI = {
+  /**
+   * List not confirmed reservations, optionally filtered by date range
+   * @param {string} fromDate - Start date (YYYY-MM-DD)
+   * @param {string} toDate - End date (YYYY-MM-DD)
+   */
+  async list(fromDate = null, toDate = null) {
+    try {
+      const client = getClient()
+      let filter = { status: { eq: 'NotConfirmed' } }
+      
+      if (fromDate && toDate) {
+        filter = {
+          and: [
+            { status: { eq: 'NotConfirmed' } },
+            { date: { between: [fromDate, toDate] } }
+          ]
+        }
+      } else if (fromDate) {
+        filter = {
+          and: [
+            { status: { eq: 'NotConfirmed' } },
+            { date: { eq: fromDate } }
+          ]
+        }
+      }
+      
+      const { data, errors } = await client.models.NotConfirmedReservation.list({ filter })
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error listing not confirmed reservations:', error)
+      throw error
+    }
+  },
+
+  async create(reservationData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.NotConfirmedReservation.create({
+        clientName: reservationData.clientName,
+        clientPhone: reservationData.clientPhone,
+        serviceId: reservationData.serviceId,
+        serviceName: reservationData.serviceName,
+        date: reservationData.date,
+        reservedTime: reservationData.reservedTime,
+        durationMinutes: reservationData.durationMinutes,
+        status: 'NotConfirmed',
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating not confirmed reservation:', error)
+      throw error
+    }
+  },
+
+  async update(id, reservationData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.NotConfirmedReservation.update({
+        id,
+        clientName: reservationData.clientName,
+        clientPhone: reservationData.clientPhone,
+        serviceId: reservationData.serviceId,
+        serviceName: reservationData.serviceName,
+        date: reservationData.date,
+        reservedTime: reservationData.reservedTime,
+        durationMinutes: reservationData.durationMinutes,
+        status: reservationData.status || 'NotConfirmed',
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error updating not confirmed reservation:', error)
+      throw error
+    }
+  },
+
+  async delete(id) {
+    try {
+      const client = getClient()
+      const { errors } = await client.models.NotConfirmedReservation.delete({ id })
+      if (errors) throw new Error(errors[0].message)
+      return true
+    } catch (error) {
+      console.error('Error deleting not confirmed reservation:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Confirm a reservation: create Booking and delete NotConfirmedReservation
+   */
+  async confirm(notConfirmedReservation, additionalData = {}) {
+    try {
+      // Create the confirmed booking
+      const bookingData = {
+        clientName: notConfirmedReservation.clientName,
+        clientPhone: notConfirmedReservation.clientPhone,
+        serviceId: notConfirmedReservation.serviceId,
+        serviceName: notConfirmedReservation.serviceName,
+        therapistId: additionalData.therapistId || null,
+        therapistName: additionalData.therapistName || null,
+        date: notConfirmedReservation.date,
+        reservedTime: notConfirmedReservation.reservedTime,
+        durationMinutes: notConfirmedReservation.durationMinutes,
+        priceAgreement: additionalData.priceAgreement || 0,
+        status: 'Pending',
+      }
+      
+      const newBooking = await bookingAPI.create(bookingData)
+      
+      // Delete the not confirmed reservation
+      await this.delete(notConfirmedReservation.id)
+      
+      return newBooking
+    } catch (error) {
+      console.error('Error confirming reservation:', error)
+      throw error
+    }
+  },
+}
+
+// ============================================
+// Public API (for unauthenticated users)
+// ============================================
+export const publicAPI = {
+  /**
+   * Create a public booking request (guest access)
+   */
+  async createBookingRequest(reservationData) {
+    try {
+      // Use API key auth for public access
+      const client = generateClient({ authMode: 'apiKey' })
+      const { data, errors } = await client.models.NotConfirmedReservation.create({
+        clientName: reservationData.clientName,
+        clientPhone: reservationData.clientPhone,
+        serviceId: reservationData.serviceId,
+        serviceName: reservationData.serviceName,
+        date: reservationData.date,
+        reservedTime: reservationData.reservedTime,
+        durationMinutes: reservationData.durationMinutes,
+        status: 'NotConfirmed',
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating public booking request:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get available services (guest access)
+   */
+  async getServices() {
+    try {
+      const client = generateClient({ authMode: 'apiKey' })
+      const { data, errors } = await client.models.Service.list()
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error fetching services:', error)
       throw error
     }
   },
