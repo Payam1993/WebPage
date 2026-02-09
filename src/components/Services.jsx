@@ -6,136 +6,90 @@ import { servicesData, serviceTranslations } from '../data/services'
 import './Services.css'
 
 const CorporateModal = ({ isOpen, onClose, serviceText, setCursorVariant, t }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
-    phone: '',
-    email: '',
-    company: ''
-  })
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      setIsSubmitted(true)
-    }, 1500)
-  }
-
-  const handleClose = () => {
-    onClose()
-    setTimeout(() => {
-      setIsSubmitted(false)
-      setFormData({ name: '', surname: '', phone: '', email: '', company: '' })
-    }, 300)
-  }
+  const phoneNumber = '+34 678 902 765'
+  const whatsappLink = 'https://wa.me/34678902765'
 
   if (!isOpen) return null
 
   return (
-    <div className="corporate-modal-overlay" onClick={handleClose}>
+    <div className="corporate-modal-overlay" onClick={onClose}>
       <motion.div 
-        className="corporate-modal"
+        className="corporate-modal corporate-modal-b2b"
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         onClick={e => e.stopPropagation()}
       >
-        <button className="modal-close-btn" onClick={handleClose}>×</button>
+        <button className="modal-close-btn" onClick={onClose}>×</button>
         
-        {isSubmitted ? (
-          <div className="corporate-success">
-            <div className="success-icon">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-            </div>
-            <h3>{t.corporate?.successTitle || 'Thank You!'}</h3>
-            <p>{t.corporate?.successMessage || 'We will get in contact with you as soon as possible.'}</p>
-            <button 
-              className="btn btn-primary"
-              onClick={handleClose}
+        <div className="corporate-b2b-content">
+          {/* Icon */}
+          <div className="b2b-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+
+          {/* Heading */}
+          <h3 className="b2b-title">{serviceText?.name || 'Corporate Wellness'}</h3>
+          
+          {/* Subtitle */}
+          <p className="b2b-subtitle">
+            {t.corporate?.b2bSubtitle || 'Business to Business Partnership'}
+          </p>
+
+          {/* Main Message */}
+          <div className="b2b-message">
+            <p>
+              {t.corporate?.b2bMessage || 
+                'Interested in elevating your team\'s well-being through our premium corporate wellness programs? We\'d love to discuss how we can create a tailored experience for your organization.'}
+            </p>
+            <p className="b2b-highlight">
+              {t.corporate?.b2bCta || 
+                'For B2B collaborations and corporate inquiries, please contact us directly — we\'re here to help you design the perfect wellness solution for your company.'}
+            </p>
+          </div>
+
+          {/* Contact Options */}
+          <div className="b2b-contact-options">
+            {/* WhatsApp Button */}
+            <a 
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="b2b-contact-btn whatsapp"
               onMouseEnter={() => setCursorVariant('hover')}
               onMouseLeave={() => setCursorVariant('default')}
             >
-              {t.corporate?.close || 'Close'}
-            </button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+              </svg>
+              <span>{t.corporate?.whatsappBtn || 'Chat on WhatsApp'}</span>
+            </a>
+
+            {/* Phone Button */}
+            <a 
+              href={`tel:${phoneNumber.replace(/\s/g, '')}`}
+              className="b2b-contact-btn phone"
+              onMouseEnter={() => setCursorVariant('hover')}
+              onMouseLeave={() => setCursorVariant('default')}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+              <span>{phoneNumber}</span>
+            </a>
           </div>
-        ) : (
-          <>
-            <div className="corporate-modal-header">
-              <h3>{serviceText?.name || 'Corporate Wellness'}</h3>
-              <p>{t.corporate?.formSubtitle || 'Fill out the form and we will contact you shortly.'}</p>
-            </div>
-            <form onSubmit={handleSubmit} className="corporate-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>{t.corporate?.name || 'Name'} *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={e => setFormData({...formData, name: e.target.value})}
-                    placeholder={t.corporate?.namePlaceholder || 'Your name'}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>{t.corporate?.surname || 'Surname'} *</label>
-                  <input
-                    type="text"
-                    value={formData.surname}
-                    onChange={e => setFormData({...formData, surname: e.target.value})}
-                    placeholder={t.corporate?.surnamePlaceholder || 'Your surname'}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>{t.corporate?.phone || 'Phone Number'} *</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={e => setFormData({...formData, phone: e.target.value})}
-                  placeholder="+34 XXX XXX XXX"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>{t.corporate?.email || 'Email'} *</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>{t.corporate?.company || 'Company Name'} *</label>
-                <input
-                  type="text"
-                  value={formData.company}
-                  onChange={e => setFormData({...formData, company: e.target.value})}
-                  placeholder={t.corporate?.companyPlaceholder || 'Your company name'}
-                  required
-                />
-              </div>
-              <button 
-                type="submit" 
-                className={`btn btn-primary submit-btn ${isLoading ? 'loading' : ''}`}
-                disabled={isLoading}
-                onMouseEnter={() => setCursorVariant('hover')}
-                onMouseLeave={() => setCursorVariant('default')}
-              >
-                {isLoading ? <span className="loader-spinner"></span> : (t.corporate?.submit || 'Submit')}
-              </button>
-            </form>
-          </>
-        )}
+
+          {/* Footer Note */}
+          <p className="b2b-footer">
+            {t.corporate?.b2bFooter || 
+              'Our team is available Monday to Saturday, 10:00 - 20:00'}
+          </p>
+        </div>
       </motion.div>
     </div>
   )

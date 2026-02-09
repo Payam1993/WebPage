@@ -353,10 +353,10 @@ const Reservations = () => {
     label: s.staffName,
   }))
 
-  // Service options for dropdown
+  // Service options for dropdown - only show service name
   const serviceOptions = servicesList.map(s => ({
     value: s.id,
-    label: s.serviceName + (s.fixedPrice ? ` - €${s.fixedPrice.toFixed(2)}` : ''),
+    label: s.serviceName,
   }))
 
   // Duration options
@@ -468,8 +468,8 @@ const Reservations = () => {
 
       {/* Bookings List */}
       <Card padding={false}>
-        <CardHeader>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+        <CardHeader style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--ui-border-light)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <CardTitle subtitle={`${filteredBookings.length} bookings found`}>
               Booking List
             </CardTitle>
@@ -662,8 +662,8 @@ const Reservations = () => {
 
       {/* Not Confirmed Reservations Section */}
       <Card style={{ marginTop: '32px' }}>
-        <CardHeader>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+        <CardHeader style={{ paddingBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <CardTitle subtitle={`${notConfirmedList.length} pending requests from public website (auto-refreshes every 30s)`}>
               Not Confirmed Reservations
             </CardTitle>

@@ -154,6 +154,27 @@ const schema = a.schema({
       allow.publicApiKey().to(["create"]), // Public can create booking requests (API key auth)
       allow.authenticated(), // Staff can read, update, delete
     ]),
+
+  // ============================================
+  // Staff Cost Submissions (Pending Admin Confirmation)
+  // ============================================
+
+  // NotConfirmedCost - costs submitted by staff awaiting admin confirmation
+  NotConfirmedCost: a
+    .model({
+      // Cost details
+      costName: a.string().required(),
+      price: a.float().required(),
+      date: a.date().required(),
+      reason: a.string(),
+      // Status for tracking
+      status: a.enum(["NotConfirmed", "Confirmed"]),
+      // Who submitted it
+      submittedBy: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated(), // Staff can create and view their submissions
+    ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;

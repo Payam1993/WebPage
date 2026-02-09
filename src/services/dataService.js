@@ -718,6 +718,96 @@ export const publicAPI = {
 }
 
 // ============================================
+// NotConfirmedCost CRUD (Staff Cost Submissions)
+// ============================================
+export const notConfirmedCostAPI = {
+  /**
+   * List not confirmed costs (status = NotConfirmed)
+   */
+  async list() {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.NotConfirmedCost.list({
+        filter: { status: { eq: 'NotConfirmed' } }
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error listing not confirmed costs:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Create a new not confirmed cost
+   */
+  async create(costData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.NotConfirmedCost.create({
+        costName: costData.costName,
+        price: costData.price,
+        date: costData.date,
+        reason: costData.reason || null,
+        status: 'NotConfirmed',
+        submittedBy: costData.submittedBy || null,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating not confirmed cost:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Delete a not confirmed cost
+   */
+  async delete(id) {
+    try {
+      const client = getClient()
+      const { errors } = await client.models.NotConfirmedCost.delete({ id })
+      if (errors) throw new Error(errors[0].message)
+      return true
+    } catch (error) {
+      console.error('Error deleting not confirmed cost:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Confirm a cost: create DailyCost and delete NotConfirmedCost
+   * Only admins can call this
+   */
+  async confirm(notConfirmedCost) {
+    try {
+      // First, we need to find or create a matching Cost ID (static cost type)
+      // For simplicity, we'll use the cost name directly and set costId as empty
+      // In a real implementation, you might want to link to an existing Cost record
+      
+      // Create the confirmed daily cost
+      const dailyCostData = {
+        costId: '', // Will be set later or left empty
+        costName: notConfirmedCost.costName,
+        price: notConfirmedCost.price,
+        date: notConfirmedCost.date,
+        reason: notConfirmedCost.reason,
+      }
+      
+      const newDailyCost = await dailyCostAPI.create(dailyCostData)
+      
+      // Delete the not confirmed cost
+      await this.delete(notConfirmedCost.id)
+      
+      return newDailyCost
+    } catch (error) {
+      console.error('Error confirming cost:', error)
+      throw error
+    }
+  },
+}
+
+// ============================================
 // Utility Functions
 // ============================================
 

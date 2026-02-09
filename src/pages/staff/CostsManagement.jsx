@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Card,
   CardHeader,
@@ -6,7 +6,6 @@ import {
   CardContent,
   Button,
   Badge,
-  StatCard,
   Table,
   TableHeader,
   TableBody,
@@ -16,248 +15,277 @@ import {
   PageHeader,
   Grid,
   Input,
-  Select,
+  Modal,
   Icons,
   EmptyState,
-  Divider,
+  LoadingState,
 } from '../../components/admin/ui'
+import { notConfirmedCostAPI, dailyCostAPI, getTodayDate } from '../../services/dataService'
+import { useAuth } from '../../context/AuthContext'
 
 /**
- * CostsManagement - Manage business costs and expenses
+ * CostsManagement - Staff can submit costs, Admin can confirm them
+ * 
+ * - Staff: Add costs (saved to NotConfirmedCost table)
+ * - Admin: Confirm costs (moves to DailyCost table in Administration)
  */
 const CostsManagement = () => {
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [newCost, setNewCost] = useState({
-    category: '',
-    description: '',
-    amount: '',
-    date: new Date().toISOString().split('T')[0],
+  const { isAdmin } = useAuth()
+  
+  // State
+  const [costs, setCosts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  // Modal state
+  const [showModal, setShowModal] = useState(false)
+  const [formData, setFormData] = useState({
+    costName: '',
+    price: '',
+    date: getTodayDate(),
+    reason: '',
   })
+  const [isSaving, setIsSaving] = useState(false)
+  const [isConfirming, setIsConfirming] = useState(null) // ID of cost being confirmed
 
-  // Sample data - replace with real data from your API
-  const costs = [
-    { id: 1, category: 'Supplies', description: 'Massage oils and lotions', amount: 245.50, date: '2026-01-18' },
-    { id: 2, category: 'Utilities', description: 'Electricity bill', amount: 189.00, date: '2026-01-15' },
-    { id: 3, category: 'Staff', description: 'Training materials', amount: 150.00, date: '2026-01-12' },
-    { id: 4, category: 'Maintenance', description: 'Equipment repair', amount: 320.00, date: '2026-01-10' },
-    { id: 5, category: 'Marketing', description: 'Social media ads', amount: 200.00, date: '2026-01-08' },
-  ]
+  // Load costs on mount
+  useEffect(() => {
+    loadCosts()
+  }, [])
 
-  const totalCosts = costs.reduce((sum, cost) => sum + cost.amount, 0)
-
-  const costsByCategory = costs.reduce((acc, cost) => {
-    acc[cost.category] = (acc[cost.category] || 0) + cost.amount
-    return acc
-  }, {})
-
-  const categoryOptions = [
-    { value: 'Supplies', label: 'Supplies' },
-    { value: 'Utilities', label: 'Utilities' },
-    { value: 'Staff', label: 'Staff' },
-    { value: 'Maintenance', label: 'Maintenance' },
-    { value: 'Marketing', label: 'Marketing' },
-    { value: 'Other', label: 'Other' },
-  ]
-
-  const getCategoryColor = (category) => {
-    const colors = {
-      'Supplies': 'info',
-      'Utilities': 'warning',
-      'Staff': 'success',
-      'Maintenance': 'danger',
-      'Marketing': 'neutral',
-      'Other': 'neutral',
+  const loadCosts = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const data = await notConfirmedCostAPI.list()
+      // Sort by date descending
+      data.sort((a, b) => b.date.localeCompare(a.date))
+      setCosts(data)
+    } catch (err) {
+      setError(err.message || 'Failed to load costs')
+    } finally {
+      setIsLoading(false)
     }
-    return colors[category] || 'neutral'
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log('New cost:', newCost)
-    setShowAddForm(false)
-    setNewCost({
-      category: '',
-      description: '',
-      amount: '',
-      date: new Date().toISOString().split('T')[0],
+  const handleOpenModal = () => {
+    setFormData({
+      costName: '',
+      price: '',
+      date: getTodayDate(),
+      reason: '',
+    })
+    setShowModal(true)
+    setError(null)
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setFormData({
+      costName: '',
+      price: '',
+      date: getTodayDate(),
+      reason: '',
+    })
+    setError(null)
+  }
+
+  const handleSubmit = async () => {
+    setIsSaving(true)
+    setError(null)
+    try {
+      // Validate required fields
+      if (!formData.costName?.trim()) throw new Error('Cost Name is required')
+      if (!formData.price || formData.price <= 0) throw new Error('Price is required and must be greater than 0')
+      if (!formData.date) throw new Error('Date is required')
+
+      await notConfirmedCostAPI.create({
+        costName: formData.costName.trim(),
+        price: parseFloat(formData.price),
+        date: formData.date,
+        reason: formData.reason?.trim() || null,
+      })
+
+      await loadCosts()
+      handleCloseModal()
+    } catch (err) {
+      setError(err.message || 'Failed to save cost')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleConfirm = async (cost) => {
+    if (!isAdmin) return
+    
+    setIsConfirming(cost.id)
+    try {
+      await notConfirmedCostAPI.confirm(cost)
+      // Remove from local state
+      setCosts(prev => prev.filter(c => c.id !== cost.id))
+    } catch (err) {
+      setError(err.message || 'Failed to confirm cost')
+    } finally {
+      setIsConfirming(null)
+    }
+  }
+
+  const handleDelete = async (cost) => {
+    if (!window.confirm(`Are you sure you want to delete "${cost.costName}"?`)) return
+    
+    try {
+      await notConfirmedCostAPI.delete(cost.id)
+      setCosts(prev => prev.filter(c => c.id !== cost.id))
+    } catch (err) {
+      setError(err.message || 'Failed to delete cost')
+    }
+  }
+
+  // Format date for display
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
     })
   }
+
+  // Calculate total
+  const totalCosts = costs.reduce((sum, cost) => sum + (cost.price || 0), 0)
 
   return (
     <div>
       <PageHeader 
         title="Costs Management"
-        subtitle="Track and manage your business expenses"
+        subtitle="Submit business expenses for admin approval"
         actions={
           <Button 
             icon={<Icons.Plus />}
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={handleOpenModal}
           >
-            Add Expense
+            Add New Cost
           </Button>
         }
       />
 
-      {/* Add Expense Form */}
-      {showAddForm && (
-        <Card style={{ marginBottom: '24px' }}>
-          <CardHeader>
-            <CardTitle subtitle="Enter the expense details below">
-              New Expense
-            </CardTitle>
-          </CardHeader>
+      {/* Error Display */}
+      {error && (
+        <Card style={{ marginBottom: '24px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
           <CardContent>
-            <form onSubmit={handleSubmit}>
-              <Grid cols={4} gap="default">
-                <Select
-                  label="Category"
-                  options={categoryOptions}
-                  placeholder="Select category"
-                  value={newCost.category}
-                  onChange={(e) => setNewCost({ ...newCost, category: e.target.value })}
-                  required
-                />
-                <Input
-                  label="Description"
-                  type="text"
-                  placeholder="Enter description"
-                  value={newCost.description}
-                  onChange={(e) => setNewCost({ ...newCost, description: e.target.value })}
-                  required
-                />
-                <Input
-                  label="Amount (€)"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={newCost.amount}
-                  onChange={(e) => setNewCost({ ...newCost, amount: e.target.value })}
-                  required
-                />
-                <Input
-                  label="Date"
-                  type="date"
-                  value={newCost.date}
-                  onChange={(e) => setNewCost({ ...newCost, date: e.target.value })}
-                  required
-                />
-              </Grid>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
-                <Button 
-                  type="button" 
-                  variant="secondary"
-                  onClick={() => setShowAddForm(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  Save Expense
-                </Button>
-              </div>
-            </form>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#dc2626' }}>
+              <Icons.X />
+              <span>{error}</span>
+              <Button variant="ghost" size="small" onClick={() => setError(null)} style={{ marginLeft: 'auto' }}>
+                Dismiss
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Summary Cards */}
-      <Grid cols={4} gap="default" style={{ marginBottom: '24px' }}>
-        <StatCard
-          title="Total This Month"
-          value={`€${totalCosts.toFixed(2)}`}
-          icon={<Icons.DollarSign />}
-          trend="-5%"
-          trendDirection="down"
-          subtitle="vs last month"
-        />
-        {Object.entries(costsByCategory).slice(0, 3).map(([category, amount]) => (
-          <StatCard
-            key={category}
-            title={category}
-            value={`€${amount.toFixed(2)}`}
-            icon={<Icons.TrendingUp />}
-          />
-        ))}
-      </Grid>
-
       {/* Costs Table */}
       <Card padding={false}>
-        <CardHeader
-          actions={
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Button variant="ghost" size="small">
-                Export
-              </Button>
-              <Button variant="ghost" size="small">
-                Filter
-              </Button>
-            </div>
-          }
-        >
-          <CardTitle subtitle={`${costs.length} expenses recorded`}>
-            Expense Records
-          </CardTitle>
+        <CardHeader style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--ui-border-light)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <CardTitle subtitle={`${costs.length} pending costs awaiting approval`}>
+              Pending Costs
+            </CardTitle>
+            <Button 
+              variant="secondary" 
+              size="small" 
+              onClick={loadCosts}
+              loading={isLoading}
+            >
+              <Icons.Refresh /> Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          {costs.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Amount</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {costs.map((cost) => (
-                  <TableRow key={cost.id}>
-                    <TableCell>
-                      <span style={{ color: 'var(--ui-text-muted)' }}>
-                        {new Date(cost.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getCategoryColor(cost.category)}>
-                        {cost.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ fontWeight: 500 }}>{cost.description}</span>
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right' }}>
-                      <span style={{ fontWeight: 600 }}>€{cost.amount.toFixed(2)}</span>
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                        <Button variant="ghost" size="small">
-                          <Icons.Edit />
-                        </Button>
-                        <Button variant="ghost" size="small">
-                          <Icons.Trash />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
+          {isLoading ? (
+            <LoadingState text="Loading costs..." />
+          ) : costs.length === 0 ? (
             <EmptyState
               icon={<Icons.FileText />}
-              title="No expenses recorded"
-              description="Start tracking your business expenses by adding your first entry."
+              title="No pending costs"
+              description="All submitted costs have been processed, or no costs have been submitted yet."
               action={
-                <Button onClick={() => setShowAddForm(true)} icon={<Icons.Plus />}>
-                  Add Expense
+                <Button onClick={handleOpenModal} icon={<Icons.Plus />}>
+                  Add New Cost
                 </Button>
               }
             />
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Cost Name</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>Price</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {costs.map((cost) => (
+                    <TableRow key={cost.id}>
+                      <TableCell>
+                        <Badge variant={cost.date === getTodayDate() ? 'info' : 'neutral'} size="small">
+                          {formatDate(cost.date)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span style={{ fontWeight: 600 }}>{cost.costName}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>
+                          {cost.reason || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--ui-danger)' }}>
+                          €{cost.price?.toFixed(2)}
+                        </span>
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                          {isAdmin ? (
+                            <Button 
+                              variant="success" 
+                              size="small"
+                              onClick={() => handleConfirm(cost)}
+                              loading={isConfirming === cost.id}
+                              disabled={isConfirming !== null}
+                            >
+                              <Icons.Check /> Confirm
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="secondary" 
+                              size="small"
+                              disabled
+                              title="Only administrators can confirm costs"
+                              style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                            >
+                              <Icons.Check /> Pending Approval
+                            </Button>
+                          )}
+                          <Button 
+                            variant="icon" 
+                            size="small" 
+                            className="ui-btn-icon-danger"
+                            onClick={() => handleDelete(cost)}
+                            title="Delete cost"
+                          >
+                            <Icons.Trash />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
 
@@ -270,16 +298,98 @@ const CostsManagement = () => {
             padding: '16px 24px',
             borderTop: '1px solid var(--ui-border)',
             background: 'var(--ui-bg)',
+            borderRadius: '0 0 16px 16px',
           }}>
-            <span style={{ marginRight: '24px', color: 'var(--ui-text-muted)' }}>
-              Total Expenses:
+            <span style={{ marginRight: '24px', color: 'var(--ui-text-muted)', fontWeight: 500 }}>
+              Total Pending:
             </span>
-            <span style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+            <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--ui-danger)' }}>
               €{totalCosts.toFixed(2)}
             </span>
           </div>
         )}
       </Card>
+
+      {/* Info Note for non-admins */}
+      {!isAdmin && (
+        <Card style={{ marginTop: '24px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.1))' }}>
+          <CardContent>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ 
+                width: '48px', 
+                height: '48px', 
+                borderRadius: '12px', 
+                background: 'rgba(59, 130, 246, 0.15)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                color: 'var(--ui-primary)',
+                flexShrink: 0,
+              }}>
+                <Icons.Info />
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 8px 0', fontWeight: 600 }}>How it works</h4>
+                <p style={{ margin: 0, color: 'var(--ui-text-muted)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                  Submit your business expenses using the "Add New Cost" button. 
+                  An administrator will review and confirm your submissions. 
+                  Once confirmed, the cost will be recorded in the daily expense report.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Add Cost Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        title="Add New Cost"
+        subtitle="Submit a business expense for approval"
+        size="default"
+      >
+        <Grid cols={2} gap="default">
+          <Input
+            label="Cost Name *"
+            type="text"
+            placeholder="e.g., Office Supplies"
+            value={formData.costName}
+            onChange={(e) => setFormData({ ...formData, costName: e.target.value })}
+          />
+          <Input
+            label="Price (€) *"
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder="0.00"
+            value={formData.price}
+            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          />
+          <Input
+            label="Date *"
+            type="date"
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          />
+          <Input
+            label="Reason (optional)"
+            type="text"
+            placeholder="Brief description or reason"
+            value={formData.reason}
+            onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+          />
+        </Grid>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} loading={isSaving}>
+            <Icons.Plus /> Submit Cost
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }

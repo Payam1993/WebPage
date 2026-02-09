@@ -51,7 +51,13 @@ export const translations = {
       submit: "Submit",
       successTitle: "Thank You!",
       successMessage: "We will get in contact with you as soon as possible.",
-      close: "Close"
+      close: "Close",
+      // B2B Modal
+      b2bSubtitle: "Business to Business Partnership",
+      b2bMessage: "Interested in elevating your team's well-being through our premium corporate wellness programs? We'd love to discuss how we can create a tailored experience for your organization.",
+      b2bCta: "For B2B collaborations and corporate inquiries, please contact us directly — we're here to help you design the perfect wellness solution for your company.",
+      whatsappBtn: "Chat on WhatsApp",
+      b2bFooter: "Our team is available Monday to Saturday, 10:00 - 20:00"
     },
     // About
     about: {
@@ -288,7 +294,13 @@ export const translations = {
       submit: "Enviar",
       successTitle: "¡Gracias!",
       successMessage: "Nos pondremos en contacto contigo lo antes posible.",
-      close: "Cerrar"
+      close: "Cerrar",
+      // B2B Modal
+      b2bSubtitle: "Colaboración Empresarial",
+      b2bMessage: "¿Interesado en mejorar el bienestar de tu equipo con nuestros programas premium de wellness corporativo? Nos encantaría diseñar una experiencia personalizada para tu organización.",
+      b2bCta: "Para colaboraciones B2B y consultas corporativas, por favor contáctanos directamente — estamos aquí para ayudarte a diseñar la solución de bienestar perfecta para tu empresa.",
+      whatsappBtn: "Chatea por WhatsApp",
+      b2bFooter: "Nuestro equipo está disponible de lunes a sábado, 10:00 - 20:00"
     },
     // About
     about: {
@@ -525,7 +537,13 @@ export const translations = {
       submit: "Enviar",
       successTitle: "Gràcies!",
       successMessage: "Ens posarem en contacte amb tu el més aviat possible.",
-      close: "Tancar"
+      close: "Tancar",
+      // B2B Modal
+      b2bSubtitle: "Col·laboració Empresarial",
+      b2bMessage: "Interessat en millorar el benestar del teu equip amb els nostres programes premium de wellness corporatiu? Ens encantaria dissenyar una experiència personalitzada per a la teva organització.",
+      b2bCta: "Per a col·laboracions B2B i consultes corporatives, si us plau contacta'ns directament — estem aquí per ajudar-te a dissenyar la solució de benestar perfecta per a la teva empresa.",
+      whatsappBtn: "Xateja per WhatsApp",
+      b2bFooter: "El nostre equip està disponible de dilluns a dissabte, 10:00 - 20:00"
     },
     // About
     about: {
