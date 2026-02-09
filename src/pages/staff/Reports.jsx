@@ -1,88 +1,309 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   Button,
-  Badge,
   StatCard,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
   PageHeader,
   Grid,
   Icons,
-  EmptyState,
+  LoadingState,
 } from '../../components/admin/ui'
+import { bookingAPI, getDateFromToday } from '../../services/dataService'
+
+/**
+ * Simple Line Chart Component for Reservations
+ */
+const ReservationsLineChart = ({ data, isLoading }) => {
+  if (isLoading) {
+    return (
+      <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState text="Loading chart data..." />
+      </div>
+    )
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ui-text-muted)' }}>
+        No reservation data available
+      </div>
+    )
+  }
+
+  const maxValue = Math.max(...data.map(d => d.count), 1)
+  const chartHeight = 250
+  const chartWidth = 800
+  const padding = { top: 20, right: 30, bottom: 50, left: 50 }
+  const innerWidth = chartWidth - padding.left - padding.right
+  const innerHeight = chartHeight - padding.top - padding.bottom
+
+  // Calculate points for the line
+  const points = data.map((d, i) => {
+    const x = padding.left + (i / (data.length - 1 || 1)) * innerWidth
+    const y = padding.top + innerHeight - (d.count / maxValue) * innerHeight
+    return { x, y, ...d }
+  })
+
+  // Create SVG path for the line
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+  
+  // Create area path (filled area under the line)
+  const areaPath = `${linePath} L ${points[points.length - 1]?.x || padding.left} ${padding.top + innerHeight} L ${padding.left} ${padding.top + innerHeight} Z`
+
+  // Y-axis ticks
+  const yTicks = [0, Math.ceil(maxValue / 4), Math.ceil(maxValue / 2), Math.ceil(maxValue * 3 / 4), maxValue]
+
+  return (
+    <div style={{ width: '100%', overflowX: 'auto' }}>
+      <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', minWidth: '500px', height: '300px' }}>
+        {/* Grid lines */}
+        {yTicks.map((tick, i) => {
+          const y = padding.top + innerHeight - (tick / maxValue) * innerHeight
+          return (
+            <g key={i}>
+              <line
+                x1={padding.left}
+                y1={y}
+                x2={chartWidth - padding.right}
+                y2={y}
+                stroke="var(--ui-border-light)"
+                strokeDasharray="4,4"
+              />
+              <text
+                x={padding.left - 10}
+                y={y + 4}
+                textAnchor="end"
+                fontSize="11"
+                fill="var(--ui-text-muted)"
+              >
+                {tick}
+              </text>
+            </g>
+          )
+        })}
+
+        {/* Area under the line */}
+        <path
+          d={areaPath}
+          fill="url(#areaGradient)"
+          opacity="0.3"
+        />
+
+        {/* Gradient definition */}
+        <defs>
+          <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="var(--ui-primary)" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="var(--ui-primary)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* Line */}
+        <path
+          d={linePath}
+          fill="none"
+          stroke="var(--ui-primary)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Data points */}
+        {points.map((p, i) => (
+          <g key={i}>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r="6"
+              fill="white"
+              stroke="var(--ui-primary)"
+              strokeWidth="3"
+              style={{ cursor: 'pointer' }}
+            />
+            {/* X-axis labels */}
+            <text
+              x={p.x}
+              y={chartHeight - 10}
+              textAnchor="middle"
+              fontSize="10"
+              fill="var(--ui-text-muted)"
+              style={{ fontWeight: 500 }}
+            >
+              {p.label}
+            </text>
+            {/* Value label on hover area */}
+            <title>{`${p.fullDate}: ${p.count} reservations`}</title>
+          </g>
+        ))}
+
+        {/* Y-axis label */}
+        <text
+          x={15}
+          y={chartHeight / 2}
+          textAnchor="middle"
+          fontSize="11"
+          fill="var(--ui-text-muted)"
+          transform={`rotate(-90, 15, ${chartHeight / 2})`}
+        >
+          Reservations
+        </text>
+      </svg>
+    </div>
+  )
+}
 
 /**
  * Reports - Dashboard overview with stats and recent activity
  */
 const Reports = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('week')
+  const [bookings, setBookings] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Sample data - replace with real data from your API
-  const stats = [
-    { 
-      title: 'Total Bookings', 
-      value: '147', 
-      icon: <Icons.Calendar />,
-      trend: '+12%',
-      trendDirection: 'up',
-      subtitle: 'vs last week'
-    },
-    { 
-      title: 'Revenue', 
-      value: '€12,450', 
-      icon: <Icons.DollarSign />,
-      trend: '+8%',
-      trendDirection: 'up',
-      subtitle: 'vs last week'
-    },
-    { 
-      title: 'New Clients', 
-      value: '23', 
-      icon: <Icons.Users />,
-      trend: '+15%',
-      trendDirection: 'up',
-      subtitle: 'vs last week'
-    },
-    { 
-      title: 'Avg. Rating', 
-      value: '4.8', 
-      icon: <Icons.Star />,
-      trend: '+0.2',
-      trendDirection: 'up',
-      subtitle: 'vs last week'
-    },
-  ]
+  // Load bookings data
+  useEffect(() => {
+    loadBookingsData()
+  }, [selectedPeriod])
 
-  const recentBookings = [
-    { id: 1, client: 'Maria Garcia', service: 'Deep Tissue Massage', date: '2026-01-20', time: '10:00', status: 'confirmed', amount: '€85' },
-    { id: 2, client: 'John Smith', service: 'Swedish Massage', date: '2026-01-20', time: '11:30', status: 'pending', amount: '€70' },
-    { id: 3, client: 'Anna Johnson', service: 'Hot Stone Therapy', date: '2026-01-19', time: '14:00', status: 'confirmed', amount: '€95' },
-    { id: 4, client: 'Carlos Rodriguez', service: 'Aromatherapy', date: '2026-01-19', time: '16:00', status: 'confirmed', amount: '€80' },
-    { id: 5, client: 'Emma Wilson', service: 'Couples Massage', date: '2026-01-18', time: '13:00', status: 'cancelled', amount: '€150' },
-  ]
+  const loadBookingsData = async () => {
+    setIsLoading(true)
+    try {
+      // Calculate date range based on selected period
+      let fromDate, toDate
+      const today = new Date().toISOString().split('T')[0]
+      
+      switch (selectedPeriod) {
+        case 'today':
+          fromDate = today
+          toDate = today
+          break
+        case 'week':
+          fromDate = getDateFromToday(-6)
+          toDate = today
+          break
+        case 'month':
+          fromDate = getDateFromToday(-29)
+          toDate = today
+          break
+        case 'year':
+          fromDate = getDateFromToday(-364)
+          toDate = today
+          break
+        default:
+          fromDate = getDateFromToday(-6)
+          toDate = today
+      }
 
-  const todayCosts = [
-    { id: 1, category: 'Supplies', description: 'Massage oils', amount: '€45.50' },
-    { id: 2, category: 'Utilities', description: 'Water bill', amount: '€32.00' },
-    { id: 3, category: 'Marketing', description: 'Social ads', amount: '€50.00' },
-  ]
-
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case 'confirmed': return 'success'
-      case 'pending': return 'warning'
-      case 'cancelled': return 'danger'
-      default: return 'neutral'
+      const data = await bookingAPI.list(fromDate, toDate)
+      setBookings(data)
+    } catch (err) {
+      console.error('Error loading bookings:', err)
+    } finally {
+      setIsLoading(false)
     }
   }
+
+  // Calculate chart data - group bookings by date
+  const chartData = useMemo(() => {
+    if (!bookings.length) return []
+
+    // Group by date
+    const countsByDate = {}
+    bookings.forEach(booking => {
+      if (booking.date) {
+        countsByDate[booking.date] = (countsByDate[booking.date] || 0) + 1
+      }
+    })
+
+    // Get date range for display
+    let days = 7
+    switch (selectedPeriod) {
+      case 'today': days = 1; break
+      case 'week': days = 7; break
+      case 'month': days = 30; break
+      case 'year': days = 12; break // Show monthly for year view
+    }
+
+    if (selectedPeriod === 'year') {
+      // Group by month for year view
+      const monthCounts = {}
+      bookings.forEach(booking => {
+        if (booking.date) {
+          const month = booking.date.substring(0, 7) // YYYY-MM
+          monthCounts[month] = (monthCounts[month] || 0) + 1
+        }
+      })
+
+      // Generate last 12 months
+      const result = []
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date()
+        date.setMonth(date.getMonth() - i)
+        const monthKey = date.toISOString().substring(0, 7)
+        const monthLabel = date.toLocaleDateString('en-US', { month: 'short' })
+        result.push({
+          date: monthKey,
+          label: monthLabel,
+          fullDate: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          count: monthCounts[monthKey] || 0
+        })
+      }
+      return result
+    }
+
+    // Generate data for each day in the range
+    const result = []
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split('T')[0]
+      const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })
+      result.push({
+        date: dateStr,
+        label: days <= 7 ? dayLabel : date.getDate().toString(),
+        fullDate: date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+        count: countsByDate[dateStr] || 0
+      })
+    }
+    return result
+  }, [bookings, selectedPeriod])
+
+  // Calculate stats from real data
+  const stats = useMemo(() => {
+    const totalBookings = bookings.length
+    const pendingBookings = bookings.filter(b => b.status === 'Pending').length
+    const completedBookings = bookings.filter(b => b.status === 'Done').length
+    const totalRevenue = bookings.reduce((sum, b) => sum + (b.priceAgreement || 0), 0)
+
+    return [
+      { 
+        title: 'Total Bookings', 
+        value: totalBookings.toString(), 
+        icon: <Icons.Calendar />,
+        subtitle: `${selectedPeriod === 'today' ? 'Today' : `Last ${selectedPeriod}`}`
+      },
+      { 
+        title: 'Pending', 
+        value: pendingBookings.toString(), 
+        icon: <Icons.Clock />,
+        subtitle: 'Awaiting completion'
+      },
+      { 
+        title: 'Completed', 
+        value: completedBookings.toString(), 
+        icon: <Icons.Check />,
+        subtitle: 'Successfully done'
+      },
+      { 
+        title: 'Revenue', 
+        value: `€${totalRevenue.toFixed(0)}`, 
+        icon: <Icons.DollarSign />,
+        subtitle: 'Total earnings'
+      },
+    ]
+  }, [bookings, selectedPeriod])
 
   return (
     <div>
@@ -120,139 +341,17 @@ const Reports = () => {
         ))}
       </Grid>
 
-      {/* Main Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
-        {/* Recent Bookings */}
-        <Card padding={false}>
-          <CardHeader
-            actions={
-              <Button variant="ghost" size="small">
-                View All
-              </Button>
-            }
-          >
-            <CardTitle subtitle="Today's scheduled services">
-              Recent Bookings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {recentBookings.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentBookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell>
-                        <span style={{ fontWeight: 500 }}>{booking.client}</span>
-                      </TableCell>
-                      <TableCell>{booking.service}</TableCell>
-                      <TableCell>
-                        <span style={{ color: 'var(--ui-text-muted)' }}>
-                          {new Date(booking.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                          })} at {booking.time}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span style={{ fontWeight: 500 }}>{booking.amount}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusVariant(booking.status)}>
-                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <EmptyState
-                icon={<Icons.Calendar />}
-                title="No bookings yet"
-                description="Your recent bookings will appear here"
-              />
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Today's Costs */}
-        <Card padding={false}>
-          <CardHeader
-            actions={
-              <Button variant="ghost" size="small" icon={<Icons.Plus />}>
-                Add
-              </Button>
-            }
-          >
-            <CardTitle subtitle="Recent expenses">
-              Today's Costs
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {todayCosts.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '0 16px 16px' }}>
-                {todayCosts.map((cost) => (
-                  <div 
-                    key={cost.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '12px',
-                      background: 'var(--ui-bg)',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--ui-text)' }}>
-                        {cost.description}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)', marginTop: '2px' }}>
-                        {cost.category}
-                      </div>
-                    </div>
-                    <div style={{ fontWeight: 600, color: 'var(--ui-text)' }}>
-                      {cost.amount}
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Total */}
-                <div 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px',
-                    borderTop: '1px solid var(--ui-border)',
-                    marginTop: '4px',
-                  }}
-                >
-                  <span style={{ fontWeight: 500, color: 'var(--ui-text-muted)' }}>Total</span>
-                  <span style={{ fontWeight: 600, fontSize: '1.125rem', color: 'var(--ui-text)' }}>
-                    €127.50
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <EmptyState
-                icon={<Icons.DollarSign />}
-                title="No costs recorded"
-                description="Add your first expense"
-              />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Reservations Line Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle subtitle={`Number of reservations ${selectedPeriod === 'today' ? 'today' : `over the last ${selectedPeriod}`}`}>
+            Reservations Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReservationsLineChart data={chartData} isLoading={isLoading} />
+        </CardContent>
+      </Card>
 
       {/* Quick Stats Row */}
       <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
