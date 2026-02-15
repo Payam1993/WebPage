@@ -1,0 +1,225 @@
+/**
+ * Contact Section Styles
+ * 
+ * Elegant CTA with premium contact options
+ */
+
+.erotic-contact {
+  padding: var(--erotic-section-padding);
+  background: var(--erotic-black);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background */
+.erotic-contact-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.erotic-contact-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.12) 0%, transparent 60%);
+}
+
+/* Content */
+.erotic-contact-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.erotic-contact-header {
+  margin-bottom: 60px;
+}
+
+.erotic-contact-label {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--erotic-gold);
+  margin-bottom: 24px;
+}
+
+.erotic-contact-title {
+  margin: 0 0 24px;
+  color: var(--erotic-text-primary);
+}
+
+.erotic-contact-subtitle {
+  font-size: 1.125rem;
+  color: var(--erotic-text-muted);
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* Contact Options */
+.erotic-contact-options {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.erotic-contact-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 32px;
+  background: var(--erotic-black-light);
+  border: 1px solid var(--erotic-border);
+  text-decoration: none;
+  transition: all var(--erotic-transition-normal);
+}
+
+.erotic-contact-option:hover {
+  border-color: var(--erotic-border-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--erotic-shadow-lg);
+}
+
+.erotic-contact-option--whatsapp:hover {
+  border-color: rgba(37, 211, 102, 0.4);
+}
+
+.erotic-contact-option--phone:hover {
+  border-color: var(--erotic-border-gold);
+}
+
+.erotic-contact-option-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.erotic-contact-option-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.erotic-contact-option--whatsapp .erotic-contact-option-icon {
+  color: #25d366;
+}
+
+.erotic-contact-option--phone .erotic-contact-option-icon {
+  color: var(--erotic-gold);
+}
+
+.erotic-contact-option-content {
+  flex: 1;
+  text-align: left;
+}
+
+.erotic-contact-option-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--erotic-text-muted);
+  margin-bottom: 4px;
+}
+
+.erotic-contact-option-value {
+  display: block;
+  font-family: var(--erotic-font-display);
+  font-size: 1.125rem;
+  color: var(--erotic-text-primary);
+}
+
+.erotic-contact-option-arrow {
+  font-size: 1.25rem;
+  color: var(--erotic-text-subtle);
+  transition: all var(--erotic-transition-fast);
+}
+
+.erotic-contact-option:hover .erotic-contact-option-arrow {
+  color: var(--erotic-gold);
+  transform: translateX(4px);
+}
+
+/* Info Row */
+.erotic-contact-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.erotic-contact-info-item {
+  text-align: center;
+}
+
+.erotic-contact-info-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--erotic-text-subtle);
+  margin-bottom: 8px;
+}
+
+.erotic-contact-info-value {
+  display: block;
+  font-size: 0.9375rem;
+  color: var(--erotic-text-secondary);
+}
+
+.erotic-contact-info-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--erotic-border);
+}
+
+/* Disclaimer */
+.erotic-contact-disclaimer {
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--erotic-text-subtle);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .erotic-contact-header {
+    margin-bottom: 40px;
+  }
+
+  .erotic-contact-options {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .erotic-contact-option {
+    padding: 24px;
+  }
+
+  .erotic-contact-info {
+    gap: 16px;
+  }
+
+  .erotic-contact-info-divider {
+    display: none;
+  }
+
+  .erotic-contact-info-item {
+    width: 100%;
+  }
+}

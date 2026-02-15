@@ -1,0 +1,75 @@
+/**
+ * Erotic Brand - CSS Variables
+ * 
+ * Dark luxury aesthetic with deep red accents and gold highlights
+ */
+
+:root {
+  /* Primary Colors */
+  --erotic-black: #0a0a0a;
+  --erotic-black-light: #121212;
+  --erotic-black-medium: #1a1a1a;
+  --erotic-black-soft: #252525;
+  
+  /* Accent Colors */
+  --erotic-red: #8b0000;
+  --erotic-red-deep: #6b0000;
+  --erotic-red-bright: #a31515;
+  --erotic-red-glow: rgba(139, 0, 0, 0.4);
+  
+  /* Gold Highlights */
+  --erotic-gold: #c9a227;
+  --erotic-gold-light: #d4af37;
+  --erotic-gold-dark: #996515;
+  --erotic-gold-glow: rgba(201, 162, 39, 0.3);
+  
+  /* Text Colors */
+  --erotic-text-primary: #ffffff;
+  --erotic-text-secondary: rgba(255, 255, 255, 0.85);
+  --erotic-text-muted: rgba(255, 255, 255, 0.6);
+  --erotic-text-subtle: rgba(255, 255, 255, 0.4);
+  
+  /* Gradients */
+  --erotic-gradient-dark: linear-gradient(180deg, #0a0a0a 0%, #121212 100%);
+  --erotic-gradient-red: linear-gradient(135deg, #8b0000 0%, #6b0000 100%);
+  --erotic-gradient-gold: linear-gradient(135deg, #c9a227 0%, #996515 100%);
+  --erotic-gradient-overlay: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.95) 100%);
+  
+  /* Borders */
+  --erotic-border: rgba(255, 255, 255, 0.08);
+  --erotic-border-accent: rgba(139, 0, 0, 0.5);
+  --erotic-border-gold: rgba(201, 162, 39, 0.3);
+  
+  /* Shadows */
+  --erotic-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --erotic-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --erotic-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --erotic-shadow-glow: 0 0 40px rgba(139, 0, 0, 0.3);
+  
+  /* Typography */
+  --erotic-font-display: 'Playfair Display', Georgia, serif;
+  --erotic-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --erotic-font-accent: 'Cormorant Garamond', Georgia, serif;
+  
+  /* Spacing */
+  --erotic-section-padding: 120px 0;
+  --erotic-container-max: 1400px;
+  --erotic-container-padding: 0 48px;
+  
+  /* Transitions */
+  --erotic-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --erotic-transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --erotic-transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Z-Index */
+  --erotic-z-navbar: 1000;
+  --erotic-z-modal: 1100;
+  --erotic-z-tooltip: 1200;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --erotic-section-padding: 80px 0;
+    --erotic-container-padding: 0 24px;
+  }
+}

@@ -1,0 +1,340 @@
+/**
+ * Erotic Brand - Main Stylesheet
+ * 
+ * Dark luxury aesthetic with sensual, powerful design
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+@import './variables.css';
+
+/* ============================================
+   Global Reset for Erotic App
+   ============================================ */
+.erotic-app {
+  background: var(--erotic-black);
+  color: var(--erotic-text-primary);
+  font-family: var(--erotic-font-body);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.erotic-app *,
+.erotic-app *::before,
+.erotic-app *::after {
+  box-sizing: border-box;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+.erotic-app h1,
+.erotic-app h2,
+.erotic-app h3,
+.erotic-app h4 {
+  font-family: var(--erotic-font-display);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.erotic-app h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+}
+
+.erotic-app h2 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.erotic-app h3 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.erotic-app p {
+  font-size: 1.125rem;
+  color: var(--erotic-text-secondary);
+}
+
+.erotic-accent-text {
+  font-family: var(--erotic-font-accent);
+  font-style: italic;
+  color: var(--erotic-gold);
+}
+
+.erotic-text-gradient {
+  background: linear-gradient(135deg, var(--erotic-text-primary) 0%, var(--erotic-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   Layout
+   ============================================ */
+.erotic-container {
+  max-width: var(--erotic-container-max);
+  margin: 0 auto;
+  padding: var(--erotic-container-padding);
+}
+
+.erotic-section {
+  padding: var(--erotic-section-padding);
+  position: relative;
+}
+
+.erotic-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--erotic-border-gold) 50%, transparent 100%);
+}
+
+.erotic-section:first-of-type::before {
+  display: none;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.erotic-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 40px;
+  font-family: var(--erotic-font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all var(--erotic-transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.erotic-btn-primary {
+  background: var(--erotic-gradient-red);
+  color: var(--erotic-text-primary);
+  box-shadow: var(--erotic-shadow-md), var(--erotic-shadow-glow);
+}
+
+.erotic-btn-primary:hover {
+  background: var(--erotic-red-bright);
+  transform: translateY(-2px);
+  box-shadow: var(--erotic-shadow-lg), 0 0 60px rgba(139, 0, 0, 0.5);
+}
+
+.erotic-btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.erotic-btn-primary:hover::before {
+  left: 100%;
+}
+
+.erotic-btn-secondary {
+  background: transparent;
+  color: var(--erotic-gold);
+  border: 1px solid var(--erotic-border-gold);
+}
+
+.erotic-btn-secondary:hover {
+  background: rgba(201, 162, 39, 0.1);
+  border-color: var(--erotic-gold);
+  transform: translateY(-2px);
+}
+
+.erotic-btn-ghost {
+  background: transparent;
+  color: var(--erotic-text-secondary);
+  padding: 12px 24px;
+}
+
+.erotic-btn-ghost:hover {
+  color: var(--erotic-gold);
+}
+
+/* ============================================
+   Cards
+   ============================================ */
+.erotic-card {
+  background: var(--erotic-black-light);
+  border: 1px solid var(--erotic-border);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--erotic-transition-normal);
+}
+
+.erotic-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--erotic-gradient-red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--erotic-transition-normal);
+}
+
+.erotic-card:hover {
+  border-color: var(--erotic-border-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--erotic-shadow-lg);
+}
+
+.erotic-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* ============================================
+   Decorative Elements
+   ============================================ */
+.erotic-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--erotic-gold);
+  margin: 24px 0;
+}
+
+.erotic-divider-center {
+  margin: 24px auto;
+}
+
+.erotic-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 32px 0;
+}
+
+.erotic-ornament::before,
+.erotic-ornament::after {
+  content: '';
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--erotic-border-gold));
+}
+
+.erotic-ornament::after {
+  background: linear-gradient(90deg, var(--erotic-border-gold), transparent);
+}
+
+.erotic-ornament-icon {
+  color: var(--erotic-gold);
+  font-size: 1.25rem;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes erotic-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes erotic-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 0, 0, 0.5);
+  }
+}
+
+@keyframes erotic-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.erotic-animate-fade-in {
+  animation: erotic-fade-in 0.8s ease-out forwards;
+}
+
+.erotic-animate-glow {
+  animation: erotic-glow-pulse 3s ease-in-out infinite;
+}
+
+/* ============================================
+   Scrollbar
+   ============================================ */
+.erotic-app::-webkit-scrollbar {
+  width: 8px;
+}
+
+.erotic-app::-webkit-scrollbar-track {
+  background: var(--erotic-black);
+}
+
+.erotic-app::-webkit-scrollbar-thumb {
+  background: var(--erotic-black-soft);
+  border-radius: 4px;
+}
+
+.erotic-app::-webkit-scrollbar-thumb:hover {
+  background: var(--erotic-red-deep);
+}
+
+/* ============================================
+   Selection
+   ============================================ */
+.erotic-app ::selection {
+  background: var(--erotic-red);
+  color: var(--erotic-text-primary);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 1024px) {
+  .erotic-btn {
+    padding: 16px 32px;
+  }
+  
+  .erotic-card {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .erotic-app p {
+    font-size: 1rem;
+  }
+  
+  .erotic-btn {
+    padding: 14px 28px;
+    font-size: 0.8125rem;
+  }
+  
+  .erotic-card {
+    padding: 24px;
+  }
+}

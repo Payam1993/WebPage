@@ -1,0 +1,128 @@
+/**
+ * Footer Component Styles
+ * 
+ * Elegant, minimal footer design
+ */
+
+.erotic-footer {
+  background: var(--erotic-black);
+  padding: 80px 0 40px;
+  text-align: center;
+}
+
+.erotic-footer-divider {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--erotic-border-gold), transparent);
+  margin: 0 auto 60px;
+}
+
+.erotic-footer-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Brand */
+.erotic-footer-brand {
+  margin-bottom: 16px;
+}
+
+.erotic-footer-logo {
+  font-family: var(--erotic-font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--erotic-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.erotic-footer-logo-accent {
+  font-family: var(--erotic-font-accent);
+  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--erotic-gold);
+  margin-left: 8px;
+}
+
+/* Tagline */
+.erotic-footer-tagline {
+  font-family: var(--erotic-font-accent);
+  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--erotic-text-muted);
+  margin: 0 0 32px;
+}
+
+/* Contact */
+.erotic-footer-contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.erotic-footer-link {
+  color: var(--erotic-text-secondary);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  letter-spacing: 0.05em;
+  transition: color var(--erotic-transition-fast);
+}
+
+.erotic-footer-link:hover {
+  color: var(--erotic-gold);
+}
+
+.erotic-footer-separator {
+  color: var(--erotic-border-gold);
+}
+
+.erotic-footer-location {
+  color: var(--erotic-text-muted);
+  font-size: 0.9375rem;
+  letter-spacing: 0.05em;
+}
+
+/* Legal */
+.erotic-footer-legal {
+  border-top: 1px solid var(--erotic-border);
+  padding-top: 24px;
+}
+
+.erotic-footer-copyright {
+  font-size: 0.8125rem;
+  color: var(--erotic-text-subtle);
+  margin: 0 0 8px;
+}
+
+.erotic-footer-disclaimer {
+  font-size: 0.75rem;
+  color: var(--erotic-text-subtle);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Ornament */
+.erotic-footer-ornament {
+  margin-top: 40px;
+  color: var(--erotic-gold);
+  font-size: 1.5rem;
+  opacity: 0.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .erotic-footer {
+    padding: 60px 0 32px;
+  }
+
+  .erotic-footer-contact {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .erotic-footer-separator {
+    display: none;
+  }
+}

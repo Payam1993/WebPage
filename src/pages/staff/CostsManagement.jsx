@@ -15,12 +15,13 @@ import {
   PageHeader,
   Grid,
   Input,
+  Select,
   Modal,
   Icons,
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { notConfirmedCostAPI, dailyCostAPI, getTodayDate } from '../../services/dataService'
+import { notConfirmedCostAPI, costAPI, getTodayDate } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 
 /**
@@ -34,12 +35,14 @@ const CostsManagement = () => {
   
   // State
   const [costs, setCosts] = useState([])
+  const [costTypes, setCostTypes] = useState([]) // Static cost types from Master Data
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   
   // Modal state
   const [showModal, setShowModal] = useState(false)
   const [formData, setFormData] = useState({
+    costId: '',
     costName: '',
     price: '',
     date: getTodayDate(),
@@ -48,10 +51,27 @@ const CostsManagement = () => {
   const [isSaving, setIsSaving] = useState(false)
   const [isConfirming, setIsConfirming] = useState(null) // ID of cost being confirmed
 
-  // Load costs on mount
+  // Load costs and cost types on mount
   useEffect(() => {
     loadCosts()
+    loadCostTypes()
   }, [])
+
+  // Load static cost types from Master Data (Administration)
+  const loadCostTypes = async () => {
+    try {
+      const data = await costAPI.list()
+      setCostTypes(data)
+    } catch (err) {
+      console.error('Error loading cost types:', err)
+    }
+  }
+
+  // Convert cost types to dropdown options
+  const costTypeOptions = costTypes.map(ct => ({
+    value: ct.id,
+    label: ct.costName,
+  }))
 
   const loadCosts = async () => {
     setIsLoading(true)
@@ -70,6 +90,7 @@ const CostsManagement = () => {
 
   const handleOpenModal = () => {
     setFormData({
+      costId: '',
       costName: '',
       price: '',
       date: getTodayDate(),
@@ -82,6 +103,7 @@ const CostsManagement = () => {
   const handleCloseModal = () => {
     setShowModal(false)
     setFormData({
+      costId: '',
       costName: '',
       price: '',
       date: getTodayDate(),
@@ -95,12 +117,12 @@ const CostsManagement = () => {
     setError(null)
     try {
       // Validate required fields
-      if (!formData.costName?.trim()) throw new Error('Cost Name is required')
+      if (!formData.costId) throw new Error('Please select a Cost Name')
       if (!formData.price || formData.price <= 0) throw new Error('Price is required and must be greater than 0')
       if (!formData.date) throw new Error('Date is required')
 
       await notConfirmedCostAPI.create({
-        costName: formData.costName.trim(),
+        costName: formData.costName,
         price: parseFloat(formData.price),
         date: formData.date,
         reason: formData.reason?.trim() || null,
@@ -350,12 +372,21 @@ const CostsManagement = () => {
         size="default"
       >
         <Grid cols={2} gap="default">
-          <Input
+          <Select
             label="Cost Name *"
-            type="text"
-            placeholder="e.g., Office Supplies"
-            value={formData.costName}
-            onChange={(e) => setFormData({ ...formData, costName: e.target.value })}
+            options={costTypeOptions}
+            placeholder="Select cost type"
+            value={formData.costId}
+            onChange={(e) => {
+              const selectedCost = costTypes.find(ct => ct.id === e.target.value)
+              setFormData({ 
+                ...formData, 
+                costId: e.target.value,
+                costName: selectedCost?.costName || '',
+                // Auto-fill price if the cost type has a fixed price
+                price: selectedCost?.fixedPrice ? selectedCost.fixedPrice.toString() : formData.price,
+              })
+            }}
           />
           <Input
             label="Price (€) *"

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
 import { BookingProvider } from './context/BookingContext'
+import { getBrand } from './core/brand'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Services from './components/Services'
@@ -19,6 +20,9 @@ import StaffLogin from './components/StaffLogin'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
 import WorkWithUs from './components/WorkWithUs'
+
+// Erotic Brand - Lazy loaded for code splitting
+const EroticApp = lazy(() => import('./erotic/EroticApp'))
 
 // Staff Admin Pages
 import AdminLayout from './pages/staff/AdminLayout'
@@ -37,6 +41,9 @@ import DailyData from './pages/administration/DailyData'
 import DailyConfirmation from './pages/administration/DailyConfirmation'
 
 import './App.css'
+
+// Detect brand once at app initialization
+const currentBrand = getBrand()
 
 function HomePage({ setCursorVariant }) {
   return (
@@ -65,17 +72,10 @@ function CursorWrapper({ variant }) {
   return <Cursor variant={variant} />
 }
 
-function AppContent() {
-  const [loading, setLoading] = useState(true)
-  const [cursorVariant, setCursorVariant] = useState('default')
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 2500)
-    return () => clearTimeout(timer)
-  }, [])
-
+/**
+ * NormalAppContent - The standard public UI (confessionbarcelona.com)
+ */
+function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
   return (
     <div className="app noise-overlay">
       <CursorWrapper variant={cursorVariant} />
@@ -148,6 +148,97 @@ function AppContent() {
       </AnimatePresence>
     </div>
   )
+}
+
+/**
+ * EroticAppContent - The erotic brand UI (confessionerotic.com)
+ * Staff routes are shared between both brands
+ */
+function EroticAppContent({ loading, setCursorVariant }) {
+  const location = useLocation()
+  
+  // Staff/Admin routes are shared between both brands
+  const isStaffRoute = location.pathname.startsWith('/staff') || location.pathname.startsWith('/administration')
+  
+  if (isStaffRoute) {
+    // Render staff routes without erotic styling
+    return (
+      <div className="app noise-overlay">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <Loader key="loader" />
+          ) : (
+            <Routes>
+              {/* Staff Login Route */}
+              <Route path="/staff" element={<StaffLogin setCursorVariant={setCursorVariant} />} />
+
+              {/* Staff Admin Routes - Protected, uses AdminLayout */}
+              <Route
+                path="/staff/*"
+                element={
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="reports" element={<Reports />} />
+                <Route path="costs" element={<CostsManagement />} />
+                <Route path="reservations" element={<Reservations />} />
+                <Route path="calendar" element={<Calendar />} />
+                <Route path="assigned-task" element={<AssignedTask />} />
+                <Route path="profile" element={<ProfileSettings />} />
+              </Route>
+
+              {/* Administration Routes - Admin-only, uses AdministrationLayout */}
+              <Route
+                path="/administration/*"
+                element={
+                  <AdminProtectedRoute>
+                    <AdministrationLayout />
+                  </AdminProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="reporting" replace />} />
+                <Route path="reporting" element={<Reporting />} />
+                <Route path="static-data" element={<StaticData />} />
+                <Route path="daily-data" element={<DailyData />} />
+                <Route path="daily-confirmation" element={<DailyConfirmation />} />
+              </Route>
+
+              {/* Redirect any other route to home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          )}
+        </AnimatePresence>
+      </div>
+    )
+  }
+
+  // Render Erotic public UI
+  return (
+    <Suspense fallback={<Loader />}>
+      <EroticApp />
+    </Suspense>
+  )
+}
+
+function AppContent() {
+  const [loading, setLoading] = useState(true)
+  const [cursorVariant, setCursorVariant] = useState('default')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 2500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Render based on brand
+  if (currentBrand === 'erotic') {
+    return <EroticAppContent loading={loading} setCursorVariant={setCursorVariant} />
+  }
+
+  return <NormalAppContent loading={loading} cursorVariant={cursorVariant} setCursorVariant={setCursorVariant} />
 }
 
 function App() {

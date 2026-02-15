@@ -1,0 +1,219 @@
+/**
+ * Navbar Component Styles
+ * 
+ * Dark luxury navigation with elegant transitions
+ */
+
+.erotic-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--erotic-z-navbar);
+  padding: 24px 0;
+  transition: all var(--erotic-transition-normal);
+}
+
+.erotic-navbar--scrolled {
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 16px 0;
+  box-shadow: 0 1px 0 var(--erotic-border);
+}
+
+.erotic-navbar-container {
+  max-width: var(--erotic-container-max);
+  margin: 0 auto;
+  padding: var(--erotic-container-padding);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo */
+.erotic-navbar-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.erotic-navbar-logo-text {
+  font-family: var(--erotic-font-display);
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--erotic-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.erotic-navbar-logo-accent {
+  font-family: var(--erotic-font-accent);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--erotic-gold);
+}
+
+/* Desktop Navigation Links */
+.erotic-navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.erotic-navbar-link {
+  font-family: var(--erotic-font-body);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--erotic-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  position: relative;
+  transition: color var(--erotic-transition-fast);
+}
+
+.erotic-navbar-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--erotic-gold);
+  transition: width var(--erotic-transition-normal);
+}
+
+.erotic-navbar-link:hover {
+  color: var(--erotic-text-primary);
+}
+
+.erotic-navbar-link:hover::after {
+  width: 100%;
+}
+
+/* CTA Button */
+.erotic-navbar-cta {
+  font-family: var(--erotic-font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--erotic-text-primary);
+  background: var(--erotic-red);
+  border: none;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: all var(--erotic-transition-normal);
+}
+
+.erotic-navbar-cta:hover {
+  background: var(--erotic-red-bright);
+  box-shadow: var(--erotic-shadow-glow);
+}
+
+/* Mobile Toggle */
+.erotic-navbar-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.erotic-navbar-toggle span {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--erotic-text-primary);
+  transition: all var(--erotic-transition-fast);
+}
+
+.erotic-navbar-toggle--open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.erotic-navbar-toggle--open span:nth-child(2) {
+  opacity: 0;
+}
+
+.erotic-navbar-toggle--open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Mobile Menu */
+.erotic-navbar-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--erotic-black);
+  z-index: calc(var(--erotic-z-navbar) - 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--erotic-transition-normal);
+}
+
+.erotic-navbar-mobile--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.erotic-navbar-mobile-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.erotic-navbar-mobile-link {
+  display: block;
+  font-family: var(--erotic-font-display);
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--erotic-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 16px 0;
+  transition: color var(--erotic-transition-fast);
+}
+
+.erotic-navbar-mobile-link:hover {
+  color: var(--erotic-gold);
+}
+
+.erotic-navbar-mobile-links li:last-child {
+  margin-top: 32px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .erotic-navbar-links {
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .erotic-navbar-links,
+  .erotic-navbar-cta {
+    display: none;
+  }
+
+  .erotic-navbar-toggle {
+    display: flex;
+  }
+}

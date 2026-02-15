@@ -43,6 +43,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),
+      allow.authenticated().to(["read"]), // Staff can read for dropdowns
     ]),
 
   // Staff model - staff members

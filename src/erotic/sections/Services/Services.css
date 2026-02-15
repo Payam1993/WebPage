@@ -1,0 +1,199 @@
+/**
+ * Services Section Styles
+ * 
+ * Elegant service list with sophisticated numbering
+ */
+
+.erotic-services {
+  padding: var(--erotic-section-padding);
+  background: var(--erotic-black-light);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Accent */
+.erotic-services-bg-accent {
+  position: absolute;
+  top: 50%;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.08) 0%, transparent 70%);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Header */
+.erotic-services-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.erotic-services-label {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--erotic-gold);
+  margin-bottom: 24px;
+}
+
+.erotic-services-title {
+  margin: 0 0 24px;
+  color: var(--erotic-text-primary);
+}
+
+.erotic-services-subtitle {
+  font-size: 1.125rem;
+  color: var(--erotic-text-muted);
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* Services List */
+.erotic-services-list {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Service Item */
+.erotic-service-item {
+  display: flex;
+  gap: 40px;
+  padding: 48px 0;
+  border-bottom: 1px solid var(--erotic-border);
+  transition: all var(--erotic-transition-normal);
+}
+
+.erotic-service-item:first-child {
+  border-top: 1px solid var(--erotic-border);
+}
+
+.erotic-service-item:hover {
+  padding-left: 24px;
+  background: linear-gradient(90deg, rgba(139, 0, 0, 0.05) 0%, transparent 50%);
+}
+
+.erotic-service-number {
+  font-family: var(--erotic-font-display);
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--erotic-red);
+  opacity: 0.6;
+  flex-shrink: 0;
+  width: 60px;
+  transition: all var(--erotic-transition-normal);
+}
+
+.erotic-service-item:hover .erotic-service-number {
+  opacity: 1;
+  color: var(--erotic-gold);
+}
+
+.erotic-service-content {
+  flex: 1;
+}
+
+.erotic-service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 24px;
+}
+
+.erotic-service-title {
+  font-family: var(--erotic-font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--erotic-text-primary);
+  margin: 0 0 4px;
+}
+
+.erotic-service-subtitle {
+  font-family: var(--erotic-font-accent);
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: var(--erotic-gold);
+}
+
+.erotic-service-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.erotic-service-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--erotic-black);
+  background: var(--erotic-gold);
+  padding: 6px 12px;
+}
+
+.erotic-service-duration {
+  font-size: 0.875rem;
+  color: var(--erotic-text-muted);
+  letter-spacing: 0.05em;
+}
+
+.erotic-service-description {
+  font-size: 0.9375rem;
+  color: var(--erotic-text-muted);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 600px;
+}
+
+/* Note */
+.erotic-services-note {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--erotic-text-subtle);
+  margin: 48px 0 0;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .erotic-services-header {
+    margin-bottom: 48px;
+  }
+
+  .erotic-service-item {
+    flex-direction: column;
+    gap: 16px;
+    padding: 32px 0;
+  }
+
+  .erotic-service-item:hover {
+    padding-left: 16px;
+  }
+
+  .erotic-service-number {
+    font-size: 2rem;
+    width: auto;
+  }
+
+  .erotic-service-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .erotic-service-meta {
+    justify-content: flex-start;
+  }
+
+  .erotic-service-title {
+    font-size: 1.25rem;
+  }
+}
