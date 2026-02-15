@@ -1,6 +1,6 @@
 /**
  * Erotic Brand - Navbar Styles
- * Based on Erotic_Project_Sample design
+ * Same structure as original but with dark BDSM theme
  */
 
 .erotic-navbar {
@@ -10,72 +10,80 @@
   width: 100%;
   z-index: 1000;
   padding: 1.5rem 0;
-  transition: all 0.4s var(--transition-smooth);
+  transition: all 0.4s ease;
 }
 
 .erotic-navbar.scrolled {
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(10px);
   padding: 1rem 0;
-  box-shadow: 0 2px 30px rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(220, 20, 60, 0.2);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(220, 20, 60, 0.1);
 }
 
 .erotic-navbar-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 var(--space-md);
+  padding: 0 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+/* Logo */
 .erotic-navbar-logo {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
   text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.erotic-navbar-logo:hover {
+  transform: scale(1.02);
 }
 
 .erotic-logo-main {
-  font-family: var(--font-serif);
+  font-family: var(--erotic-font-display);
   font-size: 1.75rem;
-  font-weight: 500;
-  color: var(--color-pearl);
-  letter-spacing: 0.2em;
+  font-weight: 400;
+  color: var(--erotic-text);
+  letter-spacing: 0.1em;
   line-height: 1;
-  text-transform: uppercase;
 }
 
 .erotic-logo-sub {
-  font-family: var(--font-sans);
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 400;
-  color: var(--color-crimson);
+  color: var(--erotic-accent);
   letter-spacing: 0.4em;
   text-transform: uppercase;
+  margin-top: 0.25rem;
 }
 
+/* Nav Links */
 .erotic-navbar-links {
   display: flex;
   align-items: center;
-  gap: 2.5rem;
+  gap: 2rem;
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .erotic-nav-link {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-pearl);
-  transition: color 0.3s ease;
+  color: var(--erotic-text);
   text-decoration: none;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  transition: all 0.3s ease;
 }
 
 .erotic-nav-link:hover {
-  color: var(--color-crimson);
+  opacity: 1;
+  color: var(--erotic-accent);
 }
 
 /* Language Selector */
@@ -87,46 +95,19 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: rgba(220, 20, 60, 0.1);
-  border: 1px solid rgba(220, 20, 60, 0.3);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  color: var(--color-pearl);
+  background: none;
+  border: none;
+  color: var(--erotic-text);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
   cursor: pointer;
-  transition: all 0.3s ease;
+  padding: 0.5rem;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
 }
 
 .erotic-lang-selector:hover {
-  background: rgba(220, 20, 60, 0.2);
-  border-color: var(--color-crimson);
-}
-
-.erotic-lang-flag {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 16px;
-  overflow: hidden;
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-.erotic-flag-icon {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.erotic-lang-code {
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.erotic-lang-name {
-  font-size: 0.85rem;
+  opacity: 1;
 }
 
 .erotic-lang-arrow {
@@ -139,186 +120,191 @@
 
 .erotic-lang-dropdown {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  top: 100%;
   right: 0;
-  background: var(--color-charcoal);
-  border: 1px solid rgba(220, 20, 60, 0.3);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  min-width: 150px;
-  z-index: 100;
+  background: var(--erotic-bg-light);
+  border: 1px solid rgba(220, 20, 60, 0.2);
+  margin-top: 0.5rem;
+  min-width: 120px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .erotic-lang-option {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  display: block;
   width: 100%;
   padding: 0.75rem 1rem;
-  font-size: 0.85rem;
-  color: var(--color-pearl);
   background: none;
   border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  color: var(--erotic-text);
+  font-size: 0.85rem;
   text-align: left;
-}
-
-.erotic-lang-option .erotic-lang-flag {
-  width: 28px;
-  height: 18px;
-}
-
-.erotic-lang-option:hover {
-  background: rgba(220, 20, 60, 0.2);
-}
-
-.erotic-lang-option.active {
-  background: var(--color-crimson);
-  color: var(--color-cream);
-}
-
-/* Mobile Language Selector */
-.erotic-mobile-lang-selector {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-}
-
-.erotic-mobile-lang-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(220, 20, 60, 0.1);
-  border: 1px solid rgba(220, 20, 60, 0.3);
-  color: var(--color-cream);
-  font-size: 0.8rem;
-  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.erotic-mobile-lang-btn .erotic-lang-flag {
-  width: 28px;
-  height: 18px;
+.erotic-lang-option:hover,
+.erotic-lang-option.active {
+  background: rgba(220, 20, 60, 0.1);
+  color: var(--erotic-accent);
 }
 
-.erotic-mobile-lang-btn:hover {
-  background: rgba(220, 20, 60, 0.2);
+/* Nav CTA Button */
+.erotic-nav-cta {
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.75rem !important;
 }
 
-.erotic-mobile-lang-btn.active {
-  background: var(--color-crimson);
-  border-color: var(--color-crimson);
+/* Staff Link */
+.erotic-nav-staff {
+  font-size: 0.75rem;
+  color: var(--erotic-text-muted);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
 }
 
+.erotic-nav-staff:hover {
+  opacity: 1;
+}
+
+/* Mobile Menu Toggle */
 .erotic-menu-toggle {
   display: none;
   flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
+  gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
+  padding: 10px;
   z-index: 1001;
 }
 
 .erotic-menu-toggle span {
   display: block;
-  width: 100%;
-  height: 1.5px;
-  background: var(--color-pearl);
+  width: 25px;
+  height: 2px;
+  background: var(--erotic-text);
   transition: all 0.3s ease;
-  transform-origin: center;
 }
 
 .erotic-menu-toggle.open span:nth-child(1) {
-  transform: rotate(45deg) translateY(5px);
+  transform: rotate(45deg) translate(5px, 5px);
 }
 
 .erotic-menu-toggle.open span:nth-child(2) {
   opacity: 0;
-  transform: scaleX(0);
 }
 
 .erotic-menu-toggle.open span:nth-child(3) {
-  transform: rotate(-45deg) translateY(-5px);
+  transform: rotate(-45deg) translate(5px, -5px);
 }
 
+/* Mobile Menu Overlay */
 .erotic-menu-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
-  background: rgba(10, 10, 10, 0.8);
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
   z-index: 998;
 }
 
+/* Mobile Menu */
 .erotic-mobile-menu {
   position: fixed;
   top: 0;
   right: 0;
   width: 100%;
   max-width: 400px;
-  height: 100vh;
-  background: linear-gradient(180deg, var(--color-charcoal) 0%, var(--color-obsidian) 100%);
+  height: 100%;
+  background: var(--erotic-bg);
   z-index: 999;
-  display: flex;
-  align-items: center;
-  border-left: 1px solid rgba(220, 20, 60, 0.2);
+  overflow-y: auto;
 }
 
 .erotic-mobile-menu-content {
-  width: 100%;
-  padding: var(--space-lg);
+  padding: 6rem 2rem 2rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  padding-top: 120px;
+  min-height: 100%;
 }
 
-.erotic-mobile-menu-links {
+.erotic-mobile-lang {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(220, 20, 60, 0.2);
+}
+
+.erotic-mobile-lang-btn {
+  background: none;
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  color: var(--erotic-text);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.erotic-mobile-lang-btn.active,
+.erotic-mobile-lang-btn:hover {
+  background: var(--erotic-accent);
+  border-color: var(--erotic-accent);
+}
+
+.erotic-mobile-links {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  flex: 1;
 }
 
-.erotic-mobile-menu-links a {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  color: var(--color-pearl);
+.erotic-mobile-links li {
+  margin-bottom: 1.5rem;
+}
+
+.erotic-mobile-links a {
+  font-family: var(--erotic-font-display);
+  font-size: 1.75rem;
+  color: var(--erotic-text);
+  text-decoration: none;
+  letter-spacing: 0.05em;
   transition: color 0.3s ease;
+}
+
+.erotic-mobile-links a:hover {
+  color: var(--erotic-accent);
+}
+
+.erotic-mobile-cta {
   display: inline-block;
+  padding: 1rem 2rem !important;
+  background: var(--erotic-accent) !important;
+  font-size: 0.9rem !important;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  text-decoration: none;
+  margin-top: 1rem;
 }
 
-.erotic-mobile-menu-links a:hover {
-  color: var(--color-crimson);
+.erotic-mobile-footer {
+  margin-top: auto;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(220, 20, 60, 0.2);
 }
 
-.erotic-mobile-menu-footer {
-  color: rgba(232, 228, 225, 0.5);
-  font-size: 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.erotic-mobile-footer p {
+  font-size: 0.9rem;
+  color: var(--erotic-text-muted);
+  margin-bottom: 0.5rem;
 }
 
-@media (max-width: 1100px) {
-  .erotic-navbar-links {
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 968px) {
+/* Responsive */
+@media (max-width: 1024px) {
   .erotic-navbar-links {
     display: none;
   }

@@ -1,6 +1,6 @@
 /**
  * Erotic Brand - Hero Styles
- * Based on Erotic_Project_Sample design
+ * Same structure as original but with dark BDSM theme
  */
 
 .erotic-hero {
@@ -10,7 +10,6 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: var(--color-obsidian);
 }
 
 .erotic-hero-bg {
@@ -27,10 +26,10 @@
   width: 100%;
   height: 100%;
   background: 
-    radial-gradient(ellipse at 20% 80%, rgba(139, 0, 0, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 20%, rgba(220, 20, 60, 0.15) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 50%, rgba(74, 14, 14, 0.2) 0%, transparent 60%),
-    linear-gradient(180deg, var(--color-obsidian) 0%, var(--color-void) 50%, var(--color-charcoal) 100%);
+    radial-gradient(ellipse at 50% 50%, rgba(201, 169, 98, 0.05) 0%, transparent 60%),
+    linear-gradient(180deg, var(--erotic-bg) 0%, var(--erotic-bg-accent) 100%);
 }
 
 .erotic-hero-bg-pattern {
@@ -39,12 +38,11 @@
   height: 100%;
   opacity: 0.15;
   background-image: 
-    radial-gradient(circle at 25% 25%, var(--color-crimson) 1px, transparent 1px),
-    radial-gradient(circle at 75% 75%, var(--color-gold) 0.5px, transparent 0.5px);
+    radial-gradient(circle at 25% 25%, var(--erotic-accent) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, var(--erotic-accent) 1px, transparent 1px);
   background-size: 80px 80px;
 }
 
-/* Chain-like decorative elements */
 .erotic-floating-element {
   position: absolute;
   border-radius: 50%;
@@ -55,24 +53,24 @@
 .erotic-floating-element.el-1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(139, 0, 0, 0.5), transparent);
-  top: 5%;
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.4), transparent);
+  top: 10%;
   right: 5%;
 }
 
 .erotic-floating-element.el-2 {
-  width: 350px;
-  height: 350px;
+  width: 400px;
+  height: 400px;
   background: radial-gradient(circle, rgba(220, 20, 60, 0.3), transparent);
   bottom: 15%;
   left: 0%;
 }
 
 .erotic-floating-element.el-3 {
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(201, 169, 98, 0.2), transparent);
-  top: 45%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(201, 169, 98, 0.15), transparent);
+  top: 40%;
   left: 35%;
 }
 
@@ -80,164 +78,65 @@
   position: relative;
   z-index: 1;
   text-align: center;
-  max-width: 1000px;
-  padding: var(--space-md);
+  max-width: 900px;
+  padding: var(--erotic-space-md);
 }
 
 .erotic-hero-text-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--erotic-space-md);
 }
 
 .erotic-hero-overline {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.4em;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--color-crimson);
+  color: var(--erotic-accent);
 }
 
-.erotic-hero-overline .erotic-ornament {
-  width: 50px;
+.erotic-ornament {
+  width: 40px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-crimson), transparent);
+  background: var(--erotic-gold);
+  opacity: 0.5;
 }
 
 .erotic-hero-title {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .erotic-title-line {
   display: block;
-  color: var(--color-pearl);
-  text-shadow: 0 0 60px rgba(220, 20, 60, 0.3);
+  color: var(--erotic-text);
 }
 
 .erotic-title-line.accent {
-  color: var(--color-crimson);
-  font-style: normal;
-  text-shadow: 0 0 80px rgba(220, 20, 60, 0.5);
-  animation: eroticPulseGlow 4s ease-in-out infinite;
-}
-
-@keyframes eroticPulseGlow {
-  0%, 100% { text-shadow: 0 0 80px rgba(220, 20, 60, 0.5); }
-  50% { text-shadow: 0 0 120px rgba(220, 20, 60, 0.8), 0 0 40px rgba(220, 20, 60, 0.6); }
+  color: var(--erotic-accent);
+  font-style: italic;
 }
 
 .erotic-hero-description {
-  max-width: 600px;
-  font-size: 1.2rem;
-  line-height: 2;
-  color: var(--color-pearl);
-  opacity: 0.85;
-  font-style: italic;
+  max-width: 550px;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--erotic-text);
+  opacity: 0.8;
 }
 
 .erotic-hero-cta {
   display: flex;
-  gap: 2rem;
-  margin-top: var(--space-sm);
+  gap: 1.5rem;
+  margin-top: var(--erotic-space-sm);
   flex-wrap: wrap;
   justify-content: center;
-}
-
-/* Corner ornaments - bondage inspired */
-.erotic-hero .erotic-corner-ornament {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  opacity: 0.2;
-}
-
-.erotic-hero .erotic-corner-ornament::before,
-.erotic-hero .erotic-corner-ornament::after {
-  content: '';
-  position: absolute;
-  background: var(--color-gold);
-}
-
-.erotic-hero .erotic-corner-ornament.top-left {
-  top: 40px;
-  left: 40px;
-}
-
-.erotic-hero .erotic-corner-ornament.top-left::before {
-  width: 80px;
-  height: 1px;
-  top: 0;
-  left: 0;
-}
-
-.erotic-hero .erotic-corner-ornament.top-left::after {
-  width: 1px;
-  height: 80px;
-  top: 0;
-  left: 0;
-}
-
-.erotic-hero .erotic-corner-ornament.top-right {
-  top: 40px;
-  right: 40px;
-}
-
-.erotic-hero .erotic-corner-ornament.top-right::before {
-  width: 80px;
-  height: 1px;
-  top: 0;
-  right: 0;
-}
-
-.erotic-hero .erotic-corner-ornament.top-right::after {
-  width: 1px;
-  height: 80px;
-  top: 0;
-  right: 0;
-}
-
-.erotic-hero .erotic-corner-ornament.bottom-left {
-  bottom: 40px;
-  left: 40px;
-}
-
-.erotic-hero .erotic-corner-ornament.bottom-left::before {
-  width: 80px;
-  height: 1px;
-  bottom: 0;
-  left: 0;
-}
-
-.erotic-hero .erotic-corner-ornament.bottom-left::after {
-  width: 1px;
-  height: 80px;
-  bottom: 0;
-  left: 0;
-}
-
-.erotic-hero .erotic-corner-ornament.bottom-right {
-  bottom: 40px;
-  right: 40px;
-}
-
-.erotic-hero .erotic-corner-ornament.bottom-right::before {
-  width: 80px;
-  height: 1px;
-  bottom: 0;
-  right: 0;
-}
-
-.erotic-hero .erotic-corner-ornament.bottom-right::after {
-  width: 1px;
-  height: 80px;
-  bottom: 0;
-  right: 0;
 }
 
 @media (max-width: 768px) {
@@ -262,38 +161,5 @@
   
   .erotic-hero-cta .erotic-btn {
     width: 100%;
-  }
-
-  .erotic-hero .erotic-corner-ornament {
-    width: 60px;
-    height: 60px;
-  }
-
-  .erotic-hero .erotic-corner-ornament::before {
-    width: 40px !important;
-  }
-
-  .erotic-hero .erotic-corner-ornament::after {
-    height: 40px !important;
-  }
-
-  .erotic-hero .erotic-corner-ornament.top-left,
-  .erotic-hero .erotic-corner-ornament.top-right {
-    top: 20px;
-  }
-
-  .erotic-hero .erotic-corner-ornament.bottom-left,
-  .erotic-hero .erotic-corner-ornament.bottom-right {
-    bottom: 20px;
-  }
-
-  .erotic-hero .erotic-corner-ornament.top-left,
-  .erotic-hero .erotic-corner-ornament.bottom-left {
-    left: 20px;
-  }
-
-  .erotic-hero .erotic-corner-ornament.top-right,
-  .erotic-hero .erotic-corner-ornament.bottom-right {
-    right: 20px;
   }
 }

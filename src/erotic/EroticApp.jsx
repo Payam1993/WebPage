@@ -1,9 +1,7 @@
 /**
  * Erotic Brand - Main App Component
- * 
- * Entry point for the erotic brand UI.
- * Only renders on confessionerotic.com hostname.
- * Reuses existing backend for booking functionality.
+ * Entry point for erotic brand UI on confessionerotic.com
+ * Uses same backend as normal version for booking
  */
 
 import { useState, useEffect } from 'react'
@@ -16,9 +14,8 @@ import './styles/index.css'
 const EroticApp = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isAgeVerified, setIsAgeVerified] = useState(false)
-  const [cursorVariant, setCursorVariant] = useState('default')
 
-  // Check for existing age verification in localStorage
+  // Check for existing age verification
   useEffect(() => {
     const verified = localStorage.getItem('erotic_age_verified')
     if (verified === 'true') {
@@ -26,18 +23,15 @@ const EroticApp = () => {
     }
   }, [])
 
-  // Handle loader completion
   const handleLoaderComplete = () => {
     setIsLoading(false)
   }
 
-  // Handle age verification
   const handleAgeVerification = (verified) => {
     if (verified) {
       localStorage.setItem('erotic_age_verified', 'true')
       setIsAgeVerified(true)
     } else {
-      // Redirect away from site
       window.location.href = 'https://google.com'
     }
   }
@@ -46,7 +40,7 @@ const EroticApp = () => {
     <EroticLanguageProvider>
       <EroticBookingProvider>
         <div className="erotic-app">
-          {/* Initial Loading Screen */}
+          {/* Loading Screen */}
           {isLoading && (
             <Loader onComplete={handleLoaderComplete} />
           )}
@@ -56,21 +50,19 @@ const EroticApp = () => {
             <AgeVerification onVerify={handleAgeVerification} />
           )}
 
-          {/* Main Content (only shown after age verification) */}
+          {/* Main Content */}
           {!isLoading && isAgeVerified && (
             <>
-              <Navbar setCursorVariant={setCursorVariant} />
-              
-              <main className="erotic-main">
-                <Hero setCursorVariant={setCursorVariant} />
-                <Services setCursorVariant={setCursorVariant} />
+              <Navbar />
+              <main>
+                <Hero />
+                <Services />
                 <About />
                 <Experience />
                 <Testimonials />
                 <Booking />
               </main>
-              
-              <Footer setCursorVariant={setCursorVariant} />
+              <Footer />
             </>
           )}
         </div>

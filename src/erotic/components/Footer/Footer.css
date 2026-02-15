@@ -1,189 +1,136 @@
 /**
  * Erotic Brand - Footer Styles
- * Based on Erotic_Project_Sample design
+ * Same structure as original but with dark BDSM theme
  */
 
 .erotic-footer {
-  background: var(--color-obsidian);
-  color: var(--color-cream);
-  position: relative;
-  border-top: 1px solid rgba(220, 20, 60, 0.2);
+  background: var(--erotic-bg);
+  border-top: 1px solid rgba(220, 20, 60, 0.15);
+  padding: var(--erotic-space-xl) 0 var(--erotic-space-md);
 }
 
 .erotic-footer-top {
-  padding: var(--space-xl) 0;
-  border-bottom: 1px solid rgba(220, 20, 60, 0.15);
-}
-
-.erotic-footer-grid {
   display: grid;
-  grid-template-columns: 1.5fr 2fr;
-  gap: var(--space-lg);
+  grid-template-columns: 1.5fr 2fr 1fr;
+  gap: 3rem;
+  padding-bottom: var(--erotic-space-lg);
+  border-bottom: 1px solid rgba(220, 20, 60, 0.1);
 }
 
+/* Brand */
 .erotic-footer-brand {
-  max-width: 320px;
+  max-width: 280px;
 }
 
 .erotic-footer-logo {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  margin-bottom: 1.5rem;
-  text-decoration: none;
+  margin-bottom: 1rem;
 }
 
 .erotic-footer-logo .erotic-logo-main {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  font-weight: 500;
-  color: var(--color-pearl);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-family: var(--erotic-font-display);
+  font-size: 1.5rem;
+  color: var(--erotic-text);
+  letter-spacing: 0.1em;
 }
 
 .erotic-footer-logo .erotic-logo-sub {
-  font-family: var(--font-sans);
-  font-size: 0.65rem;
-  font-weight: 400;
-  color: var(--color-crimson);
+  font-size: 0.6rem;
+  color: var(--erotic-accent);
   letter-spacing: 0.4em;
   text-transform: uppercase;
 }
 
 .erotic-footer-tagline {
   font-size: 0.95rem;
-  line-height: 2;
-  color: rgba(232, 228, 225, 0.6);
-  margin-bottom: 2rem;
+  color: var(--erotic-text-muted);
+  line-height: 1.7;
   font-style: italic;
 }
 
-.erotic-footer-newsletter p {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-crimson);
-  margin-bottom: 0.75rem;
-}
-
-.erotic-newsletter-form {
-  display: flex;
-  gap: 0;
-}
-
-.erotic-newsletter-form input {
-  flex: 1;
-  padding: 1rem;
-  background: rgba(220, 20, 60, 0.1);
-  border: 1px solid rgba(220, 20, 60, 0.3);
-  border-right: none;
-  color: var(--color-pearl);
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-}
-
-.erotic-newsletter-form input::placeholder {
-  color: rgba(232, 228, 225, 0.4);
-}
-
-.erotic-newsletter-form input:focus {
-  outline: none;
-  background: rgba(220, 20, 60, 0.15);
-}
-
-.erotic-newsletter-form button {
-  width: 54px;
-  background: linear-gradient(135deg, var(--color-blood), var(--color-crimson));
-  border: 1px solid var(--color-crimson);
-  color: var(--color-cream);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.erotic-newsletter-form button:hover {
-  background: var(--color-crimson);
-  box-shadow: 0 0 20px rgba(220, 20, 60, 0.4);
-}
-
-.erotic-newsletter-form button svg {
-  width: 20px;
-  height: 20px;
-}
-
+/* Links */
 .erotic-footer-links {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
 
-.erotic-links-column h4 {
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
-  color: var(--color-pearl);
+.erotic-footer-col h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--erotic-gold);
   letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
 }
 
-.erotic-links-column ul {
+.erotic-footer-col ul {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  padding: 0;
+  margin: 0;
 }
 
-.erotic-links-column a {
+.erotic-footer-col li {
+  margin-bottom: 0.75rem;
+}
+
+.erotic-footer-col a {
   font-size: 0.9rem;
-  color: rgba(232, 228, 225, 0.6);
-  transition: color 0.3s ease;
-  display: inline-block;
+  color: var(--erotic-text-muted);
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-.erotic-links-column a:hover {
-  color: var(--color-crimson);
+.erotic-footer-col a:hover {
+  color: var(--erotic-accent);
 }
 
-.erotic-footer-bottom {
-  padding: 2rem 0;
+/* Contact */
+.erotic-footer-contact h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--erotic-gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
 }
 
-.erotic-footer-bottom-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+.erotic-contact-item {
+  margin-bottom: 0.75rem;
 }
 
-.erotic-copyright {
-  font-size: 0.85rem;
-  color: rgba(232, 228, 225, 0.5);
+.erotic-contact-item a {
+  font-size: 0.9rem;
+  color: var(--erotic-text-muted);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.erotic-contact-item a:hover {
+  color: var(--erotic-accent);
 }
 
 .erotic-footer-social {
   display: flex;
   gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .erotic-footer-social a {
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(220, 20, 60, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  color: var(--erotic-text);
   transition: all 0.3s ease;
-  color: var(--color-pearl);
 }
 
 .erotic-footer-social a:hover {
-  border-color: var(--color-crimson);
-  background: var(--color-crimson);
+  background: var(--erotic-accent);
+  border-color: var(--erotic-accent);
 }
 
 .erotic-footer-social svg {
@@ -191,55 +138,48 @@
   height: 18px;
 }
 
-.erotic-made-with {
-  font-size: 0.85rem;
-  color: rgba(232, 228, 225, 0.5);
+/* Bottom */
+.erotic-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--erotic-space-md);
 }
 
-.erotic-made-with .erotic-heart {
-  color: var(--color-crimson);
-  animation: eroticPulse 1.5s ease infinite;
-}
-
-@keyframes eroticPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+.erotic-footer-bottom p {
+  font-size: 0.8rem;
+  color: var(--erotic-text-muted);
 }
 
 .erotic-back-to-top {
-  position: absolute;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.erotic-back-to-top a {
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, var(--color-blood), var(--color-crimson));
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 45px;
+  height: 45px;
+  background: transparent;
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  color: var(--erotic-text);
+  cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 20px rgba(220, 20, 60, 0.4);
 }
 
-.erotic-back-to-top a:hover {
-  background: var(--color-crimson);
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(220, 20, 60, 0.5);
+.erotic-back-to-top:hover {
+  background: var(--erotic-accent);
+  border-color: var(--erotic-accent);
+  transform: translateY(-3px);
 }
 
 .erotic-back-to-top svg {
-  width: 24px;
-  height: 24px;
-  color: var(--color-cream);
+  width: 20px;
+  height: 20px;
 }
 
+/* Responsive */
 @media (max-width: 968px) {
-  .erotic-footer-grid {
+  .erotic-footer-top {
     grid-template-columns: 1fr;
-    gap: var(--space-lg);
+    gap: 2rem;
   }
   
   .erotic-footer-brand {
@@ -256,8 +196,7 @@
     grid-template-columns: 1fr 1fr;
   }
   
-  .erotic-footer-bottom-content {
-    flex-direction: column;
-    text-align: center;
+  .erotic-footer-contact {
+    grid-column: span 2;
   }
 }

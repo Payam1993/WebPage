@@ -1,6 +1,6 @@
 /**
  * Erotic Brand - Navbar Component
- * Based on Erotic_Project_Sample design
+ * Same structure as original but with dark BDSM theme
  */
 
 import { useState, useEffect } from 'react'
@@ -23,72 +23,27 @@ const Navbar = ({ setCursorVariant }) => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const handleNavClick = (e, sectionId) => {
+    e.preventDefault()
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
+    setIsMenuOpen(false)
+  }
+
   const navLinks = [
-    { name: t.nav.services, href: '#services' },
-    { name: t.nav.about, href: '#about' },
-    { name: t.nav.experience, href: '#experience' },
-    { name: t.nav.testimonials, href: '#testimonials' },
-    { name: t.nav.bookNow, href: '#booking' },
+    { name: t.nav.services, href: 'services' },
+    { name: t.nav.about, href: 'about' },
+    { name: t.nav.experience, href: 'experience' },
+    { name: t.nav.testimonials, href: 'testimonials' },
   ]
 
   const languages = [
-    { 
-      code: 'en', 
-      name: 'English', 
-      flag: (
-        <svg viewBox="0 0 60 30" className="erotic-flag-icon">
-          <clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
-          <path d="M0,0 v30 h60 v-30 z" fill="#00247d"/>
-          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
-          <path d="M0,0 L60,30 M60,0 L0,30" clipPath="url(#t)" stroke="#cf142b" strokeWidth="4"/>
-          <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-          <path d="M30,0 v30 M0,15 h60" stroke="#cf142b" strokeWidth="6"/>
-        </svg>
-      )
-    },
-    { 
-      code: 'es', 
-      name: 'Español', 
-      flag: (
-        <svg viewBox="0 0 750 500" className="erotic-flag-icon">
-          <rect width="750" height="500" fill="#c60b1e"/>
-          <rect width="750" height="250" y="125" fill="#ffc400"/>
-        </svg>
-      )
-    },
-    { 
-      code: 'ca', 
-      name: 'Català', 
-      flag: (
-        <svg viewBox="0 0 810 540" className="erotic-flag-icon">
-          <rect width="810" height="540" fill="#FCDD09"/>
-          <path stroke="#DA121A" strokeWidth="60" d="M0,90H810 M0,210H810 M0,330H810 M0,450H810"/>
-        </svg>
-      )
-    },
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' },
+    { code: 'ca', name: 'Català' },
   ]
-
-  const currentLang = languages.find(l => l.code === language)
-
-  const menuVariants = {
-    closed: {
-      x: '100%',
-      transition: { type: 'tween', duration: 0.5, ease: [0.4, 0, 0.2, 1] }
-    },
-    open: {
-      x: 0,
-      transition: { type: 'tween', duration: 0.5, ease: [0.4, 0, 0.2, 1] }
-    }
-  }
-
-  const linkVariants = {
-    closed: { x: 50, opacity: 0 },
-    open: (i) => ({
-      x: 0,
-      opacity: 1,
-      transition: { delay: 0.3 + i * 0.1, duration: 0.5 }
-    })
-  }
 
   return (
     <>
@@ -99,24 +54,22 @@ const Navbar = ({ setCursorVariant }) => {
         transition={{ duration: 0.8, delay: 0.2 }}
       >
         <div className="erotic-navbar-container">
-          <Link 
-            to="/" 
+          <a 
+            href="#hero" 
             className="erotic-navbar-logo"
-            onMouseEnter={() => setCursorVariant?.('hover')}
-            onMouseLeave={() => setCursorVariant?.('default')}
+            onClick={(e) => handleNavClick(e, 'hero')}
           >
             <span className="erotic-logo-main">Confession</span>
-            <span className="erotic-logo-sub">Barcelona</span>
-          </Link>
+            <span className="erotic-logo-sub">Erotic</span>
+          </a>
 
           <ul className="erotic-navbar-links">
             {navLinks.map((link, index) => (
               <li key={index}>
                 <a 
-                  href={link.href}
+                  href={`#${link.href}`}
                   className="erotic-nav-link erotic-animated-underline"
-                  onMouseEnter={() => setCursorVariant?.('hover')}
-                  onMouseLeave={() => setCursorVariant?.('default')}
+                  onClick={(e) => handleNavClick(e, link.href)}
                 >
                   {link.name}
                 </a>
@@ -128,15 +81,12 @@ const Navbar = ({ setCursorVariant }) => {
               <button 
                 className="erotic-lang-selector"
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                onMouseEnter={() => setCursorVariant?.('hover')}
-                onMouseLeave={() => setCursorVariant?.('default')}
               >
-                <span className="erotic-lang-flag">{currentLang?.flag}</span>
                 <span className="erotic-lang-code">{language.toUpperCase()}</span>
                 <svg 
                   className={`erotic-lang-arrow ${isLangOpen ? 'open' : ''}`}
-                  width="12" 
-                  height="12" 
+                  width="10" 
+                  height="10" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
@@ -153,7 +103,6 @@ const Navbar = ({ setCursorVariant }) => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
                   >
                     {languages.map((lang) => (
                       <button
@@ -163,24 +112,37 @@ const Navbar = ({ setCursorVariant }) => {
                           changeLanguage(lang.code)
                           setIsLangOpen(false)
                         }}
-                        onMouseEnter={() => setCursorVariant?.('hover')}
-                        onMouseLeave={() => setCursorVariant?.('default')}
                       >
-                        <span className="erotic-lang-flag">{lang.flag}</span>
-                        <span className="erotic-lang-name">{lang.name}</span>
+                        {lang.name}
                       </button>
                     ))}
                   </motion.div>
                 )}
               </AnimatePresence>
             </li>
+
+            {/* Book Now Button */}
+            <li>
+              <a 
+                href="#booking"
+                className="erotic-btn erotic-btn-primary erotic-nav-cta"
+                onClick={(e) => handleNavClick(e, 'booking')}
+              >
+                {t.nav.bookNow}
+              </a>
+            </li>
+
+            {/* Staff Sign In */}
+            <li>
+              <Link to="/staff" className="erotic-nav-staff">
+                Staff
+              </Link>
+            </li>
           </ul>
 
           <button 
             className={`erotic-menu-toggle ${isMenuOpen ? 'open' : ''}`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            onMouseEnter={() => setCursorVariant?.('hover')}
-            onMouseLeave={() => setCursorVariant?.('default')}
             aria-label="Toggle menu"
           >
             <span></span>
@@ -190,6 +152,7 @@ const Navbar = ({ setCursorVariant }) => {
         </div>
       </motion.nav>
 
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -202,52 +165,61 @@ const Navbar = ({ setCursorVariant }) => {
             />
             <motion.div 
               className="erotic-mobile-menu"
-              variants={menuVariants}
-              initial="closed"
-              animate="open"
-              exit="closed"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.4 }}
             >
               <div className="erotic-mobile-menu-content">
                 {/* Mobile Language Selector */}
-                <div className="erotic-mobile-lang-selector">
+                <div className="erotic-mobile-lang">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
                       className={`erotic-mobile-lang-btn ${language === lang.code ? 'active' : ''}`}
                       onClick={() => changeLanguage(lang.code)}
                     >
-                      <span className="erotic-lang-flag">{lang.flag}</span>
-                      <span>{lang.code.toUpperCase()}</span>
+                      {lang.code.toUpperCase()}
                     </button>
                   ))}
                 </div>
 
-                <ul className="erotic-mobile-menu-links">
-                  {navLinks.map((link, i) => (
+                <ul className="erotic-mobile-links">
+                  {navLinks.map((link, index) => (
                     <motion.li 
-                      key={i}
-                      variants={linkVariants}
-                      custom={i}
-                      initial="closed"
-                      animate="open"
+                      key={index}
+                      initial={{ x: 50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.2 + index * 0.1 }}
                     >
                       <a 
-                        href={link.href}
-                        onClick={() => setIsMenuOpen(false)}
-                        onMouseEnter={() => setCursorVariant?.('hover')}
-                        onMouseLeave={() => setCursorVariant?.('default')}
+                        href={`#${link.href}`}
+                        onClick={(e) => handleNavClick(e, link.href)}
                       >
                         {link.name}
                       </a>
                     </motion.li>
                   ))}
+                  <motion.li
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <a 
+                      href="#booking"
+                      className="erotic-mobile-cta"
+                      onClick={(e) => handleNavClick(e, 'booking')}
+                    >
+                      {t.nav.bookNow}
+                    </a>
+                  </motion.li>
                 </ul>
                 
                 <motion.div 
-                  className="erotic-mobile-menu-footer"
+                  className="erotic-mobile-footer"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
+                  transition={{ delay: 0.7 }}
                 >
                   <p>{t.nav.location}</p>
                   <p>+34 678 902 765</p>

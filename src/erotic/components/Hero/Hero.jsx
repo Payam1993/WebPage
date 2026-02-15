@@ -1,15 +1,17 @@
 /**
  * Erotic Brand - Hero Component
- * Based on Erotic_Project_Sample design
+ * Same structure as original but with dark BDSM theme
  */
 
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useEroticLanguage } from '../../context/EroticLanguageContext'
+import { useEroticBooking } from '../../context/EroticBookingContext'
 import './Hero.css'
 
 const Hero = ({ setCursorVariant }) => {
   const { t } = useEroticLanguage()
+  const { openBookingModal } = useEroticBooking()
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -20,8 +22,13 @@ const Hero = ({ setCursorVariant }) => {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9])
 
+  const handleBookClick = (e) => {
+    e.preventDefault()
+    openBookingModal()
+  }
+
   return (
-    <section className="erotic-hero" ref={heroRef}>
+    <section className="erotic-hero" id="hero" ref={heroRef}>
       <div className="erotic-hero-bg">
         <motion.div 
           className="erotic-hero-bg-gradient"
@@ -90,8 +97,6 @@ const Hero = ({ setCursorVariant }) => {
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            onMouseEnter={() => setCursorVariant?.('text')}
-            onMouseLeave={() => setCursorVariant?.('default')}
           >
             <span className="erotic-title-line">{t.hero.titleLine1}</span>
             <span className="erotic-title-line accent">{t.hero.titleLine2}</span>
@@ -112,19 +117,19 @@ const Hero = ({ setCursorVariant }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
           >
-            <a 
-              href="#booking" 
+            <button 
+              onClick={handleBookClick}
               className="erotic-btn erotic-btn-primary"
-              onMouseEnter={() => setCursorVariant?.('hover')}
-              onMouseLeave={() => setCursorVariant?.('default')}
             >
               {t.hero.cta1}
-            </a>
+            </button>
             <a 
               href="#services" 
               className="erotic-btn erotic-btn-outline"
-              onMouseEnter={() => setCursorVariant?.('hover')}
-              onMouseLeave={() => setCursorVariant?.('default')}
+              onClick={(e) => {
+                e.preventDefault()
+                document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
+              }}
             >
               {t.hero.cta2}
             </a>
