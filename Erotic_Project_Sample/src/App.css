@@ -1,0 +1,115 @@
+.app {
+  min-height: 100vh;
+  position: relative;
+  background: var(--color-obsidian);
+}
+
+/* Smooth section transitions */
+section {
+  position: relative;
+}
+
+/* Interactive elements cursor change */
+a:hover,
+button:hover {
+  cursor: none;
+}
+
+/* Text highlight on dark backgrounds */
+.light-text {
+  color: var(--color-cream);
+}
+
+/* Decorative corner ornaments */
+.corner-ornament {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-crimson);
+  opacity: 0.4;
+}
+
+.corner-ornament.top-left {
+  top: 20px;
+  left: 20px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-ornament.top-right {
+  top: 20px;
+  right: 20px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-ornament.bottom-left {
+  bottom: 20px;
+  left: 20px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-ornament.bottom-right {
+  bottom: 20px;
+  right: 20px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Animated underline */
+.animated-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.animated-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-crimson);
+  transition: width 0.4s var(--transition-smooth);
+}
+
+.animated-underline:hover::after {
+  width: 100%;
+}
+
+/* Glass effect - dark version */
+.glass {
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(220, 20, 60, 0.2);
+}
+
+/* Image zoom on hover */
+.img-zoom {
+  overflow: hidden;
+}
+
+.img-zoom img {
+  transition: transform 0.6s var(--transition-smooth);
+}
+
+.img-zoom:hover img {
+  transform: scale(1.1);
+}
+
+/* Split layout */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+@media (max-width: 968px) {
+  .split-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}

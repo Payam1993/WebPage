@@ -1,0 +1,244 @@
+/**
+ * Erotic Brand - About Styles
+ * Based on Erotic_Project_Sample design
+ */
+
+.erotic-about {
+  position: relative;
+  padding: var(--space-2xl) 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--color-void) 0%, var(--color-charcoal) 50%, var(--color-obsidian) 100%);
+}
+
+.erotic-about-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.erotic-about-bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.25;
+}
+
+.erotic-about-bg-shape.shape-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--color-blood);
+  top: 10%;
+  right: -10%;
+}
+
+.erotic-about-bg-shape.shape-2 {
+  width: 400px;
+  height: 400px;
+  background: var(--color-burgundy);
+  bottom: 10%;
+  left: -5%;
+}
+
+.erotic-about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.erotic-about-images {
+  position: relative;
+  height: 700px;
+}
+
+.erotic-about-image {
+  position: absolute;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(220, 20, 60, 0.2);
+}
+
+.erotic-about-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--transition-smooth);
+  filter: brightness(0.8) contrast(1.1);
+}
+
+.erotic-about-image:hover img {
+  transform: scale(1.05);
+  filter: brightness(0.9) contrast(1.2);
+}
+
+.erotic-about-image.main-image {
+  width: 70%;
+  height: 500px;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.erotic-about-image.secondary-image {
+  width: 55%;
+  height: 350px;
+  bottom: 0;
+  right: 0;
+  z-index: 3;
+}
+
+.erotic-about-image-accent {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border: 1px solid var(--color-crimson);
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  opacity: 0.5;
+}
+
+.erotic-about-content {
+  padding-left: var(--space-md);
+}
+
+.erotic-about-content h2 {
+  margin-bottom: var(--space-md);
+  color: var(--color-pearl);
+}
+
+.erotic-about-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.erotic-about-text p {
+  font-size: 1.05rem;
+  line-height: 2;
+  color: rgba(232, 228, 225, 0.8);
+  font-style: italic;
+}
+
+.erotic-about-signature {
+  margin-top: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.erotic-signature-line {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-crimson), var(--color-gold));
+}
+
+.erotic-signature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.erotic-signature-name {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--color-crimson);
+  letter-spacing: 0.1em;
+}
+
+.erotic-signature-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.erotic-about-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid rgba(220, 20, 60, 0.2);
+}
+
+.erotic-stat-item {
+  text-align: center;
+}
+
+.erotic-stat-number {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 400;
+  color: var(--color-crimson);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 40px rgba(220, 20, 60, 0.4);
+}
+
+.erotic-stat-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+@media (max-width: 1024px) {
+  .erotic-about-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+  
+  .erotic-about-images {
+    height: 500px;
+    order: 1;
+  }
+  
+  .erotic-about-content {
+    padding-left: 0;
+    order: 2;
+  }
+  
+  .erotic-about-image.main-image {
+    width: 60%;
+    height: 400px;
+  }
+  
+  .erotic-about-image.secondary-image {
+    width: 50%;
+    height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .erotic-about-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .erotic-stat-number {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .erotic-about-images {
+    height: 400px;
+  }
+  
+  .erotic-about-image.main-image {
+    width: 75%;
+    height: 300px;
+  }
+  
+  .erotic-about-image.secondary-image {
+    width: 55%;
+    height: 200px;
+  }
+}

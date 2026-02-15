@@ -1,0 +1,80 @@
+/**
+ * Erotic Brand - Loader Styles
+ * Based on Erotic_Project_Sample design
+ */
+
+.erotic-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: var(--color-obsidian);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.erotic-loader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, rgba(139, 0, 0, 0.15), transparent 70%);
+}
+
+.erotic-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.erotic-loader-logo {
+  width: 120px;
+  height: 120px;
+}
+
+.erotic-loader-symbol {
+  width: 100%;
+  height: 100%;
+}
+
+.erotic-loader-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.erotic-loader-title {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: var(--color-cream);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-shadow: 0 0 60px rgba(220, 20, 60, 0.4);
+}
+
+.erotic-loader-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-crimson);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+}
+
+.erotic-loader-progress {
+  width: 150px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-blood), var(--color-crimson), var(--color-gold));
+  transform-origin: left;
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+}

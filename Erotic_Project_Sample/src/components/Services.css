@@ -1,20 +1,15 @@
-/**
- * Erotic Brand - Services Styles
- * Based on Erotic_Project_Sample design
- */
-
-.erotic-services {
+.services {
   background: linear-gradient(180deg, var(--color-charcoal) 0%, var(--color-void) 100%);
   position: relative;
 }
 
-.erotic-section-header {
+.section-header {
   text-align: center;
   max-width: 700px;
   margin: 0 auto var(--space-lg);
 }
 
-.erotic-section-subtitle {
+.section-subtitle {
   margin-top: var(--space-sm);
   font-size: 1.15rem;
   color: rgba(232, 228, 225, 0.7);
@@ -22,13 +17,13 @@
   font-style: italic;
 }
 
-.erotic-services-grid {
+.services-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
 
-.erotic-service-card {
+.service-card {
   background: linear-gradient(145deg, rgba(26, 26, 26, 0.9), rgba(10, 10, 10, 0.95));
   border: 1px solid rgba(220, 20, 60, 0.15);
   overflow: hidden;
@@ -36,7 +31,7 @@
   position: relative;
 }
 
-.erotic-service-card::before {
+.service-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -48,29 +43,28 @@
   transition: opacity 0.5s ease;
 }
 
-.erotic-service-card-link {
+.service-card-link {
   display: block;
   text-decoration: none;
   color: inherit;
 }
 
-.erotic-service-card:hover {
+.service-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 30px 60px rgba(220, 20, 60, 0.2), 0 0 40px rgba(220, 20, 60, 0.1);
   border-color: var(--color-crimson);
 }
 
-.erotic-service-card:hover::before {
+.service-card:hover::before {
   opacity: 1;
 }
 
-.erotic-service-image {
+.service-image {
   position: relative;
   height: 280px;
-  overflow: hidden;
 }
 
-.erotic-service-image img {
+.service-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -78,12 +72,12 @@
   transition: all 0.5s ease;
 }
 
-.erotic-service-card:hover .erotic-service-image img {
+.service-card:hover .service-image img {
   filter: brightness(0.8) contrast(1.2) saturate(1);
   transform: scale(1.05);
 }
 
-.erotic-service-overlay {
+.service-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -96,13 +90,13 @@
   padding: 1.5rem;
 }
 
-.erotic-service-prices-preview {
+.service-prices-preview {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
 
-.erotic-service-prices-preview span {
+.service-prices-preview span {
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -113,22 +107,33 @@
   border: 1px solid rgba(220, 20, 60, 0.5);
 }
 
-.erotic-service-content {
+.service-duration {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-cream);
+  background: rgba(139, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  padding: 0.5rem 1rem;
+}
+
+.service-content {
   padding: 2rem;
 }
 
-.erotic-service-header {
+.service-header {
   margin-bottom: 1rem;
 }
 
-.erotic-service-header h3 {
+.service-header h3 {
   font-size: 1.3rem;
   color: var(--color-pearl);
   line-height: 1.3;
   letter-spacing: 0.15em;
 }
 
-.erotic-service-description {
+.service-description {
   font-size: 0.95rem;
   line-height: 1.8;
   color: rgba(232, 228, 225, 0.7);
@@ -136,7 +141,7 @@
   font-style: italic;
 }
 
-.erotic-service-features {
+.service-features {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
@@ -144,7 +149,7 @@
   margin-bottom: 1.5rem;
 }
 
-.erotic-service-features li {
+.service-features li {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -158,14 +163,14 @@
   padding: 0.4rem 0.8rem;
 }
 
-.erotic-feature-dot {
+.feature-dot {
   width: 4px;
   height: 4px;
   background: var(--color-crimson);
   border-radius: 50%;
 }
 
-.erotic-service-link {
+.service-link {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
@@ -177,28 +182,28 @@
   transition: all 0.3s ease;
 }
 
-.erotic-service-link svg {
+.service-link svg {
   transition: transform 0.3s ease;
   stroke: var(--color-crimson);
 }
 
-.erotic-service-link:hover {
+.service-link:hover {
   color: var(--color-gold);
 }
 
-.erotic-service-link:hover svg {
+.service-link:hover svg {
   transform: translateX(5px);
   stroke: var(--color-gold);
 }
 
-.erotic-services-cta {
+.services-cta {
   text-align: center;
   margin-top: var(--space-lg);
   padding-top: var(--space-lg);
   border-top: 1px solid rgba(220, 20, 60, 0.2);
 }
 
-.erotic-services-cta p {
+.services-cta p {
   font-family: var(--font-serif);
   font-size: 1.25rem;
   font-style: italic;
@@ -207,17 +212,17 @@
 }
 
 @media (max-width: 1100px) {
-  .erotic-services-grid {
+  .services-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 700px) {
-  .erotic-services-grid {
+  .services-grid {
     grid-template-columns: 1fr;
   }
   
-  .erotic-service-image {
+  .service-image {
     height: 220px;
   }
 }

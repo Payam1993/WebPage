@@ -1,0 +1,300 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&display=swap');
+
+:root {
+  /* Dark BDSM Domination palette */
+  --color-obsidian: #0a0a0a;
+  --color-void: #121212;
+  --color-charcoal: #1a1a1a;
+  --color-smoke: #2a2a2a;
+  --color-blood: #8B0000;
+  --color-crimson: #DC143C;
+  --color-burgundy: #4a0e0e;
+  --color-wine: #722F37;
+  --color-gold: #C9A962;
+  --color-gold-dark: #8B7355;
+  --color-silver: #C0C0C0;
+  --color-pearl: #e8e4e1;
+  --color-cream: #f5f0eb;
+  
+  /* Legacy compatibility */
+  --color-sand: #1a1a1a;
+  --color-terracotta: #DC143C;
+  --color-terracotta-dark: #8B0000;
+  --color-olive: #8B7355;
+  --color-olive-dark: #5a4a3a;
+  --color-night: #050505;
+  --color-gold-light: #DFC88A;
+  
+  /* Typography */
+  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Cormorant Garamond', Georgia, serif;
+  
+  /* Spacing */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 6rem;
+  --space-2xl: 10rem;
+  
+  /* Transitions */
+  --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-obsidian);
+  color: var(--color-pearl);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-blood);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-crimson);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-crimson);
+  color: var(--color-cream);
+}
+
+/* Typography base */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 7vw, 6rem);
+}
+
+h2 {
+  font-size: clamp(1.8rem, 4vw, 3.5rem);
+}
+
+h3 {
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+}
+
+p {
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  font-size: 1.05rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Utility classes */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.section {
+  padding: var(--space-xl) 0;
+}
+
+/* Dark gradient background */
+.gradient-bg {
+  background: linear-gradient(
+    135deg,
+    var(--color-obsidian) 0%,
+    var(--color-void) 25%,
+    var(--color-charcoal) 50%,
+    var(--color-void) 75%,
+    var(--color-obsidian) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Decorative elements */
+.ornament {
+  display: inline-block;
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-crimson), transparent);
+  margin: var(--space-sm) 0;
+}
+
+/* Section overline styling */
+.section-overline {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--color-crimson);
+  margin-bottom: var(--space-sm);
+  position: relative;
+}
+
+.section-overline::before,
+.section-overline::after {
+  content: '◆';
+  font-size: 0.5rem;
+  margin: 0 1rem;
+  opacity: 0.6;
+}
+
+/* Button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 1.2rem 3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  transition: all 0.5s var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-serif);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-blood) 0%, var(--color-crimson) 100%);
+  color: var(--color-cream);
+  border: 1px solid var(--color-crimson);
+  box-shadow: 0 0 30px rgba(220, 20, 60, 0.3);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.6s;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-crimson) 0%, var(--color-blood) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(220, 20, 60, 0.5);
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-pearl);
+  border: 1px solid var(--color-gold);
+}
+
+.btn-outline:hover {
+  background: var(--color-gold);
+  color: var(--color-obsidian);
+  box-shadow: 0 10px 30px rgba(201, 169, 98, 0.3);
+}
+
+/* Noise texture overlay */
+.noise-overlay::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 9999;
+}
+
+/* Subtle vignette effect */
+.noise-overlay::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+  z-index: 9998;
+}
+
+/* Chain decoration keyframes */
+@keyframes chainSwing {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-lg) 0;
+  }
+  
+  .container {
+    padding: 0 var(--space-sm);
+  }
+}

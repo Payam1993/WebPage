@@ -1,0 +1,629 @@
+.age-gate {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: var(--color-obsidian);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+/* Leather texture background */
+.age-gate::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    /* Leather grain texture */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23leather)' opacity='0.15'/%3E%3C/svg%3E"),
+    /* Diamond quilt pattern like leather upholstery */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 30px,
+      rgba(40, 20, 20, 0.3) 30px,
+      rgba(40, 20, 20, 0.3) 31px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 30px,
+      rgba(40, 20, 20, 0.3) 30px,
+      rgba(40, 20, 20, 0.3) 31px
+    ),
+    /* Base leather color */
+    linear-gradient(180deg, #1a0a0a 0%, #0d0505 50%, #150808 100%);
+  z-index: 0;
+}
+
+/* Whip/lash decorative overlay */
+.age-gate::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    /* Curved whip lines */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='800' viewBox='0 0 400 800'%3E%3Cpath d='M-50 0 Q100 200, 50 400 Q0 600, 100 800' stroke='rgba(139,0,0,0.08)' stroke-width='3' fill='none'/%3E%3Cpath d='M350 0 Q200 200, 250 400 Q300 600, 200 800' stroke='rgba(201,169,98,0.05)' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-size: 400px 800px;
+  background-position: center;
+  opacity: 0.6;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Background effects */
+.age-gate-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 30% 70%, rgba(139, 0, 0, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 30%, rgba(220, 20, 60, 0.15) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 100%, rgba(74, 14, 14, 0.3) 0%, transparent 50%);
+  z-index: 2;
+}
+
+/* Decorative chains on sides */
+.chain-left,
+.chain-right {
+  position: absolute;
+  top: 0;
+  width: 40px;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 20px,
+    rgba(201, 169, 98, 0.15) 20px,
+    rgba(201, 169, 98, 0.15) 25px,
+    transparent 25px,
+    transparent 30px
+  );
+  animation: chainSwing 4s ease-in-out infinite;
+}
+
+.chain-left {
+  left: 5%;
+  transform-origin: top center;
+}
+
+.chain-right {
+  right: 5%;
+  transform-origin: top center;
+  animation-delay: 1s;
+}
+
+/* Smoke effects */
+.smoke {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+.smoke-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.4), transparent);
+  bottom: -200px;
+  left: -100px;
+}
+
+.smoke-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(220, 20, 60, 0.3), transparent);
+  top: -100px;
+  right: -100px;
+}
+
+/* Language selector */
+.age-gate-lang {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 20;
+}
+
+.age-gate-lang button {
+  background: none;
+  border: none;
+  color: var(--color-pearl);
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.5rem;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.age-gate-lang button:hover,
+.age-gate-lang button.active {
+  opacity: 1;
+  color: var(--color-crimson);
+}
+
+.lang-divider {
+  color: var(--color-gold);
+  opacity: 0.3;
+}
+
+/* Main content container */
+.age-gate-content {
+  position: relative;
+  z-index: 10;
+  max-width: 650px;
+  padding: 4rem 3rem;
+  text-align: center;
+  background: 
+    linear-gradient(135deg, rgba(15, 5, 5, 0.95) 0%, rgba(10, 5, 5, 0.98) 100%);
+  border: 1px solid rgba(220, 20, 60, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 0 80px rgba(139, 0, 0, 0.3),
+    inset 0 0 100px rgba(0, 0, 0, 0.5),
+    0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Decorative borders */
+.gate-border {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.gate-border-top {
+  top: -1px;
+}
+
+.gate-border-bottom {
+  bottom: -1px;
+}
+
+.border-ornament {
+  color: var(--color-crimson);
+  font-size: 0.6rem;
+  text-shadow: 0 0 10px rgba(220, 20, 60, 0.8);
+}
+
+.border-line {
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+/* Warning icon */
+.warning-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1.5rem;
+}
+
+.whip-icon {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 25px rgba(220, 20, 60, 0.6));
+  animation: whipGlow 3s ease-in-out infinite;
+}
+
+@keyframes whipGlow {
+  0%, 100% { filter: drop-shadow(0 0 25px rgba(220, 20, 60, 0.6)); }
+  50% { filter: drop-shadow(0 0 40px rgba(220, 20, 60, 0.9)); }
+}
+
+/* Title */
+.age-gate-title-container {
+  margin-bottom: 2rem;
+}
+
+.age-gate-brand {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 500;
+  color: var(--color-cream);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0;
+  text-shadow: 0 0 60px rgba(220, 20, 60, 0.5);
+}
+
+.age-gate-location {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-crimson);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+}
+
+/* Warning text */
+.age-gate-warning {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(139, 0, 0, 0.15);
+  border-left: 2px solid var(--color-crimson);
+  border-right: 2px solid var(--color-crimson);
+}
+
+.warning-main {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-crimson);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.warning-sub {
+  font-size: 0.95rem;
+  color: var(--color-pearl);
+  opacity: 0.9;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* Checkbox container */
+.age-gate-checkbox-container {
+  margin-bottom: 2rem;
+}
+
+.age-checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 1rem;
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.age-checkbox-label:hover {
+  border-color: rgba(201, 169, 98, 0.4);
+  background: rgba(139, 0, 0, 0.1);
+}
+
+.age-checkbox {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--color-gold);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.age-checkbox:checked + .checkbox-custom {
+  background: var(--color-crimson);
+  border-color: var(--color-crimson);
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+}
+
+.checkbox-mark {
+  color: var(--color-cream);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.checkbox-text {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--color-gold);
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+
+/* Buttons */
+.age-gate-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.gate-btn {
+  padding: 1.2rem 3rem;
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.4s var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.gate-btn-enter {
+  background: linear-gradient(135deg, var(--color-blood) 0%, var(--color-crimson) 100%);
+  color: var(--color-cream);
+  border: 1px solid var(--color-crimson);
+  box-shadow: 
+    0 0 30px rgba(220, 20, 60, 0.4),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.gate-btn-enter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.6s;
+}
+
+.gate-btn-enter:hover {
+  background: linear-gradient(135deg, var(--color-crimson) 0%, var(--color-blood) 100%);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 15px 50px rgba(220, 20, 60, 0.6),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.gate-btn-enter:hover::before {
+  left: 100%;
+}
+
+.gate-btn-enter.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #3a1515 0%, #2a1010 100%);
+  box-shadow: none;
+}
+
+.gate-btn-enter.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+}
+
+.gate-btn-exit {
+  background: transparent;
+  color: var(--color-pearl);
+  border: 1px solid rgba(201, 169, 98, 0.4);
+  opacity: 0.7;
+}
+
+.gate-btn-exit:hover {
+  opacity: 1;
+  border-color: var(--color-gold);
+  background: rgba(201, 169, 98, 0.1);
+}
+
+/* Legal text */
+.age-gate-legal-container {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 2px solid var(--color-gold-dark);
+  margin-top: 0.5rem;
+}
+
+.age-gate-legal {
+  font-size: 0.65rem;
+  color: var(--color-pearl);
+  line-height: 1.7;
+  max-width: 500px;
+  margin: 0 auto;
+  opacity: 0.7;
+  text-align: left;
+}
+
+/* Corner decorations */
+.gate-corner {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 15;
+}
+
+.gate-corner::before,
+.gate-corner::after {
+  content: '';
+  position: absolute;
+  background: var(--color-gold);
+  opacity: 0.3;
+}
+
+.gate-corner.top-left {
+  top: 30px;
+  left: 30px;
+}
+
+.gate-corner.top-left::before {
+  width: 40px;
+  height: 1px;
+  top: 0;
+  left: 0;
+}
+
+.gate-corner.top-left::after {
+  width: 1px;
+  height: 40px;
+  top: 0;
+  left: 0;
+}
+
+.gate-corner.top-right {
+  top: 30px;
+  right: 30px;
+}
+
+.gate-corner.top-right::before {
+  width: 40px;
+  height: 1px;
+  top: 0;
+  right: 0;
+}
+
+.gate-corner.top-right::after {
+  width: 1px;
+  height: 40px;
+  top: 0;
+  right: 0;
+}
+
+.gate-corner.bottom-left {
+  bottom: 30px;
+  left: 30px;
+}
+
+.gate-corner.bottom-left::before {
+  width: 40px;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+}
+
+.gate-corner.bottom-left::after {
+  width: 1px;
+  height: 40px;
+  bottom: 0;
+  left: 0;
+}
+
+.gate-corner.bottom-right {
+  bottom: 30px;
+  right: 30px;
+}
+
+.gate-corner.bottom-right::before {
+  width: 40px;
+  height: 1px;
+  bottom: 0;
+  right: 0;
+}
+
+.gate-corner.bottom-right::after {
+  width: 1px;
+  height: 40px;
+  bottom: 0;
+  right: 0;
+}
+
+/* Chain animation */
+@keyframes chainSwing {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .age-gate-content {
+    margin: 1rem;
+    padding: 3rem 2rem;
+  }
+
+  .age-gate-brand {
+    font-size: 2rem;
+  }
+
+  .checkbox-text {
+    font-size: 0.95rem;
+  }
+
+  .chain-left,
+  .chain-right {
+    display: none;
+  }
+
+  .gate-corner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .gate-corner::before {
+    width: 25px !important;
+  }
+
+  .gate-corner::after {
+    height: 25px !important;
+  }
+
+  .age-gate-lang {
+    top: 15px;
+    right: 20px;
+  }
+
+  .age-gate-legal {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .age-gate-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .warning-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .age-gate-warning {
+    padding: 1rem;
+  }
+
+  .gate-btn {
+    padding: 1rem 2rem;
+    font-size: 0.75rem;
+  }
+
+  .age-checkbox-label {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .checkbox-text {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .age-gate-legal-container {
+    padding: 0.75rem;
+  }
+
+  .age-gate-legal {
+    font-size: 0.55rem;
+    text-align: center;
+  }
+}

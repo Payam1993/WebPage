@@ -1,9 +1,4 @@
-/**
- * Erotic Brand - Experience Styles
- * Based on Erotic_Project_Sample design
- */
-
-.erotic-experience {
+.experience {
   position: relative;
   padding: var(--space-2xl) 0;
   background: linear-gradient(180deg, var(--color-obsidian) 0%, var(--color-burgundy) 50%, var(--color-obsidian) 100%);
@@ -11,7 +6,7 @@
   overflow: hidden;
 }
 
-.erotic-experience-bg {
+.experience-bg {
   position: absolute;
   top: 0;
   left: 0;
@@ -19,7 +14,7 @@
   height: 100%;
 }
 
-.erotic-experience-pattern {
+.experience-pattern {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -30,33 +25,33 @@
   background-size: 80px 80px;
 }
 
-.erotic-experience-header {
+.experience-header {
   text-align: center;
   max-width: 700px;
   margin: 0 auto var(--space-xl);
 }
 
-.erotic-experience-header h2 {
+.experience-header h2 {
   color: var(--color-cream);
 }
 
-.erotic-experience-header .erotic-section-subtitle {
+.experience-header .section-subtitle {
   color: rgba(232, 228, 225, 0.7);
   font-style: italic;
 }
 
-.erotic-section-overline.light {
+.section-overline.light {
   color: var(--color-crimson);
 }
 
-.erotic-experience-features {
+.experience-features {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
   margin-bottom: var(--space-xl);
 }
 
-.erotic-feature-card {
+.feature-card {
   text-align: center;
   padding: 2.5rem 1.5rem;
   background: rgba(10, 10, 10, 0.6);
@@ -65,53 +60,53 @@
   backdrop-filter: blur(10px);
 }
 
-.erotic-feature-card:hover {
+.feature-card:hover {
   background: rgba(220, 20, 60, 0.1);
   border-color: var(--color-crimson);
   transform: translateY(-5px);
   box-shadow: 0 20px 40px rgba(220, 20, 60, 0.2);
 }
 
-.erotic-feature-icon {
+.feature-icon {
   width: 64px;
   height: 64px;
   margin: 0 auto 1.5rem;
   color: var(--color-crimson);
 }
 
-.erotic-feature-icon svg {
+.feature-icon svg {
   width: 100%;
   height: 100%;
 }
 
-.erotic-feature-card h3 {
+.feature-card h3 {
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
   color: var(--color-pearl);
   letter-spacing: 0.15em;
 }
 
-.erotic-feature-card p {
+.feature-card p {
   font-size: 0.9rem;
   line-height: 1.8;
   color: rgba(232, 228, 225, 0.6);
   font-style: italic;
 }
 
-.erotic-experience-amenities {
+.experience-amenities {
   text-align: center;
   padding-top: var(--space-lg);
   border-top: 1px solid rgba(220, 20, 60, 0.2);
 }
 
-.erotic-experience-amenities h3 {
+.experience-amenities h3 {
   font-size: 1.3rem;
   margin-bottom: var(--space-md);
   color: var(--color-pearl);
   letter-spacing: 0.2em;
 }
 
-.erotic-amenities-list {
+.amenities-list {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -120,7 +115,7 @@
   margin: 0 auto;
 }
 
-.erotic-amenity-item {
+.amenity-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -128,27 +123,27 @@
   color: rgba(232, 228, 225, 0.8);
 }
 
-.erotic-amenity-check {
+.amenity-check {
   color: var(--color-crimson);
   font-weight: 600;
 }
 
-.erotic-experience .erotic-corner-ornament {
+.experience .corner-ornament {
   border-color: rgba(220, 20, 60, 0.3);
 }
 
 @media (max-width: 1024px) {
-  .erotic-experience-features {
+  .experience-features {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 600px) {
-  .erotic-experience-features {
+  .experience-features {
     grid-template-columns: 1fr;
   }
   
-  .erotic-amenities-list {
+  .amenities-list {
     flex-direction: column;
     align-items: center;
   }

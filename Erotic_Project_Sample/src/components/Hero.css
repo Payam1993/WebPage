@@ -1,0 +1,294 @@
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--color-obsidian);
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.hero-bg-gradient {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 20% 80%, rgba(139, 0, 0, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(220, 20, 60, 0.15) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(74, 14, 14, 0.2) 0%, transparent 60%),
+    linear-gradient(180deg, var(--color-obsidian) 0%, var(--color-void) 50%, var(--color-charcoal) 100%);
+}
+
+.hero-bg-pattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+  background-image: 
+    radial-gradient(circle at 25% 25%, var(--color-crimson) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, var(--color-gold) 0.5px, transparent 0.5px);
+  background-size: 80px 80px;
+}
+
+/* Chain-like decorative elements */
+.floating-element {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+
+.floating-element.el-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.5), transparent);
+  top: 5%;
+  right: 5%;
+}
+
+.floating-element.el-2 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(220, 20, 60, 0.3), transparent);
+  bottom: 15%;
+  left: 0%;
+}
+
+.floating-element.el-3 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(201, 169, 98, 0.2), transparent);
+  top: 45%;
+  left: 35%;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 1000px;
+  padding: var(--space-md);
+}
+
+.hero-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.hero-overline {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--color-crimson);
+}
+
+.hero-overline .ornament {
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-crimson), transparent);
+}
+
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title-line {
+  display: block;
+  color: var(--color-pearl);
+  text-shadow: 0 0 60px rgba(220, 20, 60, 0.3);
+}
+
+.title-line.accent {
+  color: var(--color-crimson);
+  font-style: normal;
+  text-shadow: 0 0 80px rgba(220, 20, 60, 0.5);
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { text-shadow: 0 0 80px rgba(220, 20, 60, 0.5); }
+  50% { text-shadow: 0 0 120px rgba(220, 20, 60, 0.8), 0 0 40px rgba(220, 20, 60, 0.6); }
+}
+
+.hero-description {
+  max-width: 600px;
+  font-size: 1.2rem;
+  line-height: 2;
+  color: var(--color-pearl);
+  opacity: 0.85;
+  font-style: italic;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 2rem;
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Corner ornaments - bondage inspired */
+.corner-ornament {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  opacity: 0.2;
+}
+
+.corner-ornament::before,
+.corner-ornament::after {
+  content: '';
+  position: absolute;
+  background: var(--color-gold);
+}
+
+.corner-ornament.top-left {
+  top: 40px;
+  left: 40px;
+}
+
+.corner-ornament.top-left::before {
+  width: 80px;
+  height: 1px;
+  top: 0;
+  left: 0;
+}
+
+.corner-ornament.top-left::after {
+  width: 1px;
+  height: 80px;
+  top: 0;
+  left: 0;
+}
+
+.corner-ornament.top-right {
+  top: 40px;
+  right: 40px;
+}
+
+.corner-ornament.top-right::before {
+  width: 80px;
+  height: 1px;
+  top: 0;
+  right: 0;
+}
+
+.corner-ornament.top-right::after {
+  width: 1px;
+  height: 80px;
+  top: 0;
+  right: 0;
+}
+
+.corner-ornament.bottom-left {
+  bottom: 40px;
+  left: 40px;
+}
+
+.corner-ornament.bottom-left::before {
+  width: 80px;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+}
+
+.corner-ornament.bottom-left::after {
+  width: 1px;
+  height: 80px;
+  bottom: 0;
+  left: 0;
+}
+
+.corner-ornament.bottom-right {
+  bottom: 40px;
+  right: 40px;
+}
+
+.corner-ornament.bottom-right::before {
+  width: 80px;
+  height: 1px;
+  bottom: 0;
+  right: 0;
+}
+
+.corner-ornament.bottom-right::after {
+  width: 1px;
+  height: 80px;
+  bottom: 0;
+  right: 0;
+}
+
+@media (max-width: 768px) {
+  .hero-overline {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .hero-overline .ornament {
+    display: none;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .hero-cta {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .hero-cta .btn {
+    width: 100%;
+  }
+
+  .corner-ornament {
+    width: 60px;
+    height: 60px;
+  }
+
+  .corner-ornament::before {
+    width: 40px !important;
+  }
+
+  .corner-ornament::after {
+    height: 40px !important;
+  }
+
+  .corner-ornament.top-left,
+  .corner-ornament.top-right {
+    top: 20px;
+  }
+
+  .corner-ornament.bottom-left,
+  .corner-ornament.bottom-right {
+    bottom: 20px;
+  }
+
+  .corner-ornament.top-left,
+  .corner-ornament.bottom-left {
+    left: 20px;
+  }
+
+  .corner-ornament.top-right,
+  .corner-ornament.bottom-right {
+    right: 20px;
+  }
+}

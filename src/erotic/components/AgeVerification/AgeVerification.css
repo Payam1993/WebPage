@@ -1,0 +1,561 @@
+/**
+ * Erotic Brand - Age Verification Styles
+ * Based on Erotic_Project_Sample design
+ */
+
+.erotic-age-gate {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: var(--color-obsidian);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+/* Leather texture background */
+.erotic-age-gate::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23leather)' opacity='0.15'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(40, 20, 20, 0.3) 30px, rgba(40, 20, 20, 0.3) 31px),
+    repeating-linear-gradient(-45deg, transparent, transparent 30px, rgba(40, 20, 20, 0.3) 30px, rgba(40, 20, 20, 0.3) 31px),
+    linear-gradient(180deg, #1a0a0a 0%, #0d0505 50%, #150808 100%);
+  z-index: 0;
+}
+
+/* Background effects */
+.erotic-age-gate-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 30% 70%, rgba(139, 0, 0, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 30%, rgba(220, 20, 60, 0.15) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 100%, rgba(74, 14, 14, 0.3) 0%, transparent 50%);
+  z-index: 2;
+}
+
+/* Decorative chains on sides */
+.erotic-chain-left,
+.erotic-chain-right {
+  position: absolute;
+  top: 0;
+  width: 40px;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 20px,
+    rgba(201, 169, 98, 0.15) 20px,
+    rgba(201, 169, 98, 0.15) 25px,
+    transparent 25px,
+    transparent 30px
+  );
+  animation: eroticChainSwing 4s ease-in-out infinite;
+}
+
+.erotic-chain-left {
+  left: 5%;
+  transform-origin: top center;
+}
+
+.erotic-chain-right {
+  right: 5%;
+  transform-origin: top center;
+  animation-delay: 1s;
+}
+
+/* Smoke effects */
+.erotic-smoke {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+.erotic-smoke-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.4), transparent);
+  bottom: -200px;
+  left: -100px;
+}
+
+.erotic-smoke-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(220, 20, 60, 0.3), transparent);
+  top: -100px;
+  right: -100px;
+}
+
+/* Language selector */
+.erotic-age-gate-lang {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 20;
+}
+
+.erotic-age-gate-lang button {
+  background: none;
+  border: none;
+  color: var(--color-pearl);
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.5rem;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.erotic-age-gate-lang button:hover,
+.erotic-age-gate-lang button.active {
+  opacity: 1;
+  color: var(--color-crimson);
+}
+
+.erotic-lang-divider {
+  color: var(--color-gold);
+  opacity: 0.3;
+}
+
+/* Main content container */
+.erotic-age-gate-content {
+  position: relative;
+  z-index: 10;
+  max-width: 650px;
+  padding: 4rem 3rem;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(15, 5, 5, 0.95) 0%, rgba(10, 5, 5, 0.98) 100%);
+  border: 1px solid rgba(220, 20, 60, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 0 80px rgba(139, 0, 0, 0.3), inset 0 0 100px rgba(0, 0, 0, 0.5), 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Decorative borders */
+.erotic-gate-border {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.erotic-gate-border-top {
+  top: -1px;
+}
+
+.erotic-gate-border-bottom {
+  bottom: -1px;
+}
+
+.erotic-border-ornament {
+  color: var(--color-crimson);
+  font-size: 0.6rem;
+  text-shadow: 0 0 10px rgba(220, 20, 60, 0.8);
+}
+
+.erotic-border-line {
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+/* Warning icon */
+.erotic-warning-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1.5rem;
+}
+
+.erotic-whip-icon {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 25px rgba(220, 20, 60, 0.6));
+  animation: eroticWhipGlow 3s ease-in-out infinite;
+}
+
+@keyframes eroticWhipGlow {
+  0%, 100% { filter: drop-shadow(0 0 25px rgba(220, 20, 60, 0.6)); }
+  50% { filter: drop-shadow(0 0 40px rgba(220, 20, 60, 0.9)); }
+}
+
+/* Title */
+.erotic-age-gate-title-container {
+  margin-bottom: 2rem;
+}
+
+.erotic-age-gate-brand {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 500;
+  color: var(--color-cream);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0;
+  text-shadow: 0 0 60px rgba(220, 20, 60, 0.5);
+}
+
+.erotic-age-gate-location {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-crimson);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+}
+
+/* Warning text */
+.erotic-age-gate-warning {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(139, 0, 0, 0.15);
+  border-left: 2px solid var(--color-crimson);
+  border-right: 2px solid var(--color-crimson);
+}
+
+.erotic-warning-main {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-crimson);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.erotic-warning-sub {
+  font-size: 0.95rem;
+  color: var(--color-pearl);
+  opacity: 0.9;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* Checkbox container */
+.erotic-age-gate-checkbox-container {
+  margin-bottom: 2rem;
+}
+
+.erotic-age-checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 1rem;
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.erotic-age-checkbox-label:hover {
+  border-color: rgba(201, 169, 98, 0.4);
+  background: rgba(139, 0, 0, 0.1);
+}
+
+.erotic-age-checkbox {
+  display: none;
+}
+
+.erotic-checkbox-custom {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--color-gold);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.erotic-age-checkbox:checked + .erotic-checkbox-custom {
+  background: var(--color-crimson);
+  border-color: var(--color-crimson);
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+}
+
+.erotic-checkbox-mark {
+  color: var(--color-cream);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.erotic-checkbox-text {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--color-gold);
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+
+/* Buttons */
+.erotic-age-gate-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.erotic-gate-btn {
+  padding: 1.2rem 3rem;
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.4s var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+.erotic-gate-btn-enter {
+  background: linear-gradient(135deg, var(--color-blood) 0%, var(--color-crimson) 100%);
+  color: var(--color-cream);
+  border: 1px solid var(--color-crimson);
+  box-shadow: 0 0 30px rgba(220, 20, 60, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.erotic-gate-btn-enter:hover:not(.disabled) {
+  background: linear-gradient(135deg, var(--color-crimson) 0%, var(--color-blood) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 50px rgba(220, 20, 60, 0.6), inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.erotic-gate-btn-enter.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #3a1515 0%, #2a1010 100%);
+  box-shadow: none;
+}
+
+.erotic-btn-icon {
+  font-size: 1.1rem;
+}
+
+.erotic-gate-btn-exit {
+  background: transparent;
+  color: var(--color-pearl);
+  border: 1px solid rgba(201, 169, 98, 0.4);
+  opacity: 0.7;
+}
+
+.erotic-gate-btn-exit:hover {
+  opacity: 1;
+  border-color: var(--color-gold);
+  background: rgba(201, 169, 98, 0.1);
+}
+
+/* Legal text */
+.erotic-age-gate-legal-container {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 2px solid var(--color-gold-dark);
+  margin-top: 0.5rem;
+}
+
+.erotic-age-gate-legal {
+  font-size: 0.65rem;
+  color: var(--color-pearl);
+  line-height: 1.7;
+  max-width: 500px;
+  margin: 0 auto;
+  opacity: 0.7;
+  text-align: left;
+}
+
+/* Corner decorations */
+.erotic-gate-corner {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 15;
+}
+
+.erotic-gate-corner::before,
+.erotic-gate-corner::after {
+  content: '';
+  position: absolute;
+  background: var(--color-gold);
+  opacity: 0.3;
+}
+
+.erotic-gate-corner.top-left {
+  top: 30px;
+  left: 30px;
+}
+
+.erotic-gate-corner.top-left::before {
+  width: 40px;
+  height: 1px;
+  top: 0;
+  left: 0;
+}
+
+.erotic-gate-corner.top-left::after {
+  width: 1px;
+  height: 40px;
+  top: 0;
+  left: 0;
+}
+
+.erotic-gate-corner.top-right {
+  top: 30px;
+  right: 30px;
+}
+
+.erotic-gate-corner.top-right::before {
+  width: 40px;
+  height: 1px;
+  top: 0;
+  right: 0;
+}
+
+.erotic-gate-corner.top-right::after {
+  width: 1px;
+  height: 40px;
+  top: 0;
+  right: 0;
+}
+
+.erotic-gate-corner.bottom-left {
+  bottom: 30px;
+  left: 30px;
+}
+
+.erotic-gate-corner.bottom-left::before {
+  width: 40px;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+}
+
+.erotic-gate-corner.bottom-left::after {
+  width: 1px;
+  height: 40px;
+  bottom: 0;
+  left: 0;
+}
+
+.erotic-gate-corner.bottom-right {
+  bottom: 30px;
+  right: 30px;
+}
+
+.erotic-gate-corner.bottom-right::before {
+  width: 40px;
+  height: 1px;
+  bottom: 0;
+  right: 0;
+}
+
+.erotic-gate-corner.bottom-right::after {
+  width: 1px;
+  height: 40px;
+  bottom: 0;
+  right: 0;
+}
+
+/* Chain animation */
+@keyframes eroticChainSwing {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .erotic-age-gate-content {
+    margin: 1rem;
+    padding: 3rem 2rem;
+  }
+
+  .erotic-age-gate-brand {
+    font-size: 2rem;
+  }
+
+  .erotic-checkbox-text {
+    font-size: 0.95rem;
+  }
+
+  .erotic-chain-left,
+  .erotic-chain-right {
+    display: none;
+  }
+
+  .erotic-gate-corner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .erotic-gate-corner::before {
+    width: 25px !important;
+  }
+
+  .erotic-gate-corner::after {
+    height: 25px !important;
+  }
+
+  .erotic-age-gate-lang {
+    top: 15px;
+    right: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .erotic-age-gate-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .erotic-warning-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .erotic-age-gate-warning {
+    padding: 1rem;
+  }
+
+  .erotic-gate-btn {
+    padding: 1rem 2rem;
+    font-size: 0.75rem;
+  }
+
+  .erotic-age-checkbox-label {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .erotic-checkbox-text {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+}

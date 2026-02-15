@@ -1,0 +1,215 @@
+/**
+ * Erotic Brand - Testimonials Styles
+ * Based on Erotic_Project_Sample design
+ */
+
+.erotic-testimonials {
+  position: relative;
+  padding: var(--space-2xl) 0;
+  background: var(--color-charcoal);
+  overflow: hidden;
+}
+
+.erotic-testimonials::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 20% 0%, rgba(139, 0, 0, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(139, 0, 0, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.erotic-testimonials-carousel {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.erotic-testimonial-container {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.erotic-testimonial-card {
+  position: relative;
+  padding: 3rem;
+  text-align: center;
+  background: rgba(10, 10, 10, 0.7);
+  border: 1px solid rgba(220, 20, 60, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.erotic-testimonial-quote {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 2rem;
+  color: var(--color-crimson);
+  opacity: 0.5;
+}
+
+.erotic-testimonial-quote svg {
+  width: 100%;
+  height: 100%;
+}
+
+.erotic-testimonial-text {
+  font-family: var(--font-sans);
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 2;
+  color: rgba(232, 228, 225, 0.9);
+  margin-bottom: 2rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.erotic-testimonial-service {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 2rem;
+}
+
+.erotic-testimonial-service span {
+  color: rgba(232, 228, 225, 0.5);
+}
+
+.erotic-testimonial-author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.erotic-author-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-crimson);
+}
+
+.erotic-author-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(40%) brightness(0.9);
+}
+
+.erotic-author-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 0.25rem;
+}
+
+.erotic-author-name {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--color-pearl);
+  letter-spacing: 0.1em;
+}
+
+.erotic-author-location {
+  font-size: 0.75rem;
+  color: var(--color-crimson);
+  letter-spacing: 0.15em;
+}
+
+.erotic-author-rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.erotic-star {
+  color: var(--color-gold);
+  font-size: 1rem;
+}
+
+.erotic-testimonial-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.erotic-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: transparent;
+  border: 1px solid var(--color-crimson);
+  color: var(--color-crimson);
+  cursor: pointer;
+  transition: all 0.3s var(--transition-smooth);
+}
+
+.erotic-nav-btn:hover {
+  background: var(--color-crimson);
+  color: var(--color-pearl);
+  transform: scale(1.1);
+}
+
+.erotic-nav-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.erotic-nav-dots {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.erotic-nav-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(220, 20, 60, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.erotic-nav-dot:hover {
+  background: rgba(220, 20, 60, 0.6);
+}
+
+.erotic-nav-dot.active {
+  background: var(--color-crimson);
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.5);
+}
+
+@media (max-width: 768px) {
+  .erotic-testimonial-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .erotic-testimonial-text {
+    font-size: 1.05rem;
+  }
+  
+  .erotic-testimonial-author {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .erotic-author-info {
+    text-align: center;
+  }
+  
+  .erotic-nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
