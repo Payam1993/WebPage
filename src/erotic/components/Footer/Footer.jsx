@@ -33,10 +33,10 @@ const Footer = ({ setCursorVariant }) => {
             <div className="erotic-footer-col">
               <h4>{t.footer.servicesTitle}</h4>
               <ul>
-                <li><a href="#services">Surrender Ritual</a></li>
-                <li><a href="#services">Velvet Chains</a></li>
-                <li><a href="#services">The Confession</a></li>
-                <li><a href="#services">Dark Tantra</a></li>
+                <li><a href="#services">Foot Devotion Ritual</a></li>
+                <li><a href="#services">Dominance Ritual</a></li>
+                <li><a href="#services">Sensory Immersion</a></li>
+                <li><a href="#services">Bespoke Experience</a></li>
               </ul>
             </div>
             <div className="erotic-footer-col">

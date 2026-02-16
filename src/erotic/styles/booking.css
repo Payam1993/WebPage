@@ -24,8 +24,8 @@
   max-width: 550px;
   max-height: 90vh;
   overflow-y: auto;
-  background: linear-gradient(180deg, #1a0a0a 0%, #0d0505 100%);
-  border: 1px solid rgba(220, 20, 60, 0.3);
+  background: linear-gradient(180deg, #1f1215 0%, #150a0c 100%);
+  border: 1px solid rgba(220, 20, 60, 0.4);
   padding: 2.5rem;
   box-shadow: 
     0 40px 80px rgba(0, 0, 0, 0.6),
@@ -94,7 +94,7 @@
 
 .erotic-booking-header p {
   font-size: 0.9rem;
-  color: rgba(232, 228, 225, 0.6);
+  color: rgba(255, 255, 255, 0.75);
   font-style: italic;
 }
 
@@ -153,7 +153,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(232, 228, 225, 0.4);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .erotic-booking-form {
@@ -178,15 +178,16 @@
   font-size: 0.7rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: #d4a853;
+  font-weight: 500;
 }
 
 .erotic-form-group input,
 .erotic-form-group select {
   padding: 0.875rem 1rem;
-  background: rgba(10, 10, 10, 0.8);
-  border: 1px solid rgba(220, 20, 60, 0.2);
-  color: var(--color-pearl);
+  background: rgba(30, 20, 22, 0.9);
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  color: #ffffff;
   font-family: var(--font-sans);
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -200,7 +201,7 @@
 }
 
 .erotic-form-group input::placeholder {
-  color: rgba(232, 228, 225, 0.3);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .erotic-form-group select {
@@ -212,8 +213,8 @@
 }
 
 .erotic-form-group select option {
-  background: #0d0505;
-  color: var(--color-pearl);
+  background: #1a0d0f;
+  color: #ffffff;
 }
 
 .erotic-form-error {
@@ -227,9 +228,9 @@
 
 .erotic-loading-services {
   padding: 0.875rem 1rem;
-  background: rgba(10, 10, 10, 0.8);
-  border: 1px solid rgba(220, 20, 60, 0.2);
-  color: rgba(232, 228, 225, 0.5);
+  background: rgba(30, 20, 22, 0.9);
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  color: rgba(255, 255, 255, 0.7);
   font-style: italic;
 }
 
@@ -355,7 +356,7 @@
 
 .erotic-booking-success p {
   font-size: 0.95rem;
-  color: rgba(232, 228, 225, 0.7);
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: 2rem;
   line-height: 1.8;
 }
