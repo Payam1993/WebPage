@@ -23,6 +23,7 @@ import {
   LoadingState,
 } from '../../components/admin/ui'
 import { bookingAPI, staffAPI, serviceAPI, centerAPI, roomAPI, getTodayDate, getDateFromToday, formatDisplayDate, notConfirmedReservationAPI } from '../../services/dataService'
+import { useAuth } from '../../context/AuthContext'
 import AvailabilityCalendar from '../../components/AvailabilityCalendar'
 import '../../components/AvailabilityCalendar.css'
 
