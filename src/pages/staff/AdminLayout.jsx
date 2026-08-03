@@ -54,17 +54,17 @@ const AdminLayout = () => {
 
   const getPageTitle = () => {
     const path = location.pathname
-    if (path.includes('/reports')) return 'Dashboard'
+    if (path.includes('/reports')) return isAdmin ? 'Dashboard' : 'My Dashboard'
     if (path.includes('/costs')) return 'Costs Management'
-    if (path.includes('/reservations')) return 'Reservations'
-    if (path.includes('/calendar')) return 'Calendar'
+    if (path.includes('/reservations')) return isAdmin ? 'Reservations' : 'My Reservations'
+    if (path.includes('/calendar')) return isAdmin ? 'Calendar' : 'My Calendar'
     if (path.includes('/assigned-task')) return 'Assigned Task'
     if (path.includes('/staff-management')) return 'Staff'
     if (path.includes('/profile')) return 'Profile Settings'
     return 'Dashboard'
   }
 
-  const navItems = [
+  const adminNavItems = [
     {
       path: '/staff/reports',
       label: 'Dashboard',
@@ -121,8 +121,7 @@ const AdminLayout = () => {
         </svg>
       ),
     },
-    // Staff management (Work With Us requests) - admin only
-    ...(isAdmin ? [{
+    {
       path: '/staff/staff-management',
       label: 'Staff',
       icon: (
@@ -133,9 +132,49 @@ const AdminLayout = () => {
           <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
       ),
-      isAdmin: true,
-    }] : []),
+    },
   ]
+
+  // Individual staff accounts: personal Dashboard, Reservations, Calendar only
+  const staffNavItems = [
+    {
+      path: '/staff/reports',
+      label: 'Dashboard',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      ),
+    },
+    {
+      path: '/staff/reservations',
+      label: 'Reservations',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+          <path d="M9 14l2 2 4-4"/>
+        </svg>
+      ),
+    },
+    {
+      path: '/staff/calendar',
+      label: 'Calendar',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      ),
+    },
+  ]
+
+  const navItems = isAdmin ? adminNavItems : staffNavItems
 
   const bottomNavItems = [
     // Administration link - only shown to admins
@@ -213,17 +252,16 @@ const AdminLayout = () => {
         {/* Main navigation */}
         <nav className="sidebar-nav">
           <div className="nav-section">
-            <span className="nav-section-title">Menu</span>
+            <span className="nav-section-title">{isAdmin ? 'Admin Menu' : 'My Menu'}</span>
             <ul className="nav-list">
               {navItems.map((item) => (
                 <li key={item.path}>
                   <NavLink 
                     to={item.path}
-                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''} ${item.isAdmin ? 'nav-link--admin' : ''}`}
+                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                   >
                     <span className="nav-icon">{item.icon}</span>
                     <span className="nav-label">{item.label}</span>
-                    {item.isAdmin && <span className="nav-badge">Admin</span>}
                   </NavLink>
                 </li>
               ))}

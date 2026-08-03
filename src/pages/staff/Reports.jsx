@@ -12,6 +12,7 @@ import {
   LoadingState,
 } from '../../components/admin/ui'
 import { bookingAPI, getDateFromToday } from '../../services/dataService'
+import { useAuth } from '../../context/AuthContext'
 
 /**
  * Simple Line Chart Component for Reservations
@@ -158,14 +159,16 @@ const ReservationsLineChart = ({ data, isLoading }) => {
  * Reports - Dashboard overview with stats and recent activity
  */
 const Reports = () => {
+  const { isAdmin, staffProfile, isLoading: authLoading } = useAuth()
   const [selectedPeriod, setSelectedPeriod] = useState('week')
   const [bookings, setBookings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   // Load bookings data
   useEffect(() => {
+    if (authLoading) return
     loadBookingsData()
-  }, [selectedPeriod])
+  }, [selectedPeriod, authLoading, isAdmin, staffProfile?.id])
 
   const loadBookingsData = async () => {
     setIsLoading(true)
@@ -196,7 +199,17 @@ const Reports = () => {
           toDate = today
       }
 
-      const data = await bookingAPI.list(fromDate, toDate)
+      // Non-admin staff: only their own bookings (individual view)
+      if (!isAdmin && !staffProfile?.id) {
+        setBookings([])
+        return
+      }
+
+      const therapistOptions = !isAdmin && staffProfile?.id
+        ? { therapistId: staffProfile.id }
+        : {}
+
+      const data = await bookingAPI.list(fromDate, toDate, therapistOptions)
       setBookings(data)
     } catch (err) {
       console.error('Error loading bookings:', err)
@@ -308,8 +321,12 @@ const Reports = () => {
   return (
     <div>
       <PageHeader 
-        title="Dashboard"
-        subtitle="Overview of your business performance and recent activity"
+        title={isAdmin ? 'Dashboard' : 'My Dashboard'}
+        subtitle={
+          isAdmin
+            ? 'Overview of your business performance and recent activity'
+            : 'Overview of your personal reservations and activity'
+        }
         actions={
           <div style={{ display: 'flex', gap: '8px' }}>
             {['today', 'week', 'month', 'year'].map((period) => (

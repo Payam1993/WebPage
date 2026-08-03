@@ -412,38 +412,70 @@ export const dailyCostAPI = {
 // ============================================
 // Booking CRUD (Staff Portal)
 // ============================================
+
+/**
+ * Build Amplify list filter for bookings
+ * @param {{ fromDate?: string|null, toDate?: string|null, therapistId?: string|null, status?: string|null }} options
+ */
+const buildBookingFilter = ({ fromDate = null, toDate = null, therapistId = null, status = null } = {}) => {
+  const conditions = []
+
+  if (status) {
+    conditions.push({ status: { eq: status } })
+  }
+
+  if (fromDate && toDate) {
+    conditions.push({ date: { between: [fromDate, toDate] } })
+  } else if (fromDate) {
+    conditions.push({ date: { eq: fromDate } })
+  }
+
+  if (therapistId) {
+    conditions.push({ therapistId: { eq: therapistId } })
+  }
+
+  if (conditions.length === 0) return undefined
+  if (conditions.length === 1) return conditions[0]
+  return { and: conditions }
+}
+
+/**
+ * Resolve Staff record by Cognito login email (case-insensitive)
+ * @param {string} email
+ * @returns {Promise<object|null>}
+ */
+export const resolveStaffByEmail = async (email) => {
+  if (!email) return null
+  try {
+    const staffList = await staffAPI.list()
+    const normalized = email.trim().toLowerCase()
+    return staffList.find((s) => s.email?.trim().toLowerCase() === normalized) || null
+  } catch (error) {
+    console.error('Error resolving staff by email:', error)
+    return null
+  }
+}
+
 export const bookingAPI = {
   /**
-   * List bookings, optionally filtered by date range
+   * List bookings, optionally filtered by date range and therapist
    * @param {string} fromDate - Start date (YYYY-MM-DD)
    * @param {string} toDate - End date (YYYY-MM-DD)
+   * @param {{ therapistId?: string|null }} options
    */
-  async list(fromDate = null, toDate = null) {
+  async list(fromDate = null, toDate = null, options = {}) {
     try {
       const client = getClient()
-      let result
-      
-      if (fromDate && toDate) {
-        // Filter by date range
-        result = await client.models.Booking.list({
-          filter: {
-            date: {
-              between: [fromDate, toDate]
-            }
-          }
-        })
-      } else if (fromDate) {
-        // Filter by single date
-        result = await client.models.Booking.list({
-          filter: {
-            date: { eq: fromDate }
-          }
-        })
-      } else {
-        // No filter - get all
-        result = await client.models.Booking.list()
-      }
-      
+      const filter = buildBookingFilter({
+        fromDate,
+        toDate,
+        therapistId: options.therapistId || null,
+      })
+
+      const result = filter
+        ? await client.models.Booking.list({ filter })
+        : await client.models.Booking.list()
+
       const { data, errors } = result
       if (errors) throw new Error(errors[0].message)
       return data || []
@@ -458,28 +490,18 @@ export const bookingAPI = {
    * Only Pending reservations appear in the calendar
    * @param {string} fromDate - Start date (YYYY-MM-DD)
    * @param {string} toDate - End date (YYYY-MM-DD)
+   * @param {{ therapistId?: string|null }} options
    */
-  async listPending(fromDate = null, toDate = null) {
+  async listPending(fromDate = null, toDate = null, options = {}) {
     try {
       const client = getClient()
-      let filter = { status: { eq: 'Pending' } }
-      
-      if (fromDate && toDate) {
-        filter = {
-          and: [
-            { status: { eq: 'Pending' } },
-            { date: { between: [fromDate, toDate] } }
-          ]
-        }
-      } else if (fromDate) {
-        filter = {
-          and: [
-            { status: { eq: 'Pending' } },
-            { date: { eq: fromDate } }
-          ]
-        }
-      }
-      
+      const filter = buildBookingFilter({
+        fromDate,
+        toDate,
+        therapistId: options.therapistId || null,
+        status: 'Pending',
+      })
+
       const { data, errors } = await client.models.Booking.list({ filter })
       if (errors) throw new Error(errors[0].message)
       return data || []

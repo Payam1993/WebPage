@@ -1,16 +1,20 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth'
+import { fetchAuthSession, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth'
 import { Hub } from 'aws-amplify/utils'
+import { resolveStaffByEmail } from '../services/dataService'
 
 /**
  * AuthContext - Provides authentication state and admin detection
  * 
  * Reads Cognito groups from ID token to determine if user is admin.
  * Admin group name: "Admin_Confession"
+ * Resolves linked Staff profile by login email for individual staff views.
  */
 
 const AuthContext = createContext({
   user: null,
+  userEmail: null,
+  staffProfile: null,
   isAuthenticated: false,
   isAdmin: false,
   isLoading: true,
@@ -48,23 +52,40 @@ export const checkIsAdmin = async () => {
   }
 }
 
+const resolveUserEmail = async (currentUser) => {
+  try {
+    const attributes = await fetchUserAttributes()
+    if (attributes?.email) return attributes.email
+  } catch {
+    // Attributes may be unavailable; fall through
+  }
+  return currentUser?.signInDetails?.loginId || currentUser?.username || null
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
+  const [userEmail, setUserEmail] = useState(null)
+  const [staffProfile, setStaffProfile] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   const refreshAuth = useCallback(async () => {
     try {
-      // Get current user
       const currentUser = await getCurrentUser()
       setUser(currentUser)
-      
-      // Check admin status
+
       const adminStatus = await checkIsAdmin()
       setIsAdmin(adminStatus)
+
+      const email = await resolveUserEmail(currentUser)
+      setUserEmail(email)
+
+      const profile = email ? await resolveStaffByEmail(email) : null
+      setStaffProfile(profile)
     } catch (error) {
-      // User is not authenticated
       setUser(null)
+      setUserEmail(null)
+      setStaffProfile(null)
       setIsAdmin(false)
     } finally {
       setIsLoading(false)
@@ -72,10 +93,8 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    // Initial auth check
     refreshAuth()
 
-    // Listen for auth events (sign in, sign out)
     const hubListener = Hub.listen('auth', ({ payload }) => {
       switch (payload.event) {
         case 'signedIn':
@@ -83,6 +102,8 @@ export const AuthProvider = ({ children }) => {
           break
         case 'signedOut':
           setUser(null)
+          setUserEmail(null)
+          setStaffProfile(null)
           setIsAdmin(false)
           break
         case 'tokenRefresh':
@@ -100,6 +121,8 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    userEmail,
+    staffProfile,
     isAuthenticated: !!user,
     isAdmin,
     isLoading,

@@ -59,10 +59,10 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),
-      allow.authenticated().to(["read"]), // Staff can read for dropdowns
+      allow.authenticated(), // Staff portal can manage confirmed staff
     ]),
 
-  // StaffApplication - public "Work With Us" requests awaiting admin review
+  // StaffApplication - public "Work With Us" requests awaiting review
   StaffApplication: a
     .model({
       firstName: a.string().required(),
@@ -76,7 +76,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.publicApiKey().to(["create"]), // Public can submit applications
-      allow.group("Admin_Confession"), // Admin can review, confirm, decline
+      allow.authenticated(), // Staff portal can review, confirm, decline
     ]),
 
   // ============================================

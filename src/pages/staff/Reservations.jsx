@@ -23,13 +23,15 @@ import {
   LoadingState,
 } from '../../components/admin/ui'
 import { bookingAPI, staffAPI, serviceAPI, getTodayDate, getDateFromToday, notConfirmedReservationAPI } from '../../services/dataService'
+import { useAuth } from '../../context/AuthContext'
 
 /**
  * Reservations - Manage client bookings and reservations
- * Staff Portal feature with modal form for creating/editing bookings
- * Includes Not Confirmed Reservations section for public booking requests
+ * Admin: global view of all bookings + public not-confirmed requests
+ * Staff: individual view of bookings assigned to their Staff profile
  */
 const Reservations = () => {
+  const { isAdmin, staffProfile, isLoading: authLoading } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [bookings, setBookings] = useState([])
@@ -65,25 +67,34 @@ const Reservations = () => {
     toDate: getDateFromToday(7), // Show next 7 days by default
   })
 
-  // Load data on mount and when filter changes
+  // Load data on mount and when filter / auth context changes
   useEffect(() => {
     loadStaticData()
-    loadNotConfirmedReservations()
   }, [])
 
   useEffect(() => {
-    loadBookings()
-    // Dependency uses specific values to ensure proper comparison
-  }, [appliedFilter.fromDate, appliedFilter.toDate])
+    if (authLoading) return
+    if (isAdmin) {
+      loadNotConfirmedReservations()
+    } else {
+      setNotConfirmedList([])
+    }
+  }, [authLoading, isAdmin])
 
-  // Auto-refresh not confirmed reservations every 30 seconds
   useEffect(() => {
+    if (authLoading) return
+    loadBookings()
+  }, [appliedFilter.fromDate, appliedFilter.toDate, authLoading, isAdmin, staffProfile?.id])
+
+  // Auto-refresh not confirmed reservations every 30 seconds (admin only)
+  useEffect(() => {
+    if (!isAdmin) return undefined
     const intervalId = setInterval(() => {
       loadNotConfirmedReservations()
-    }, 30000) // 30 seconds
+    }, 30000)
 
     return () => clearInterval(intervalId)
-  }, [])
+  }, [isAdmin])
 
   const loadStaticData = async () => {
     try {
@@ -119,8 +130,16 @@ const Reservations = () => {
     setIsLoading(true)
     setError(null)
     try {
+      if (!isAdmin && !staffProfile?.id) {
+        setBookings([])
+        return
+      }
+
       const { fromDate, toDate } = appliedFilter
-      const data = await bookingAPI.list(fromDate, toDate)
+      const therapistOptions = !isAdmin && staffProfile?.id
+        ? { therapistId: staffProfile.id }
+        : {}
+      const data = await bookingAPI.list(fromDate, toDate, therapistOptions)
       // Sort by date descending, then by time descending
       data.sort((a, b) => {
         if (a.date !== b.date) return b.date.localeCompare(a.date)
@@ -155,6 +174,13 @@ const Reservations = () => {
         date: getTodayDate(),
         status: 'Pending',
         durationMinutes: 60,
+        // Individual staff: lock new bookings to themselves
+        ...(!isAdmin && staffProfile
+          ? {
+              therapistId: staffProfile.id,
+              therapistName: staffProfile.staffName,
+            }
+          : {}),
       })
     }
     setShowModal(true)
@@ -379,8 +405,12 @@ const Reservations = () => {
   return (
     <div>
       <PageHeader 
-        title="Reservations"
-        subtitle="Manage and view all client bookings"
+        title={isAdmin ? 'Reservations' : 'My Reservations'}
+        subtitle={
+          isAdmin
+            ? 'Manage and view all client bookings'
+            : 'Manage and view your assigned client bookings'
+        }
         actions={
           <Button icon={<Icons.Plus />} onClick={() => handleOpenModal()}>
             New Booking
@@ -611,10 +641,15 @@ const Reservations = () => {
           />
           <Select
             label="Therapist"
-            options={staffOptions}
-            placeholder="Select therapist (optional)"
+            options={
+              isAdmin
+                ? staffOptions
+                : staffOptions.filter((s) => s.value === staffProfile?.id)
+            }
+            placeholder={isAdmin ? 'Select therapist (optional)' : 'Assigned to you'}
             value={formData.therapistId || ''}
             onChange={(e) => handleTherapistSelect(e.target.value)}
+            disabled={!isAdmin}
           />
           <Input
             label="Date *"
@@ -660,7 +695,8 @@ const Reservations = () => {
         </div>
       </Modal>
 
-      {/* Not Confirmed Reservations Section */}
+      {/* Not Confirmed Reservations Section - admin (global) only */}
+      {isAdmin && (
       <Card style={{ marginTop: '32px' }}>
         <CardHeader style={{ paddingBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
@@ -745,6 +781,7 @@ const Reservations = () => {
           )}
         </CardContent>
       </Card>
+      )}
 
       {/* Confirm Reservation Modal */}
       <Modal

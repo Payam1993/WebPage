@@ -9,6 +9,7 @@ import {
   LoadingState,
 } from '../../components/admin/ui'
 import { bookingAPI } from '../../services/dataService'
+import { useAuth } from '../../context/AuthContext'
 
 /**
  * Calendar - Visual calendar view of pending bookings
@@ -16,6 +17,7 @@ import { bookingAPI } from '../../services/dataService'
  * Done and Canceled bookings do not appear in the calendar
  */
 const Calendar = () => {
+  const { isAdmin, staffProfile, isLoading: authLoading } = useAuth()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState('week') // 'day', 'week', 'month'
   const [events, setEvents] = useState([])
@@ -26,14 +28,23 @@ const Calendar = () => {
 
   // Load confirmed bookings when date/view changes
   useEffect(() => {
+    if (authLoading) return
     loadEvents()
-  }, [currentDate, viewMode])
+  }, [currentDate, viewMode, authLoading, isAdmin, staffProfile?.id])
 
   const loadEvents = async () => {
     setIsLoading(true)
     try {
+      if (!isAdmin && !staffProfile?.id) {
+        setEvents([])
+        return
+      }
+
       const dateRange = getDateRange()
-      const bookings = await bookingAPI.listPending(dateRange.from, dateRange.to)
+      const therapistOptions = !isAdmin && staffProfile?.id
+        ? { therapistId: staffProfile.id }
+        : {}
+      const bookings = await bookingAPI.listPending(dateRange.from, dateRange.to, therapistOptions)
       
       // Transform bookings to calendar events
       const calendarEvents = bookings.map(booking => ({
@@ -171,8 +182,12 @@ const Calendar = () => {
   return (
     <div>
       <PageHeader 
-        title="Calendar"
-        subtitle="View pending appointments awaiting completion"
+        title={isAdmin ? 'Calendar' : 'My Calendar'}
+        subtitle={
+          isAdmin
+            ? 'View pending appointments awaiting completion'
+            : 'View your pending appointments awaiting completion'
+        }
         actions={
           <Button variant="secondary" onClick={loadEvents}>
             <Icons.Search /> Refresh

@@ -99,10 +99,24 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
               }
             >
               <Route path="reports" element={<Reports />} />
-              <Route path="costs" element={<CostsManagement />} />
+              <Route
+                path="costs"
+                element={
+                  <AdminProtectedRoute>
+                    <CostsManagement />
+                  </AdminProtectedRoute>
+                }
+              />
               <Route path="reservations" element={<Reservations />} />
               <Route path="calendar" element={<Calendar />} />
-              <Route path="assigned-task" element={<AssignedTask />} />
+              <Route
+                path="assigned-task"
+                element={
+                  <AdminProtectedRoute>
+                    <AssignedTask />
+                  </AdminProtectedRoute>
+                }
+              />
               <Route
                 path="staff-management"
                 element={
@@ -192,10 +206,24 @@ function EroticAppContent({ loading, setCursorVariant }) {
                 }
               >
                 <Route path="reports" element={<Reports />} />
-                <Route path="costs" element={<CostsManagement />} />
+                <Route
+                  path="costs"
+                  element={
+                    <AdminProtectedRoute>
+                      <CostsManagement />
+                    </AdminProtectedRoute>
+                  }
+                />
                 <Route path="reservations" element={<Reservations />} />
                 <Route path="calendar" element={<Calendar />} />
-                <Route path="assigned-task" element={<AssignedTask />} />
+                <Route
+                  path="assigned-task"
+                  element={
+                    <AdminProtectedRoute>
+                      <AssignedTask />
+                    </AdminProtectedRoute>
+                  }
+                />
                 <Route
                   path="staff-management"
                   element={
