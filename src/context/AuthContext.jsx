@@ -4,19 +4,32 @@ import { Hub } from 'aws-amplify/utils'
 import { resolveStaffByEmail } from '../services/dataService'
 
 /**
- * AuthContext - Provides authentication state and admin detection
- * 
- * Reads Cognito groups from ID token to determine if user is admin.
- * Admin group name: "Admin_Confession"
- * Resolves linked Staff profile by login email for individual staff views.
+ * Cognito groups:
+ * - Admin_Confession → full admin
+ * - Mini_Admin → dashboard, costs, pending confirmations
+ * - Users → personal dashboard, reservations, calendar
  */
+
+export const ROLES = {
+  ADMIN: 'admin',
+  MINI_ADMIN: 'miniAdmin',
+  USER: 'user',
+}
+
+export const GROUP_ADMIN = 'Admin_Confession'
+export const GROUP_MINI_ADMIN = 'Mini_Admin'
+export const GROUP_USERS = 'Users'
 
 const AuthContext = createContext({
   user: null,
   userEmail: null,
   staffProfile: null,
+  groups: [],
+  role: ROLES.USER,
   isAuthenticated: false,
   isAdmin: false,
+  isMiniAdmin: false,
+  isUser: true,
   isLoading: true,
   refreshAuth: async () => {},
 })
@@ -29,27 +42,34 @@ export const useAuth = () => {
   return context
 }
 
-/**
- * Helper function to check if user is in Admin_Confession group
- */
-export const checkIsAdmin = async () => {
+export const getGroupsFromSession = async () => {
   try {
     const session = await fetchAuthSession()
     const idToken = session.tokens?.idToken
-    
-    if (!idToken) {
-      return false
-    }
-    
-    // Get groups from the ID token payload
+    if (!idToken) return []
     const groups = idToken.payload['cognito:groups'] || []
-    
-    // Check if user is in Admin_Confession group
-    return Array.isArray(groups) && groups.includes('Admin_Confession')
+    return Array.isArray(groups) ? groups : []
   } catch (error) {
-    console.error('Error checking admin status:', error)
-    return false
+    console.error('Error reading Cognito groups:', error)
+    return []
   }
+}
+
+export const resolveRole = (groups = []) => {
+  if (groups.includes(GROUP_ADMIN)) return ROLES.ADMIN
+  if (groups.includes(GROUP_MINI_ADMIN)) return ROLES.MINI_ADMIN
+  return ROLES.USER
+}
+
+/** @deprecated use resolveRole / getGroupsFromSession */
+export const checkIsAdmin = async () => {
+  const groups = await getGroupsFromSession()
+  return groups.includes(GROUP_ADMIN)
+}
+
+export const checkUserRole = async () => {
+  const groups = await getGroupsFromSession()
+  return { groups, role: resolveRole(groups) }
 }
 
 const resolveUserEmail = async (currentUser) => {
@@ -57,7 +77,7 @@ const resolveUserEmail = async (currentUser) => {
     const attributes = await fetchUserAttributes()
     if (attributes?.email) return attributes.email
   } catch {
-    // Attributes may be unavailable; fall through
+    // fall through
   }
   return currentUser?.signInDetails?.loginId || currentUser?.username || null
 }
@@ -66,16 +86,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [userEmail, setUserEmail] = useState(null)
   const [staffProfile, setStaffProfile] = useState(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [groups, setGroups] = useState([])
+  const [role, setRole] = useState(ROLES.USER)
   const [isLoading, setIsLoading] = useState(true)
+
+  const clearAuth = () => {
+    setUser(null)
+    setUserEmail(null)
+    setStaffProfile(null)
+    setGroups([])
+    setRole(ROLES.USER)
+  }
 
   const refreshAuth = useCallback(async () => {
     try {
       const currentUser = await getCurrentUser()
       setUser(currentUser)
 
-      const adminStatus = await checkIsAdmin()
-      setIsAdmin(adminStatus)
+      const nextGroups = await getGroupsFromSession()
+      setGroups(nextGroups)
+      setRole(resolveRole(nextGroups))
 
       const email = await resolveUserEmail(currentUser)
       setUserEmail(email)
@@ -83,10 +113,7 @@ export const AuthProvider = ({ children }) => {
       const profile = email ? await resolveStaffByEmail(email) : null
       setStaffProfile(profile)
     } catch (error) {
-      setUser(null)
-      setUserEmail(null)
-      setStaffProfile(null)
-      setIsAdmin(false)
+      clearAuth()
     } finally {
       setIsLoading(false)
     }
@@ -101,10 +128,7 @@ export const AuthProvider = ({ children }) => {
           refreshAuth()
           break
         case 'signedOut':
-          setUser(null)
-          setUserEmail(null)
-          setStaffProfile(null)
-          setIsAdmin(false)
+          clearAuth()
           break
         case 'tokenRefresh':
           refreshAuth()
@@ -119,12 +143,20 @@ export const AuthProvider = ({ children }) => {
     }
   }, [refreshAuth])
 
+  const isAdmin = role === ROLES.ADMIN
+  const isMiniAdmin = role === ROLES.MINI_ADMIN
+  const isUser = role === ROLES.USER
+
   const value = {
     user,
     userEmail,
     staffProfile,
+    groups,
+    role,
     isAuthenticated: !!user,
     isAdmin,
+    isMiniAdmin,
+    isUser,
     isLoading,
     refreshAuth,
   }

@@ -31,7 +31,8 @@ import { useAuth } from '../../context/AuthContext'
  * - Admin: Confirm costs (moves to DailyCost table in Administration)
  */
 const CostsManagement = () => {
-  const { isAdmin } = useAuth()
+  const { isAdmin, isMiniAdmin } = useAuth()
+  const canConfirm = isAdmin || isMiniAdmin
   
   // State
   const [costs, setCosts] = useState([])
@@ -138,7 +139,7 @@ const CostsManagement = () => {
   }
 
   const handleConfirm = async (cost) => {
-    if (!isAdmin) return
+    if (!canConfirm) return
     
     setIsConfirming(cost.id)
     try {
@@ -179,7 +180,11 @@ const CostsManagement = () => {
     <div>
       <PageHeader 
         title="Costs Management"
-        subtitle="Submit business expenses for admin approval"
+        subtitle={
+          canConfirm
+            ? 'Submit and confirm business expenses'
+            : 'Submit business expenses for admin approval'
+        }
         actions={
           <Button 
             icon={<Icons.Plus />}
@@ -271,7 +276,7 @@ const CostsManagement = () => {
                       </TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                          {isAdmin ? (
+                          {canConfirm ? (
                             <Button 
                               variant="success" 
                               size="small"
@@ -332,8 +337,8 @@ const CostsManagement = () => {
         )}
       </Card>
 
-      {/* Info Note for non-admins */}
-      {!isAdmin && (
+      {/* Info Note for users who cannot confirm */}
+      {!canConfirm && (
         <Card style={{ marginTop: '24px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.1))' }}>
           <CardContent>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>

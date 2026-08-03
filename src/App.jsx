@@ -19,7 +19,9 @@ import ServiceDetail from './components/ServiceDetail'
 import StaffLogin from './components/StaffLogin'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
+import RoleProtectedRoute from './components/RoleProtectedRoute'
 import WorkWithUs from './components/WorkWithUs'
+import { ROLES } from './context/AuthContext'
 
 // Erotic Brand - Lazy loaded for code splitting
 const EroticApp = lazy(() => import('./erotic/EroticApp'))
@@ -30,7 +32,7 @@ import Reports from './pages/staff/Reports'
 import CostsManagement from './pages/staff/CostsManagement'
 import Reservations from './pages/staff/Reservations'
 import Calendar from './pages/staff/Calendar'
-import AssignedTask from './pages/staff/AssignedTask'
+import PendingConfirmations from './pages/staff/PendingConfirmations'
 import ProfileSettings from './pages/staff/ProfileSettings'
 
 // Administration Pages (Admin-only)
@@ -102,20 +104,38 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
               <Route
                 path="costs"
                 element={
-                  <AdminProtectedRoute>
+                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN]}>
                     <CostsManagement />
-                  </AdminProtectedRoute>
+                  </RoleProtectedRoute>
                 }
               />
-              <Route path="reservations" element={<Reservations />} />
-              <Route path="calendar" element={<Calendar />} />
+              <Route
+                path="reservations"
+                element={
+                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                    <Reservations />
+                  </RoleProtectedRoute>
+                }
+              />
+              <Route
+                path="calendar"
+                element={
+                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                    <Calendar />
+                  </RoleProtectedRoute>
+                }
+              />
+              <Route
+                path="pending-confirmations"
+                element={
+                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN]}>
+                    <PendingConfirmations />
+                  </RoleProtectedRoute>
+                }
+              />
               <Route
                 path="assigned-task"
-                element={
-                  <AdminProtectedRoute>
-                    <AssignedTask />
-                  </AdminProtectedRoute>
-                }
+                element={<Navigate to="/staff/pending-confirmations" replace />}
               />
               <Route
                 path="staff-management"
@@ -209,20 +229,38 @@ function EroticAppContent({ loading, setCursorVariant }) {
                 <Route
                   path="costs"
                   element={
-                    <AdminProtectedRoute>
+                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN]}>
                       <CostsManagement />
-                    </AdminProtectedRoute>
+                    </RoleProtectedRoute>
                   }
                 />
-                <Route path="reservations" element={<Reservations />} />
-                <Route path="calendar" element={<Calendar />} />
+                <Route
+                  path="reservations"
+                  element={
+                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                      <Reservations />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="calendar"
+                  element={
+                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                      <Calendar />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="pending-confirmations"
+                  element={
+                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN]}>
+                      <PendingConfirmations />
+                    </RoleProtectedRoute>
+                  }
+                />
                 <Route
                   path="assigned-task"
-                  element={
-                    <AdminProtectedRoute>
-                      <AssignedTask />
-                    </AdminProtectedRoute>
-                  }
+                  element={<Navigate to="/staff/pending-confirmations" replace />}
                 />
                 <Route
                   path="staff-management"

@@ -12,7 +12,9 @@ import {
   LoadingState,
 } from '../../components/admin/ui'
 import { bookingAPI, getDateFromToday, getTodayDate, toLocalDateKey } from '../../services/dataService'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth, ROLES } from '../../context/AuthContext'
+import MiniAdminDashboard from './MiniAdminDashboard'
+import UserDashboard from './UserDashboard'
 
 /**
  * Simple Line Chart Component for Reservations
@@ -41,26 +43,19 @@ const ReservationsLineChart = ({ data, isLoading }) => {
   const innerWidth = chartWidth - padding.left - padding.right
   const innerHeight = chartHeight - padding.top - padding.bottom
 
-  // Calculate points for the line
   const points = data.map((d, i) => {
     const x = padding.left + (i / (data.length - 1 || 1)) * innerWidth
     const y = padding.top + innerHeight - (d.count / maxValue) * innerHeight
     return { x, y, ...d }
   })
 
-  // Create SVG path for the line
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-  
-  // Create area path (filled area under the line)
   const areaPath = `${linePath} L ${points[points.length - 1]?.x || padding.left} ${padding.top + innerHeight} L ${padding.left} ${padding.top + innerHeight} Z`
-
-  // Y-axis ticks
   const yTicks = [0, Math.ceil(maxValue / 4), Math.ceil(maxValue / 2), Math.ceil(maxValue * 3 / 4), maxValue]
 
   return (
     <div style={{ width: '100%', overflowX: 'auto' }}>
       <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', minWidth: '500px', height: '300px' }}>
-        {/* Grid lines */}
         {yTicks.map((tick, i) => {
           const y = padding.top + innerHeight - (tick / maxValue) * innerHeight
           return (
@@ -86,14 +81,8 @@ const ReservationsLineChart = ({ data, isLoading }) => {
           )
         })}
 
-        {/* Area under the line */}
-        <path
-          d={areaPath}
-          fill="url(#areaGradient)"
-          opacity="0.3"
-        />
+        <path d={areaPath} fill="url(#areaGradient)" opacity="0.3" />
 
-        {/* Gradient definition */}
         <defs>
           <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="var(--ui-primary)" stopOpacity="0.4" />
@@ -101,7 +90,6 @@ const ReservationsLineChart = ({ data, isLoading }) => {
           </linearGradient>
         </defs>
 
-        {/* Line */}
         <path
           d={linePath}
           fill="none"
@@ -111,7 +99,6 @@ const ReservationsLineChart = ({ data, isLoading }) => {
           strokeLinejoin="round"
         />
 
-        {/* Data points */}
         {points.map((p, i) => (
           <g key={i}>
             <circle
@@ -123,7 +110,6 @@ const ReservationsLineChart = ({ data, isLoading }) => {
               strokeWidth="3"
               style={{ cursor: 'pointer' }}
             />
-            {/* X-axis labels */}
             <text
               x={p.x}
               y={chartHeight - 10}
@@ -134,12 +120,10 @@ const ReservationsLineChart = ({ data, isLoading }) => {
             >
               {p.label}
             </text>
-            {/* Value label on hover area */}
             <title>{`${p.fullDate}: ${p.count} reservations`}</title>
           </g>
         ))}
 
-        {/* Y-axis label */}
         <text
           x={15}
           y={chartHeight / 2}
@@ -156,27 +140,23 @@ const ReservationsLineChart = ({ data, isLoading }) => {
 }
 
 /**
- * Reports - Dashboard overview with stats and recent activity
+ * Full admin business dashboard
  */
-const Reports = () => {
-  const { isAdmin, staffProfile, isLoading: authLoading } = useAuth()
+const AdminDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('week')
   const [bookings, setBookings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load bookings data
   useEffect(() => {
-    if (authLoading) return
     loadBookingsData()
-  }, [selectedPeriod, authLoading, isAdmin, staffProfile?.id])
+  }, [selectedPeriod])
 
   const loadBookingsData = async () => {
     setIsLoading(true)
     try {
-      // Calculate date range based on selected period
       let fromDate, toDate
       const today = getTodayDate()
-      
+
       switch (selectedPeriod) {
         case 'today':
           fromDate = today
@@ -199,17 +179,7 @@ const Reports = () => {
           toDate = today
       }
 
-      // Non-admin staff: only their own bookings (individual view)
-      if (!isAdmin && !staffProfile?.id) {
-        setBookings([])
-        return
-      }
-
-      const therapistOptions = !isAdmin && staffProfile?.id
-        ? { therapistId: staffProfile.id }
-        : {}
-
-      const data = await bookingAPI.list(fromDate, toDate, therapistOptions)
+      const data = await bookingAPI.list(fromDate, toDate, {})
       setBookings(data)
     } catch (err) {
       console.error('Error loading bookings:', err)
@@ -218,11 +188,9 @@ const Reports = () => {
     }
   }
 
-  // Calculate chart data - group bookings by date
   const chartData = useMemo(() => {
     if (!bookings.length) return []
 
-    // Group by date
     const countsByDate = {}
     bookings.forEach(booking => {
       if (booking.date) {
@@ -230,31 +198,28 @@ const Reports = () => {
       }
     })
 
-    // Get date range for display
     let days = 7
     switch (selectedPeriod) {
       case 'today': days = 1; break
       case 'week': days = 7; break
       case 'month': days = 30; break
-      case 'year': days = 12; break // Show monthly for year view
+      case 'year': days = 12; break
     }
 
     if (selectedPeriod === 'year') {
-      // Group by month for year view
       const monthCounts = {}
       bookings.forEach(booking => {
         if (booking.date) {
-          const month = booking.date.substring(0, 7) // YYYY-MM
+          const month = booking.date.substring(0, 7)
           monthCounts[month] = (monthCounts[month] || 0) + 1
         }
       })
 
-      // Generate last 12 months
       const result = []
       for (let i = 11; i >= 0; i--) {
         const date = new Date()
         date.setMonth(date.getMonth() - i)
-        const monthKey = date.toISOString().substring(0, 7)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
         const monthLabel = date.toLocaleDateString('en-US', { month: 'short' })
         result.push({
           date: monthKey,
@@ -266,7 +231,6 @@ const Reports = () => {
       return result
     }
 
-    // Generate data for each day in the range
     const result = []
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date()
@@ -283,7 +247,6 @@ const Reports = () => {
     return result
   }, [bookings, selectedPeriod])
 
-  // Calculate stats from real data
   const stats = useMemo(() => {
     const totalBookings = bookings.length
     const pendingBookings = bookings.filter(b => b.status === 'Pending').length
@@ -291,27 +254,27 @@ const Reports = () => {
     const totalRevenue = bookings.reduce((sum, b) => sum + (b.priceAgreement || 0), 0)
 
     return [
-      { 
-        title: 'Total Bookings', 
-        value: totalBookings.toString(), 
+      {
+        title: 'Total Bookings',
+        value: totalBookings.toString(),
         icon: <Icons.Calendar />,
         subtitle: `${selectedPeriod === 'today' ? 'Today' : `Last ${selectedPeriod}`}`
       },
-      { 
-        title: 'Pending', 
-        value: pendingBookings.toString(), 
+      {
+        title: 'Pending',
+        value: pendingBookings.toString(),
         icon: <Icons.Clock />,
         subtitle: 'Awaiting completion'
       },
-      { 
-        title: 'Completed', 
-        value: completedBookings.toString(), 
+      {
+        title: 'Completed',
+        value: completedBookings.toString(),
         icon: <Icons.Check />,
         subtitle: 'Successfully done'
       },
-      { 
-        title: 'Revenue', 
-        value: `€${totalRevenue.toFixed(0)}`, 
+      {
+        title: 'Revenue',
+        value: `€${totalRevenue.toFixed(0)}`,
         icon: <Icons.DollarSign />,
         subtitle: 'Total earnings'
       },
@@ -320,13 +283,9 @@ const Reports = () => {
 
   return (
     <div>
-      <PageHeader 
-        title={isAdmin ? 'Dashboard' : 'My Dashboard'}
-        subtitle={
-          isAdmin
-            ? 'Overview of your business performance and recent activity'
-            : 'Overview of your personal reservations and activity'
-        }
+      <PageHeader
+        title="Dashboard"
+        subtitle="Overview of your business performance and recent activity"
         actions={
           <div style={{ display: 'flex', gap: '8px' }}>
             {['today', 'week', 'month', 'year'].map((period) => (
@@ -343,7 +302,6 @@ const Reports = () => {
         }
       />
 
-      {/* Stats Grid */}
       <Grid cols={4} gap="default" style={{ marginBottom: '24px' }}>
         {stats.map((stat, index) => (
           <StatCard
@@ -358,7 +316,6 @@ const Reports = () => {
         ))}
       </Grid>
 
-      {/* Reservations Line Chart */}
       <Card>
         <CardHeader>
           <CardTitle subtitle={`Number of reservations ${selectedPeriod === 'today' ? 'today' : `over the last ${selectedPeriod}`}`}>
@@ -370,7 +327,6 @@ const Reports = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Stats Row */}
       <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
         <Card>
           <CardHeader>
@@ -445,6 +401,27 @@ const Reports = () => {
       </div>
     </div>
   )
+}
+
+/**
+ * Reports - role-based dashboard router
+ */
+const Reports = () => {
+  const { role, isLoading: authLoading } = useAuth()
+
+  if (authLoading) {
+    return <LoadingState text="Loading dashboard..." />
+  }
+
+  if (role === ROLES.MINI_ADMIN) {
+    return <MiniAdminDashboard />
+  }
+
+  if (role === ROLES.USER) {
+    return <UserDashboard />
+  }
+
+  return <AdminDashboard />
 }
 
 export default Reports

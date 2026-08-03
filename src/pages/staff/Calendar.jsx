@@ -19,7 +19,8 @@ import { toLocalDateKey } from '../../utils/dates'
  * Done and Canceled bookings do not appear in the calendar
  */
 const Calendar = () => {
-  const { isAdmin, staffProfile, isLoading: authLoading } = useAuth()
+  const { isUser, staffProfile, isLoading: authLoading } = useAuth()
+  const isIndividualView = isUser
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState('week') // 'day', 'week', 'month'
   const [events, setEvents] = useState([])
@@ -40,7 +41,7 @@ const Calendar = () => {
   useEffect(() => {
     if (authLoading) return
     loadEvents()
-  }, [currentDate, viewMode, authLoading, isAdmin, staffProfile?.id, filterCenterId, filterRoomId])
+  }, [currentDate, viewMode, authLoading, isIndividualView, staffProfile?.id, filterCenterId, filterRoomId])
 
   const loadCentersAndRooms = async () => {
     try {
@@ -58,14 +59,14 @@ const Calendar = () => {
   const loadEvents = async () => {
     setIsLoading(true)
     try {
-      if (!isAdmin && !staffProfile?.id) {
+      if (isIndividualView && !staffProfile?.id) {
         setEvents([])
         return
       }
 
       const dateRange = getDateRange()
       const filterOptions = {
-        ...(!isAdmin && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
+        ...(isIndividualView && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
         ...(filterCenterId ? { centerId: filterCenterId } : {}),
         ...(filterRoomId ? { roomId: filterRoomId } : {}),
       }
@@ -236,11 +237,11 @@ const Calendar = () => {
   return (
     <div>
       <PageHeader 
-        title={isAdmin ? 'Calendar' : 'My Calendar'}
+        title={isIndividualView ? 'My Calendar' : 'Calendar'}
         subtitle={
-          isAdmin
-            ? 'View pending appointments awaiting completion'
-            : 'View your pending appointments awaiting completion'
+          isIndividualView
+            ? 'View your pending appointments awaiting completion'
+            : 'View pending appointments awaiting completion'
         }
         actions={
           <Button variant="secondary" onClick={loadEvents}>

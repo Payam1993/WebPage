@@ -179,6 +179,8 @@ const schema = a.schema({
       priceAgreement: a.float().required(),
       // Status: Done | Pending | Canceled
       status: a.enum(["Done", "Pending", "Canceled"]),
+      // Payment after service is confirmed done
+      paymentStatus: a.enum(["None", "PaymentPending", "PaymentApproved"]),
     })
     .authorization((allow) => [
       allow.authenticated(), // All authenticated staff can CRUD bookings

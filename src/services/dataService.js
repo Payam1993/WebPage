@@ -710,6 +710,7 @@ export const bookingAPI = {
         durationMinutes: bookingData.durationMinutes,
         priceAgreement: bookingData.priceAgreement,
         status: bookingData.status || 'Pending',
+        paymentStatus: bookingData.paymentStatus || 'None',
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -739,6 +740,7 @@ export const bookingAPI = {
         durationMinutes: bookingData.durationMinutes,
         priceAgreement: bookingData.priceAgreement,
         status: bookingData.status,
+        paymentStatus: bookingData.paymentStatus || 'None',
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -746,6 +748,28 @@ export const bookingAPI = {
       console.error('Error updating booking:', error)
       throw error
     }
+  },
+
+  /**
+   * Mini-admin: mark service as realized after the reserved slot ended
+   */
+  async confirmServiceDone(booking) {
+    return this.update(booking.id, {
+      ...booking,
+      status: 'Done',
+      paymentStatus: 'PaymentPending',
+    })
+  },
+
+  /**
+   * Mini-admin: approve staff payment after service is done
+   */
+  async approvePayment(booking) {
+    return this.update(booking.id, {
+      ...booking,
+      status: 'Done',
+      paymentStatus: 'PaymentApproved',
+    })
   },
 
   async delete(id) {

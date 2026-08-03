@@ -30,10 +30,11 @@ import '../../components/AvailabilityCalendar.css'
 /**
  * Reservations - Manage client bookings and reservations
  * Admin: global view of all bookings + public not-confirmed requests
- * Staff: individual view of bookings assigned to their Staff profile
+ * Users: individual view of bookings assigned to their Staff profile
  */
 const Reservations = () => {
-  const { isAdmin, staffProfile, isLoading: authLoading } = useAuth()
+  const { isAdmin, isUser, staffProfile, isLoading: authLoading } = useAuth()
+  const isIndividualView = isUser
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [bookings, setBookings] = useState([])
@@ -90,7 +91,7 @@ const Reservations = () => {
   useEffect(() => {
     if (authLoading) return
     loadBookings()
-  }, [appliedFilter.fromDate, appliedFilter.toDate, authLoading, isAdmin, staffProfile?.id, filterCenterId, filterRoomId])
+  }, [appliedFilter.fromDate, appliedFilter.toDate, authLoading, isIndividualView, staffProfile?.id, filterCenterId, filterRoomId])
 
   // Auto-refresh not confirmed reservations every 30 seconds (admin only)
   useEffect(() => {
@@ -140,14 +141,14 @@ const Reservations = () => {
     setIsLoading(true)
     setError(null)
     try {
-      if (!isAdmin && !staffProfile?.id) {
+      if (isIndividualView && !staffProfile?.id) {
         setBookings([])
         return
       }
 
       const { fromDate, toDate } = appliedFilter
       const filterOptions = {
-        ...(!isAdmin && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
+        ...(isIndividualView && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
         ...(filterCenterId ? { centerId: filterCenterId } : {}),
         ...(filterRoomId ? { roomId: filterRoomId } : {}),
       }
@@ -190,8 +191,7 @@ const Reservations = () => {
         ...(defaultCenter
           ? { centerId: defaultCenter.id, centerName: defaultCenter.centerName }
           : {}),
-        // Individual staff: lock new bookings to themselves
-        ...(!isAdmin && staffProfile
+        ...((isIndividualView && staffProfile)
           ? {
               therapistId: staffProfile.id,
               therapistName: staffProfile.staffName,
@@ -483,11 +483,11 @@ const Reservations = () => {
   return (
     <div>
       <PageHeader 
-        title={isAdmin ? 'Reservations' : 'My Reservations'}
+        title={isIndividualView ? 'My Reservations' : 'Reservations'}
         subtitle={
-          isAdmin
-            ? 'Manage and view all client bookings'
-            : 'Manage and view your assigned client bookings'
+          isIndividualView
+            ? 'Manage and view your assigned client bookings'
+            : 'Manage and view all client bookings'
         }
         actions={
           <Button icon={<Icons.Plus />} onClick={() => handleOpenModal()}>
@@ -740,14 +740,14 @@ const Reservations = () => {
           <Select
             label="Therapist"
             options={
-              isAdmin
-                ? staffOptions
-                : staffOptions.filter((s) => s.value === staffProfile?.id)
+              isIndividualView
+                ? staffOptions.filter((s) => s.value === staffProfile?.id)
+                : staffOptions
             }
-            placeholder={isAdmin ? 'Select therapist (optional)' : 'Assigned to you'}
+            placeholder={isIndividualView ? 'Assigned to you' : 'Select therapist (optional)'}
             value={formData.therapistId || ''}
             onChange={(e) => handleTherapistSelect(e.target.value)}
-            disabled={!isAdmin}
+            disabled={isIndividualView}
           />
           <Select
             label="Center"
