@@ -7,6 +7,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * - Service: massage services with name, duration, price (static data)
  * - Cost: expense types with name and optional fixed price (static data)
  * - Staff: staff members with name (static data)
+ * - StaffApplication: public Work With Us applications awaiting admin review
  * - DailyService: daily service records with full details
  * - DailyCost: daily cost records
  * - Booking: client reservations/bookings (staff portal)
@@ -15,7 +16,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * Access: 
  * - Admin_Confession group: full access to all models
  * - Authenticated users: access to Booking model (staff portal)
- * - Public (guest): can create NotConfirmedReservation
+ * - Public (guest): can create NotConfirmedReservation and StaffApplication
  */
 const schema = a.schema({
   // ============================================
@@ -46,16 +47,36 @@ const schema = a.schema({
       allow.authenticated().to(["read"]), // Staff can read for dropdowns
     ]),
 
-  // Staff model - staff members
+  // Staff model - staff members (confirmed)
   Staff: a
     .model({
       staffName: a.string().required(),
+      lastName: a.string(),
       email: a.string(),
       phone: a.string(),
+      gender: a.string(),
+      yearsOfExperience: a.string(),
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),
       allow.authenticated().to(["read"]), // Staff can read for dropdowns
+    ]),
+
+  // StaffApplication - public "Work With Us" requests awaiting admin review
+  StaffApplication: a
+    .model({
+      firstName: a.string().required(),
+      lastName: a.string().required(),
+      email: a.string().required(),
+      phone: a.string().required(),
+      gender: a.enum(["Man", "Female", "Others"]),
+      yearsOfExperience: a.string().required(),
+      explanation: a.string(),
+      status: a.enum(["Pending", "Confirmed", "Declined"]),
+    })
+    .authorization((allow) => [
+      allow.publicApiKey().to(["create"]), // Public can submit applications
+      allow.group("Admin_Confession"), // Admin can review, confirm, decline
     ]),
 
   // ============================================

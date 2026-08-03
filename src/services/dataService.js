@@ -164,8 +164,11 @@ export const staffAPI = {
       const client = getClient()
       const { data, errors } = await client.models.Staff.create({
         staffName: staffData.staffName,
+        lastName: staffData.lastName || null,
         email: staffData.email || null,
         phone: staffData.phone || null,
+        gender: staffData.gender || null,
+        yearsOfExperience: staffData.yearsOfExperience || null,
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -181,8 +184,11 @@ export const staffAPI = {
       const { data, errors } = await client.models.Staff.update({
         id,
         staffName: staffData.staffName,
+        lastName: staffData.lastName || null,
         email: staffData.email || null,
         phone: staffData.phone || null,
+        gender: staffData.gender || null,
+        yearsOfExperience: staffData.yearsOfExperience || null,
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -702,6 +708,30 @@ export const publicAPI = {
   },
 
   /**
+   * Create a public staff / work-with-us application (guest access)
+   */
+  async createStaffApplication(applicationData) {
+    try {
+      const client = generateClient({ authMode: 'apiKey' })
+      const { data, errors } = await client.models.StaffApplication.create({
+        firstName: applicationData.firstName,
+        lastName: applicationData.lastName,
+        email: applicationData.email,
+        phone: applicationData.phone,
+        gender: applicationData.gender,
+        yearsOfExperience: applicationData.yearsOfExperience,
+        explanation: applicationData.explanation || null,
+        status: 'Pending',
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating staff application:', error)
+      throw error
+    }
+  },
+
+  /**
    * Get available services (guest access)
    */
   async getServices() {
@@ -714,6 +744,68 @@ export const publicAPI = {
       console.error('Error fetching services:', error)
       throw error
     }
+  },
+}
+
+// ============================================
+// StaffApplication CRUD (Work With Us requests)
+// ============================================
+export const staffApplicationAPI = {
+  /**
+   * List pending staff applications
+   */
+  async listPending() {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.StaffApplication.list({
+        filter: { status: { eq: 'Pending' } },
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error listing staff applications:', error)
+      throw error
+    }
+  },
+
+  async delete(id) {
+    try {
+      const client = getClient()
+      const { errors } = await client.models.StaffApplication.delete({ id })
+      if (errors) throw new Error(errors[0].message)
+      return true
+    } catch (error) {
+      console.error('Error deleting staff application:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Confirm application: create Staff record and remove the application
+   */
+  async confirm(application) {
+    try {
+      const newStaff = await staffAPI.create({
+        staffName: application.firstName,
+        lastName: application.lastName,
+        email: application.email,
+        phone: application.phone,
+        gender: application.gender,
+        yearsOfExperience: application.yearsOfExperience,
+      })
+      await this.delete(application.id)
+      return newStaff
+    } catch (error) {
+      console.error('Error confirming staff application:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Decline application: remove it
+   */
+  async decline(id) {
+    return this.delete(id)
   },
 }
 

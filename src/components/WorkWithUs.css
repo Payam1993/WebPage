@@ -64,6 +64,12 @@
   align-items: start;
 }
 
+.work-content--form-only {
+  grid-template-columns: 1fr;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
 .work-info {
   padding-right: 2rem;
 }
@@ -168,6 +174,10 @@
   top: 120px;
 }
 
+.work-content--form-only .work-form-container {
+  position: static;
+}
+
 .form-card {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
@@ -224,7 +234,9 @@
   font-size: 0.75rem;
 }
 
-.form-group input {
+.form-group input,
+.form-group select,
+.form-group textarea {
   padding: 1rem;
   font-size: 1rem;
   font-family: var(--font-sans);
@@ -232,17 +244,49 @@
   background: var(--color-cream);
   border: 1px solid rgba(42, 42, 42, 0.15);
   transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.form-group input:focus {
+.form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232a2a2a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.5;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: var(--color-terracotta);
   background: white;
 }
 
-.form-group input::placeholder {
+.form-group input::placeholder,
+.form-group textarea::placeholder {
   color: var(--color-charcoal);
   opacity: 0.4;
+}
+
+.form-error {
+  padding: 0.875rem 1rem;
+  background: rgba(196, 80, 60, 0.1);
+  color: #a13a2a;
+  font-size: 0.9rem;
+  border: 1px solid rgba(196, 80, 60, 0.2);
+}
+
+.form-card .work-logo {
+  margin-bottom: 1.25rem;
 }
 
 /* File Upload */

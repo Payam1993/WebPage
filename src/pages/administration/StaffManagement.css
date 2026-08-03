@@ -1,0 +1,85 @@
+.staff-management {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.staff-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  background: var(--ui-bg-muted, rgba(0, 0, 0, 0.04));
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.staff-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border: none;
+  background: transparent;
+  color: var(--ui-text-muted, #6b7280);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.staff-tab:hover {
+  color: var(--ui-text, #111827);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.staff-tab.active {
+  background: #fff;
+  color: var(--ui-text, #111827);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.staff-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.staff-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--ui-text-muted, #6b7280);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.staff-tab.active .staff-tab-count {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--ui-text, #111827);
+}
+
+@media (max-width: 640px) {
+  .staff-tabs {
+    width: 100%;
+  }
+
+  .staff-tab {
+    flex: 1;
+    justify-content: center;
+  }
+}

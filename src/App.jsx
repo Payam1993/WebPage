@@ -39,6 +39,7 @@ import Reporting from './pages/administration/Reporting'
 import StaticData from './pages/administration/StaticData'
 import DailyData from './pages/administration/DailyData'
 import DailyConfirmation from './pages/administration/DailyConfirmation'
+import StaffManagement from './pages/administration/StaffManagement'
 
 import './App.css'
 
@@ -119,6 +120,7 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
               <Route path="static-data" element={<StaticData />} />
               <Route path="daily-data" element={<DailyData />} />
               <Route path="daily-confirmation" element={<DailyConfirmation />} />
+              <Route path="staff" element={<StaffManagement />} />
             </Route>
 
             {/* Public Routes - With Navbar/Footer */}
@@ -203,6 +205,7 @@ function EroticAppContent({ loading, setCursorVariant }) {
                 <Route path="static-data" element={<StaticData />} />
                 <Route path="daily-data" element={<DailyData />} />
                 <Route path="daily-confirmation" element={<DailyConfirmation />} />
+                <Route path="staff" element={<StaffManagement />} />
               </Route>
 
               {/* Redirect any other route to home */}

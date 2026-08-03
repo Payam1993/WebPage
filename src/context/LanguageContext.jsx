@@ -156,45 +156,36 @@ export const translations = {
     },
     // Work With Us
     workWithUs: {
-      title: "Join Our Team",
+      title: "Work With Us",
       subtitle: "Become part of the Confession Barcelona family",
-      intro: "Are you a professional massage therapist looking for an exceptional work environment? At Confession Barcelona, we offer qualified professionals the opportunity to practice in our premium wellness center.",
-      offer: "What We Offer",
-      offerItems: [
-        "Private, fully-equipped treatment rooms available for rent",
-        "Premium location in the heart of Barcelona",
-        "Flexible scheduling options",
-        "Professional and welcoming environment",
-        "Access to our client base and booking system"
-      ],
-      requirements: "Requirements",
-      requirementsItems: [
-        "Professional massage therapy certification",
-        "Minimum 2 years of experience",
-        "Excellent communication skills",
-        "Passion for wellness and client care"
-      ],
-      formTitle: "Apply Now",
-      formSubtitle: "Fill out the form below and attach your CV. We will contact you shortly.",
+      formTitle: "Work With Us",
+      formSubtitle: "Fill out the form below and we will get back to you shortly.",
       form: {
-        name: "First Name",
+        name: "Name",
         namePlaceholder: "Your first name",
-        surname: "Surname",
-        surnamePlaceholder: "Your surname",
-        phone: "Phone Number",
+        surname: "Last Name",
+        surnamePlaceholder: "Your last name",
+        phone: "Contact Number",
         phonePlaceholder: "+34 XXX XXX XXX",
         email: "Email Address",
         emailPlaceholder: "your@email.com",
-        emailOptional: "(Optional)",
-        cv: "Upload CV",
-        cvNote: "PDF or Word document (with photo recommended)",
-        cvButton: "Choose File",
-        cvNoFile: "No file selected",
-        submit: "Submit Application"
+        gender: "Gender",
+        genderPlaceholder: "Select gender",
+        genderMan: "Man",
+        genderFemale: "Female",
+        genderOthers: "Others",
+        experience: "Years of Experience",
+        experiencePlaceholder: "Select experience",
+        experienceMore: "More than 5",
+        explanation: "Explanation",
+        explanationPlaceholder: "Tell us a bit about yourself...",
+        optional: "(Optional)",
+        submit: "Submit Application",
+        error: "Something went wrong. Please try again later."
       },
       success: {
-        title: "Application Received!",
-        message: "Thank you for your interest in joining our team. We will review your application and contact you soon."
+        title: "Thank You!",
+        message: "Thanks for your interest in working with us. We will get back to you shortly."
       },
       backToHome: "Back to Home"
     },
@@ -399,45 +390,36 @@ export const translations = {
     },
     // Work With Us
     workWithUs: {
-      title: "Únete a Nuestro Equipo",
+      title: "Trabaja con Nosotros",
       subtitle: "Forma parte de la familia Confession Barcelona",
-      intro: "¿Eres un terapeuta de masajes profesional buscando un entorno de trabajo excepcional? En Confession Barcelona, ofrecemos a profesionales cualificados la oportunidad de ejercer en nuestro centro de bienestar premium.",
-      offer: "Lo Que Ofrecemos",
-      offerItems: [
-        "Salas de tratamiento privadas y completamente equipadas disponibles para alquiler",
-        "Ubicación premium en el corazón de Barcelona",
-        "Opciones de horarios flexibles",
-        "Ambiente profesional y acogedor",
-        "Acceso a nuestra base de clientes y sistema de reservas"
-      ],
-      requirements: "Requisitos",
-      requirementsItems: [
-        "Certificación profesional en terapia de masajes",
-        "Mínimo 2 años de experiencia",
-        "Excelentes habilidades de comunicación",
-        "Pasión por el bienestar y la atención al cliente"
-      ],
-      formTitle: "Aplica Ahora",
-      formSubtitle: "Completa el formulario a continuación y adjunta tu CV. Nos pondremos en contacto contigo pronto.",
+      formTitle: "Trabaja con Nosotros",
+      formSubtitle: "Completa el formulario y nos pondremos en contacto contigo pronto.",
       form: {
         name: "Nombre",
         namePlaceholder: "Tu nombre",
         surname: "Apellido",
         surnamePlaceholder: "Tu apellido",
-        phone: "Número de Teléfono",
+        phone: "Número de Contacto",
         phonePlaceholder: "+34 XXX XXX XXX",
         email: "Correo Electrónico",
         emailPlaceholder: "tu@correo.com",
-        emailOptional: "(Opcional)",
-        cv: "Subir CV",
-        cvNote: "Documento PDF o Word (con foto recomendado)",
-        cvButton: "Elegir Archivo",
-        cvNoFile: "Ningún archivo seleccionado",
-        submit: "Enviar Solicitud"
+        gender: "Género",
+        genderPlaceholder: "Selecciona el género",
+        genderMan: "Hombre",
+        genderFemale: "Mujer",
+        genderOthers: "Otros",
+        experience: "Años de Experiencia",
+        experiencePlaceholder: "Selecciona la experiencia",
+        experienceMore: "Más de 5",
+        explanation: "Explicación",
+        explanationPlaceholder: "Cuéntanos un poco sobre ti...",
+        optional: "(Opcional)",
+        submit: "Enviar Solicitud",
+        error: "Algo salió mal. Por favor, inténtalo de nuevo más tarde."
       },
       success: {
-        title: "¡Solicitud Recibida!",
-        message: "Gracias por tu interés en unirte a nuestro equipo. Revisaremos tu solicitud y te contactaremos pronto."
+        title: "¡Gracias!",
+        message: "Gracias por tu interés en trabajar con nosotros. Nos pondremos en contacto contigo pronto."
       },
       backToHome: "Volver al Inicio"
     },
@@ -642,45 +624,36 @@ export const translations = {
     },
     // Work With Us
     workWithUs: {
-      title: "Uneix-te al Nostre Equip",
+      title: "Treballa amb Nosaltres",
       subtitle: "Forma part de la família Confession Barcelona",
-      intro: "Ets un terapeuta de massatges professional buscant un entorn de treball excepcional? A Confession Barcelona, oferim a professionals qualificats l'oportunitat d'exercir al nostre centre de benestar premium.",
-      offer: "El Que Oferim",
-      offerItems: [
-        "Sales de tractament privades i completament equipades disponibles per a lloguer",
-        "Ubicació premium al cor de Barcelona",
-        "Opcions d'horaris flexibles",
-        "Ambient professional i acollidor",
-        "Accés a la nostra base de clients i sistema de reserves"
-      ],
-      requirements: "Requisits",
-      requirementsItems: [
-        "Certificació professional en teràpia de massatges",
-        "Mínim 2 anys d'experiència",
-        "Excel·lents habilitats de comunicació",
-        "Passió pel benestar i l'atenció al client"
-      ],
-      formTitle: "Aplica Ara",
-      formSubtitle: "Completa el formulari a continuació i adjunta el teu CV. Ens posarem en contacte amb tu aviat.",
+      formTitle: "Treballa amb Nosaltres",
+      formSubtitle: "Completa el formulari i ens posarem en contacte amb tu aviat.",
       form: {
         name: "Nom",
         namePlaceholder: "El teu nom",
         surname: "Cognom",
         surnamePlaceholder: "El teu cognom",
-        phone: "Número de Telèfon",
+        phone: "Número de Contacte",
         phonePlaceholder: "+34 XXX XXX XXX",
         email: "Correu Electrònic",
         emailPlaceholder: "el.teu@correu.com",
-        emailOptional: "(Opcional)",
-        cv: "Pujar CV",
-        cvNote: "Document PDF o Word (amb foto recomanat)",
-        cvButton: "Triar Arxiu",
-        cvNoFile: "Cap arxiu seleccionat",
-        submit: "Enviar Sol·licitud"
+        gender: "Gènere",
+        genderPlaceholder: "Selecciona el gènere",
+        genderMan: "Home",
+        genderFemale: "Dona",
+        genderOthers: "Altres",
+        experience: "Anys d'Experiència",
+        experiencePlaceholder: "Selecciona l'experiència",
+        experienceMore: "Més de 5",
+        explanation: "Explicació",
+        explanationPlaceholder: "Explica'ns una mica sobre tu...",
+        optional: "(Opcional)",
+        submit: "Enviar Sol·licitud",
+        error: "Alguna cosa ha anat malament. Si us plau, torna-ho a provar més tard."
       },
       success: {
-        title: "Sol·licitud Rebuda!",
-        message: "Gràcies pel teu interès en unir-te al nostre equip. Revisarem la teva sol·licitud i et contactarem aviat."
+        title: "Gràcies!",
+        message: "Gràcies pel teu interès a treballar amb nosaltres. Ens posarem en contacte amb tu aviat."
       },
       backToHome: "Tornar a l'Inici"
     },
