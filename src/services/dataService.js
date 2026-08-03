@@ -1004,6 +1004,66 @@ export const publicAPI = {
       throw error
     }
   },
+
+  /**
+   * Get busy slots for availability calendar (sanitized — no client PII)
+   */
+  async listBusySlots({ fromDate = null, toDate = null, centerId = null, roomId = null } = {}) {
+    try {
+      const client = generateClient({ authMode: 'apiKey' })
+      const andFilters = []
+
+      if (fromDate && toDate) {
+        andFilters.push({ date: { between: [fromDate, toDate] } })
+      } else if (fromDate) {
+        andFilters.push({ date: { eq: fromDate } })
+      }
+      if (centerId) andFilters.push({ centerId: { eq: centerId } })
+      if (roomId) andFilters.push({ roomId: { eq: roomId } })
+
+      const bookingFilter = andFilters.length
+        ? andFilters.length === 1
+          ? andFilters[0]
+          : { and: andFilters }
+        : undefined
+
+      const pendingFilter = bookingFilter
+        ? {
+            and: [
+              ...(andFilters.length ? andFilters : []),
+              { status: { eq: 'NotConfirmed' } },
+            ],
+          }
+        : { status: { eq: 'NotConfirmed' } }
+
+      const [bookingsResult, pendingResult] = await Promise.all([
+        bookingFilter
+          ? client.models.Booking.list({ filter: bookingFilter })
+          : client.models.Booking.list(),
+        client.models.NotConfirmedReservation.list({ filter: pendingFilter }),
+      ])
+
+      if (bookingsResult.errors) throw new Error(bookingsResult.errors[0].message)
+      if (pendingResult.errors) throw new Error(pendingResult.errors[0].message)
+
+      const sanitize = (items) =>
+        (items || [])
+          .filter((item) => item.status !== 'Canceled')
+          .map((item) => ({
+            date: item.date,
+            reservedTime: item.reservedTime,
+            durationMinutes: item.durationMinutes,
+            roomId: item.roomId || null,
+            centerId: item.centerId || null,
+            status: item.status,
+          }))
+
+      return [...sanitize(bookingsResult.data), ...sanitize(pendingResult.data)]
+    } catch (error) {
+      console.error('Error listing busy slots:', error)
+      throw error
+    }
+  },
 }
 
 // ============================================
@@ -1159,42 +1219,13 @@ export const notConfirmedCostAPI = {
 }
 
 // ============================================
-// Utility Functions
+// Utility Functions (local dates — no UTC shift)
 // ============================================
-
-/**
- * Check if a date is within the last N days (including today)
- * @param {string} dateStr - Date string (YYYY-MM-DD)
- * @param {number} days - Number of days to check
- * @returns {boolean}
- */
-export const isWithinLastDays = (dateStr, days = 3) => {
-  const recordDate = new Date(dateStr)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  
-  const cutoffDate = new Date(today)
-  cutoffDate.setDate(cutoffDate.getDate() - (days - 1))
-  cutoffDate.setHours(0, 0, 0, 0)
-  
-  return recordDate >= cutoffDate
-}
-
-/**
- * Get today's date as YYYY-MM-DD string
- * @returns {string}
- */
-export const getTodayDate = () => {
-  return new Date().toISOString().split('T')[0]
-}
-
-/**
- * Get a date N days from today as YYYY-MM-DD string
- * @param {number} days - Number of days to add (can be negative)
- * @returns {string}
- */
-export const getDateFromToday = (days) => {
-  const date = new Date()
-  date.setDate(date.getDate() + days)
-  return date.toISOString().split('T')[0]
-}
+export {
+  toLocalDateKey,
+  parseLocalDateKey,
+  formatDisplayDate,
+  getTodayDate,
+  getDateFromToday,
+  isWithinLastDays,
+} from '../utils/dates'

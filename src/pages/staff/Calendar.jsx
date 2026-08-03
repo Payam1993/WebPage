@@ -11,6 +11,7 @@ import {
 } from '../../components/admin/ui'
 import { bookingAPI, centerAPI, roomAPI } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
+import { toLocalDateKey } from '../../utils/dates'
 
 /**
  * Calendar - Visual calendar view of pending bookings
@@ -198,9 +199,7 @@ const Calendar = () => {
     })
   }
 
-  const formatDateKey = (date) => {
-    return date.toISOString().split('T')[0]
-  }
+  const formatDateKey = (date) => toLocalDateKey(date)
 
   const navigateDate = (direction) => {
     const newDate = new Date(currentDate)

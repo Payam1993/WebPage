@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from './LanguageContext'
 import { publicAPI } from '../services/dataService'
+import { getDateFromToday } from '../utils/dates'
+import AvailabilityCalendar from '../components/AvailabilityCalendar'
 import '../components/Booking.css'
 
 const BookingContext = createContext()
@@ -114,10 +116,8 @@ export const BookingProvider = ({ children }) => {
     setPreselectedService(serviceInfo)
     setSubmitSuccess(false)
     setSubmitError(null)
-    // Set default date to tomorrow
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const dateStr = tomorrow.toISOString().split('T')[0]
+    // Set default date to tomorrow (local)
+    const dateStr = getDateFromToday(1)
     setFormData({
       clientName: '',
       clientPhone: '',
@@ -383,33 +383,11 @@ export const BookingProvider = ({ children }) => {
                       </div>
                     </div>
 
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>{bookingFormText.date || 'Preferred Date'} *</label>
-                        <input
-                          type="date"
-                          value={formData.date}
-                          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                          min={new Date().toISOString().split('T')[0]}
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>{bookingFormText.time || 'Preferred Time'} *</label>
-                        <input
-                          type="time"
-                          value={formData.reservedTime}
-                          onChange={(e) => setFormData({ ...formData, reservedTime: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-
                     <div className="form-group">
                       <label>{bookingFormText.duration || 'Duration'}</label>
                       <select
                         value={formData.durationMinutes}
-                        onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) })}
+                        onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value), reservedTime: '' })}
                       >
                         {durationOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -417,6 +395,38 @@ export const BookingProvider = ({ children }) => {
                           </option>
                         ))}
                       </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label>{bookingFormText.availability || 'Availability'} *</label>
+                      <AvailabilityCalendar
+                        centerId={formData.centerId}
+                        roomId={formData.roomId}
+                        roomIds={roomsForCenter.map((r) => r.id)}
+                        durationMinutes={formData.durationMinutes}
+                        selectedDate={formData.date}
+                        selectedTime={formData.reservedTime}
+                        onSelectDate={(date) => setFormData((prev) => ({ ...prev, date, reservedTime: '' }))}
+                        onSelectTime={(time) => setFormData((prev) => ({ ...prev, reservedTime: time }))}
+                        authMode="public"
+                        labels={{
+                          selectCenterFirst: bookingFormText.selectCenterFirst || 'Select a center to see room availability.',
+                          available: bookingFormText.available || 'Available',
+                          limited: bookingFormText.limited || 'Limited',
+                          full: bookingFormText.full || 'Full',
+                          slotsTitle: bookingFormText.slotsTitle || 'Available times',
+                          noSlots: bookingFormText.noSlots || 'No available slots for this day. Try another date or room.',
+                          loading: bookingFormText.loading || 'loading…',
+                        }}
+                      />
+                      {/* Keep values for HTML5 required validation via hidden inputs */}
+                      <input type="hidden" value={formData.date} required readOnly />
+                      <input type="hidden" value={formData.reservedTime} required readOnly />
+                      {formData.date && formData.reservedTime && (
+                        <p className="availability-selected-summary">
+                          {(bookingFormText.selectedSlot || 'Selected')}: {formData.date} · {formData.reservedTime.substring(0, 5)}
+                        </p>
+                      )}
                     </div>
 
                     <div className="form-actions">
@@ -430,7 +440,7 @@ export const BookingProvider = ({ children }) => {
                       <button 
                         type="submit" 
                         className="btn btn-primary"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !formData.date || !formData.reservedTime}
                       >
                         {isSubmitting ? (
                           <span className="loading-spinner"></span>

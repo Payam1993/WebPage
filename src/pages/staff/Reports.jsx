@@ -11,7 +11,7 @@ import {
   Icons,
   LoadingState,
 } from '../../components/admin/ui'
-import { bookingAPI, getDateFromToday } from '../../services/dataService'
+import { bookingAPI, getDateFromToday, getTodayDate, toLocalDateKey } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 
 /**
@@ -175,7 +175,7 @@ const Reports = () => {
     try {
       // Calculate date range based on selected period
       let fromDate, toDate
-      const today = new Date().toISOString().split('T')[0]
+      const today = getTodayDate()
       
       switch (selectedPeriod) {
         case 'today':
@@ -271,7 +271,7 @@ const Reports = () => {
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date()
       date.setDate(date.getDate() - i)
-      const dateStr = date.toISOString().split('T')[0]
+      const dateStr = toLocalDateKey(date)
       const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })
       result.push({
         date: dateStr,

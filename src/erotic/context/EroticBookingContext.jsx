@@ -7,6 +7,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEroticLanguage } from './EroticLanguageContext'
 import { publicAPI } from '../../services/dataService'
+import { getDateFromToday } from '../../utils/dates'
+import AvailabilityCalendar from '../../components/AvailabilityCalendar'
 import '../styles/booking.css'
 
 const EroticBookingContext = createContext()
@@ -119,10 +121,8 @@ export const EroticBookingProvider = ({ children }) => {
     setPreselectedService(serviceInfo)
     setSubmitSuccess(false)
     setSubmitError(null)
-    // Set default date to tomorrow
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const dateStr = tomorrow.toISOString().split('T')[0]
+    // Set default date to tomorrow (local)
+    const dateStr = getDateFromToday(1)
     setFormData({
       clientName: '',
       clientPhone: '',
@@ -392,33 +392,11 @@ export const EroticBookingProvider = ({ children }) => {
                       </div>
                     </div>
 
-                    <div className="erotic-form-row">
-                      <div className="erotic-form-group">
-                        <label>{t.booking.fields.date} *</label>
-                        <input
-                          type="date"
-                          value={formData.date}
-                          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                          min={new Date().toISOString().split('T')[0]}
-                          required
-                        />
-                      </div>
-                      <div className="erotic-form-group">
-                        <label>{t.booking.fields.time} *</label>
-                        <input
-                          type="time"
-                          value={formData.reservedTime}
-                          onChange={(e) => setFormData({ ...formData, reservedTime: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-
                     <div className="erotic-form-group">
                       <label>{t.booking.fields.duration}</label>
                       <select
                         value={formData.durationMinutes}
-                        onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) })}
+                        onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value), reservedTime: '' })}
                       >
                         {durationOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -426,6 +404,37 @@ export const EroticBookingProvider = ({ children }) => {
                           </option>
                         ))}
                       </select>
+                    </div>
+
+                    <div className="erotic-form-group">
+                      <label>{t.booking.fields.availability || t.booking.fields.date} *</label>
+                      <AvailabilityCalendar
+                        centerId={formData.centerId}
+                        roomId={formData.roomId}
+                        roomIds={roomsForCenter.map((r) => r.id)}
+                        durationMinutes={formData.durationMinutes}
+                        selectedDate={formData.date}
+                        selectedTime={formData.reservedTime}
+                        onSelectDate={(date) => setFormData((prev) => ({ ...prev, date, reservedTime: '' }))}
+                        onSelectTime={(time) => setFormData((prev) => ({ ...prev, reservedTime: time }))}
+                        authMode="public"
+                        labels={{
+                          selectCenterFirst: t.booking.placeholders?.selectCenterFirst || 'Select a center to see room availability.',
+                          available: t.booking.availability?.available || 'Available',
+                          limited: t.booking.availability?.limited || 'Limited',
+                          full: t.booking.availability?.full || 'Full',
+                          slotsTitle: t.booking.availability?.slotsTitle || 'Available times',
+                          noSlots: t.booking.availability?.noSlots || 'No available slots for this day. Try another date or room.',
+                          loading: t.booking.availability?.loading || 'loading…',
+                        }}
+                      />
+                      <input type="hidden" value={formData.date} required readOnly />
+                      <input type="hidden" value={formData.reservedTime} required readOnly />
+                      {formData.date && formData.reservedTime && (
+                        <p className="availability-selected-summary">
+                          {(t.booking.availability?.selected || 'Selected')}: {formData.date} · {formData.reservedTime.substring(0, 5)}
+                        </p>
+                      )}
                     </div>
 
                     <div className="erotic-form-actions">
@@ -439,7 +448,7 @@ export const EroticBookingProvider = ({ children }) => {
                       <button 
                         type="submit" 
                         className="erotic-btn-primary"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !formData.date || !formData.reservedTime}
                       >
                         {isSubmitting ? (
                           <span className="erotic-loading-spinner"></span>

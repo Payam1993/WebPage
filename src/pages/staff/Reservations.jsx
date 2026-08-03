@@ -22,8 +22,9 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { bookingAPI, staffAPI, serviceAPI, centerAPI, roomAPI, getTodayDate, getDateFromToday, notConfirmedReservationAPI } from '../../services/dataService'
-import { useAuth } from '../../context/AuthContext'
+import { bookingAPI, staffAPI, serviceAPI, centerAPI, roomAPI, getTodayDate, getDateFromToday, formatDisplayDate, notConfirmedReservationAPI } from '../../services/dataService'
+import AvailabilityCalendar from '../../components/AvailabilityCalendar'
+import '../../components/AvailabilityCalendar.css'
 
 /**
  * Reservations - Manage client bookings and reservations
@@ -406,12 +407,8 @@ const Reservations = () => {
     return timeStr.substring(0, 5) // HH:MM
   }
 
-  // Format date for display
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-'
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-  }
+  // Format date for display (local YYYY-MM-DD, no UTC shift)
+  const formatDate = (dateStr) => formatDisplayDate(dateStr)
 
   // Calculate end time
   const getEndTime = (startTime, durationMinutes) => {
@@ -765,23 +762,15 @@ const Reservations = () => {
             value={formData.roomId || ''}
             onChange={(e) => handleRoomSelect(e.target.value)}
           />
-          <Input
-            label="Date *"
-            type="date"
-            value={formData.date || ''}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-          />
-          <Input
-            label="Reserved Time *"
-            type="time"
-            value={formData.reservedTime || ''}
-            onChange={(e) => setFormData({ ...formData, reservedTime: e.target.value })}
-          />
           <Select
             label="Duration *"
             options={durationOptions}
             value={formData.durationMinutes || ''}
-            onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) })}
+            onChange={(e) => setFormData({
+              ...formData,
+              durationMinutes: parseInt(e.target.value),
+              reservedTime: '',
+            })}
           />
           <Input
             label="Price Agreement (€) *"
@@ -798,6 +787,28 @@ const Reservations = () => {
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
           />
         </Grid>
+
+        <div style={{ marginTop: '16px' }} className="availability-calendar--admin">
+          <AvailabilityCalendar
+            centerId={formData.centerId || ''}
+            roomId={formData.roomId || ''}
+            roomIds={roomsList
+              .filter((r) => !formData.centerId || r.centerId === formData.centerId)
+              .map((r) => r.id)}
+            durationMinutes={formData.durationMinutes || 60}
+            selectedDate={formData.date || ''}
+            selectedTime={formData.reservedTime || ''}
+            onSelectDate={(date) => setFormData((prev) => ({ ...prev, date, reservedTime: '' }))}
+            onSelectTime={(time) => setFormData((prev) => ({ ...prev, reservedTime: time }))}
+            authMode="staff"
+          />
+        </div>
+
+        {/* Keep date/time fields synced for save validation */}
+        <div style={{ display: 'none' }}>
+          <Input label="Date *" type="date" value={formData.date || ''} readOnly />
+          <Input label="Reserved Time *" type="time" value={formData.reservedTime || ''} readOnly />
+        </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
           <Button variant="secondary" onClick={handleCloseModal}>

@@ -182,6 +182,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.authenticated(), // All authenticated staff can CRUD bookings
+      allow.publicApiKey().to(["read"]), // Public availability calendar (busy slots)
     ]),
 
   // ============================================
@@ -210,7 +211,7 @@ const schema = a.schema({
       status: a.enum(["NotConfirmed", "Confirmed"]),
     })
     .authorization((allow) => [
-      allow.publicApiKey().to(["create"]), // Public can create booking requests (API key auth)
+      allow.publicApiKey().to(["create", "read"]), // Public create + read for availability
       allow.authenticated(), // Staff can read, update, delete
     ]),
 
