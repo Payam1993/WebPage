@@ -22,7 +22,7 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { bookingAPI, staffAPI, serviceAPI, getTodayDate, getDateFromToday, notConfirmedReservationAPI } from '../../services/dataService'
+import { bookingAPI, staffAPI, serviceAPI, centerAPI, roomAPI, getTodayDate, getDateFromToday, notConfirmedReservationAPI } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 
 /**
@@ -37,6 +37,10 @@ const Reservations = () => {
   const [bookings, setBookings] = useState([])
   const [staffList, setStaffList] = useState([])
   const [servicesList, setServicesList] = useState([])
+  const [centersList, setCentersList] = useState([])
+  const [roomsList, setRoomsList] = useState([])
+  const [filterCenterId, setFilterCenterId] = useState('')
+  const [filterRoomId, setFilterRoomId] = useState('')
   
   // Not confirmed reservations
   const [notConfirmedList, setNotConfirmedList] = useState([])
@@ -84,7 +88,7 @@ const Reservations = () => {
   useEffect(() => {
     if (authLoading) return
     loadBookings()
-  }, [appliedFilter.fromDate, appliedFilter.toDate, authLoading, isAdmin, staffProfile?.id])
+  }, [appliedFilter.fromDate, appliedFilter.toDate, authLoading, isAdmin, staffProfile?.id, filterCenterId, filterRoomId])
 
   // Auto-refresh not confirmed reservations every 30 seconds (admin only)
   useEffect(() => {
@@ -98,12 +102,16 @@ const Reservations = () => {
 
   const loadStaticData = async () => {
     try {
-      const [staffData, servicesData] = await Promise.all([
+      const [staffData, servicesData, centersData, roomsData] = await Promise.all([
         staffAPI.list(),
         serviceAPI.list(),
+        centerAPI.list(),
+        roomAPI.list(),
       ])
       setStaffList(staffData)
       setServicesList(servicesData)
+      setCentersList(centersData)
+      setRoomsList(roomsData)
     } catch (err) {
       console.error('Error loading static data:', err)
     }
@@ -136,10 +144,12 @@ const Reservations = () => {
       }
 
       const { fromDate, toDate } = appliedFilter
-      const therapistOptions = !isAdmin && staffProfile?.id
-        ? { therapistId: staffProfile.id }
-        : {}
-      const data = await bookingAPI.list(fromDate, toDate, therapistOptions)
+      const filterOptions = {
+        ...(!isAdmin && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
+        ...(filterCenterId ? { centerId: filterCenterId } : {}),
+        ...(filterRoomId ? { roomId: filterRoomId } : {}),
+      }
+      const data = await bookingAPI.list(fromDate, toDate, filterOptions)
       // Sort by date descending, then by time descending
       data.sort((a, b) => {
         if (a.date !== b.date) return b.date.localeCompare(a.date)
@@ -170,10 +180,14 @@ const Reservations = () => {
       setFormData({ ...item })
     } else {
       setEditingItem(null)
+      const defaultCenter = centersList.length === 1 ? centersList[0] : null
       setFormData({
         date: getTodayDate(),
         status: 'Pending',
         durationMinutes: 60,
+        ...(defaultCenter
+          ? { centerId: defaultCenter.id, centerName: defaultCenter.centerName }
+          : {}),
         // Individual staff: lock new bookings to themselves
         ...(!isAdmin && staffProfile
           ? {
@@ -210,6 +224,42 @@ const Reservations = () => {
       therapistId: staffId,
       therapistName: staff?.staffName || '',
     })
+  }
+
+  const handleCenterSelect = (centerId) => {
+    const center = centersList.find((c) => c.id === centerId)
+    setFormData({
+      ...formData,
+      centerId,
+      centerName: center?.centerName || '',
+      roomId: '',
+      roomName: '',
+    })
+  }
+
+  const handleRoomSelect = (roomId) => {
+    const room = roomsList.find((r) => r.id === roomId)
+    setFormData({
+      ...formData,
+      roomId,
+      roomName: room?.roomName || '',
+      ...(room?.centerId && !formData.centerId
+        ? {
+            centerId: room.centerId,
+            centerName: room.centerName || centersList.find((c) => c.id === room.centerId)?.centerName || '',
+          }
+        : {}),
+    })
+  }
+
+  const handleCenterFilterChange = (centerId) => {
+    setFilterCenterId(centerId)
+    if (centerId && filterRoomId) {
+      const room = roomsList.find((r) => r.id === filterRoomId)
+      if (room && room.centerId !== centerId) {
+        setFilterRoomId('')
+      }
+    }
   }
 
   // Confirm modal handlers
@@ -385,6 +435,36 @@ const Reservations = () => {
     label: s.serviceName,
   }))
 
+  const centerFilterOptions = [
+    { value: '', label: 'All Centers' },
+    ...centersList.map((c) => ({
+      value: c.id,
+      label: `${c.centerName}${c.referenceNumber ? ` (${c.referenceNumber})` : ''}`,
+    })),
+  ]
+
+  const roomFilterOptions = [
+    { value: '', label: 'All Rooms' },
+    ...roomsList
+      .filter((r) => !filterCenterId || r.centerId === filterCenterId)
+      .map((r) => ({
+        value: r.id,
+        label: `${r.roomName}${r.referenceNumber ? ` (${r.referenceNumber})` : ''}`,
+      })),
+  ]
+
+  const centerFormOptions = centersList.map((c) => ({
+    value: c.id,
+    label: `${c.centerName}${c.referenceNumber ? ` (${c.referenceNumber})` : ''}`,
+  }))
+
+  const roomFormOptions = roomsList
+    .filter((r) => !formData.centerId || r.centerId === formData.centerId)
+    .map((r) => ({
+      value: r.id,
+      label: `${r.roomName}${r.referenceNumber ? ` (${r.referenceNumber})` : ''}`,
+    }))
+
   // Duration options
   const durationOptions = [
     { value: 30, label: '30 minutes' },
@@ -437,6 +517,22 @@ const Reservations = () => {
               onChange={(e) => setDateFilter({ ...dateFilter, toDate: e.target.value })}
               containerClassName="ui-mb-0"
               style={{ width: '160px' }}
+            />
+            <Select
+              label="Center"
+              options={centerFilterOptions}
+              value={filterCenterId}
+              onChange={(e) => handleCenterFilterChange(e.target.value)}
+              containerClassName="ui-mb-0"
+              style={{ width: '180px' }}
+            />
+            <Select
+              label="Room"
+              options={roomFilterOptions}
+              value={filterRoomId}
+              onChange={(e) => setFilterRoomId(e.target.value)}
+              containerClassName="ui-mb-0"
+              style={{ width: '180px' }}
             />
             <Button onClick={handleApplyFilter} size="small">
               <Icons.Search /> Search
@@ -537,6 +633,8 @@ const Reservations = () => {
                     <TableHead>Client</TableHead>
                     <TableHead>Service</TableHead>
                     <TableHead>Therapist</TableHead>
+                    <TableHead>Center</TableHead>
+                    <TableHead>Room</TableHead>
                     <TableHead>Duration</TableHead>
                     <TableHead style={{ textAlign: 'right' }}>Price</TableHead>
                     <TableHead>Status</TableHead>
@@ -570,6 +668,8 @@ const Reservations = () => {
                         ) : '-'}
                       </TableCell>
                       <TableCell>{booking.therapistName || '-'}</TableCell>
+                      <TableCell style={{ fontSize: '0.875rem' }}>{booking.centerName || '-'}</TableCell>
+                      <TableCell style={{ fontSize: '0.875rem' }}>{booking.roomName || '-'}</TableCell>
                       <TableCell>{booking.durationMinutes} min</TableCell>
                       <TableCell style={{ textAlign: 'right', fontWeight: 500 }}>
                         €{booking.priceAgreement?.toFixed(2)}
@@ -650,6 +750,20 @@ const Reservations = () => {
             value={formData.therapistId || ''}
             onChange={(e) => handleTherapistSelect(e.target.value)}
             disabled={!isAdmin}
+          />
+          <Select
+            label="Center"
+            options={centerFormOptions}
+            placeholder="Select center"
+            value={formData.centerId || ''}
+            onChange={(e) => handleCenterSelect(e.target.value)}
+          />
+          <Select
+            label="Room (optional)"
+            options={roomFormOptions}
+            placeholder="Select room (optional)"
+            value={formData.roomId || ''}
+            onChange={(e) => handleRoomSelect(e.target.value)}
           />
           <Input
             label="Date *"

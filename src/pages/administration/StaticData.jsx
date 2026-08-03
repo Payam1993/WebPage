@@ -15,6 +15,7 @@ import {
   PageHeader,
   Grid,
   Input,
+  Select,
   Modal,
   ConfirmDialog,
   ClickableCard,
@@ -22,14 +23,42 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { serviceAPI, costAPI, staffAPI } from '../../services/dataService'
+import { serviceAPI, costAPI, staffAPI, centerAPI, roomAPI, roomPictureAPI } from '../../services/dataService'
+
+const RoomPictureThumb = ({ pictureKey }) => {
+  const [url, setUrl] = useState(null)
+
+  useEffect(() => {
+    if (!pictureKey) {
+      setUrl(null)
+      return
+    }
+    let cancelled = false
+    roomPictureAPI.getUrl(pictureKey).then((resolved) => {
+      if (!cancelled) setUrl(resolved)
+    })
+    return () => { cancelled = true }
+  }, [pictureKey])
+
+  if (!pictureKey) return '-'
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt=""
+        style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }}
+      />
+    )
+  }
+  return <span style={{ fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>Has picture</span>
+}
 
 /**
- * StaticData - CRUD for Services, Cost Types, and Staff
+ * StaticData - CRUD for Services, Cost Types, Staff, Centers, and Rooms
  * Card-based layout with modals for management
  */
 const StaticData = () => {
-  const [activeModal, setActiveModal] = useState(null) // 'services' | 'costs' | 'staff' | null
+  const [activeModal, setActiveModal] = useState(null) // 'services' | 'costs' | 'staff' | 'centers' | 'rooms' | null
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -37,6 +66,12 @@ const StaticData = () => {
   const [services, setServices] = useState([])
   const [costs, setCosts] = useState([])
   const [staff, setStaff] = useState([])
+  const [centers, setCenters] = useState([])
+  const [rooms, setRooms] = useState([])
+
+  // Room picture upload
+  const [roomPictureFile, setRoomPictureFile] = useState(null)
+  const [roomPicturePreview, setRoomPicturePreview] = useState(null)
 
   // Form states
   const [editingItem, setEditingItem] = useState(null)
@@ -53,6 +88,11 @@ const StaticData = () => {
       loadData(activeModal)
     }
   }, [activeModal])
+
+  const clearRoomPicture = () => {
+    setRoomPictureFile(null)
+    setRoomPicturePreview(null)
+  }
 
   const loadData = async (type) => {
     setIsLoading(true)
@@ -71,6 +111,18 @@ const StaticData = () => {
           const staffData = await staffAPI.list()
           setStaff(staffData)
           break
+        case 'centers':
+          const centersData = await centerAPI.list()
+          setCenters(centersData)
+          break
+        case 'rooms':
+          const [roomsData, centersForRooms] = await Promise.all([
+            roomAPI.list(),
+            centerAPI.list(),
+          ])
+          setRooms(roomsData)
+          setCenters(centersForRooms)
+          break
       }
     } catch (err) {
       setError(err.message || 'Failed to load data')
@@ -83,6 +135,7 @@ const StaticData = () => {
     setActiveModal(type)
     setEditingItem(null)
     setFormData({})
+    clearRoomPicture()
     setError(null)
   }
 
@@ -90,17 +143,31 @@ const StaticData = () => {
     setActiveModal(null)
     setEditingItem(null)
     setFormData({})
+    clearRoomPicture()
     setError(null)
   }
 
-  const handleEdit = (item) => {
+  const handleEdit = async (item) => {
     setEditingItem(item)
     setFormData({ ...item })
+    clearRoomPicture()
+    if (activeModal === 'rooms' && item.pictureKey) {
+      const url = await roomPictureAPI.getUrl(item.pictureKey)
+      if (url) setRoomPicturePreview(url)
+    }
   }
 
   const handleCancelEdit = () => {
     setEditingItem(null)
     setFormData({})
+    clearRoomPicture()
+  }
+
+  const handleRoomPictureChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setRoomPictureFile(file)
+    setRoomPicturePreview(URL.createObjectURL(file))
   }
 
   const handleSave = async () => {
@@ -137,9 +204,49 @@ const StaticData = () => {
           await staffAPI.create(formData)
         }
         await loadData('staff')
+      } else if (activeModal === 'centers') {
+        if (!formData.centerName?.trim()) {
+          throw new Error('Center Name is required')
+        }
+        if (!formData.referenceNumber?.trim()) {
+          throw new Error('Center Reference Number is required')
+        }
+        if (editingItem) {
+          await centerAPI.update(editingItem.id, formData)
+        } else {
+          await centerAPI.create(formData)
+        }
+        await loadData('centers')
+      } else if (activeModal === 'rooms') {
+        if (!formData.roomName?.trim()) {
+          throw new Error('Room Name is required')
+        }
+        if (!formData.referenceNumber?.trim()) {
+          throw new Error('Room Reference Number is required')
+        }
+        if (!formData.centerId) {
+          throw new Error('Associated Center is required')
+        }
+        const center = centers.find(c => c.id === formData.centerId)
+        let pictureKey = formData.pictureKey || null
+        if (roomPictureFile) {
+          pictureKey = await roomPictureAPI.upload(roomPictureFile)
+        }
+        const roomPayload = {
+          ...formData,
+          centerName: center?.centerName,
+          pictureKey,
+        }
+        if (editingItem) {
+          await roomAPI.update(editingItem.id, roomPayload)
+        } else {
+          await roomAPI.create(roomPayload)
+        }
+        await loadData('rooms')
       }
       setEditingItem(null)
       setFormData({})
+      clearRoomPicture()
     } catch (err) {
       setError(err.message || 'Failed to save')
     } finally {
@@ -164,6 +271,12 @@ const StaticData = () => {
       } else if (type === 'staff') {
         await staffAPI.delete(item.id)
         await loadData('staff')
+      } else if (type === 'centers') {
+        await centerAPI.delete(item.id)
+        await loadData('centers')
+      } else if (type === 'rooms') {
+        await roomAPI.delete(item.id)
+        await loadData('rooms')
       }
       setDeleteConfirm({ open: false, item: null, type: null })
     } catch (err) {
@@ -172,6 +285,11 @@ const StaticData = () => {
       setIsDeleting(false)
     }
   }
+
+  const centerOptions = centers.map((c) => ({
+    value: c.id,
+    label: `${c.centerName} (${c.referenceNumber})`,
+  }))
 
   const cardItems = [
     {
@@ -212,16 +330,45 @@ const StaticData = () => {
         </svg>
       ),
     },
+    {
+      id: 'centers',
+      title: 'Centers',
+      subtitle: 'Manage physical locations',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M3 21h18"/>
+          <path d="M5 21V7l7-4 7 4v14"/>
+          <path d="M9 21v-6h6v6"/>
+          <path d="M9 9h.01"/>
+          <path d="M15 9h.01"/>
+          <path d="M9 13h.01"/>
+          <path d="M15 13h.01"/>
+        </svg>
+      ),
+    },
+    {
+      id: 'rooms',
+      title: 'Rooms',
+      subtitle: 'Manage rooms within centers',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M3 21h18"/>
+          <path d="M5 21V9l7-4v16"/>
+          <path d="M19 21V9l-7-4"/>
+          <path d="M9 21v-4h4v4"/>
+          <path d="M10 12h2"/>
+        </svg>
+      ),
+    },
   ]
 
   return (
     <div>
       <PageHeader 
-        title="Static Data Registration"
-        subtitle="Manage services, cost types, and staff information"
+        title="Local Configuration"
+        subtitle="Manage services, costs, staff, centers, and rooms"
       />
 
-      {/* Three Cards Grid */}
       <Grid cols={3} gap="large">
         {cardItems.map((item) => (
           <ClickableCard
@@ -569,6 +716,247 @@ const StaticData = () => {
         </Card>
       </Modal>
 
+      {/* Centers Modal */}
+      <Modal
+        isOpen={activeModal === 'centers'}
+        onClose={handleCloseModal}
+        title="Centers"
+        subtitle="Manage physical locations"
+        size="large"
+      >
+        <Card style={{ marginBottom: '24px' }}>
+          <CardHeader>
+            <CardTitle>
+              {editingItem ? 'Edit Center' : 'Add New Center'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <div style={{ 
+                padding: '12px', 
+                background: 'rgba(239, 68, 68, 0.1)', 
+                color: '#dc2626',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '0.875rem'
+              }}>
+                {error}
+              </div>
+            )}
+            <Grid cols={2} gap="default">
+              <Input
+                label="Center Name *"
+                placeholder="e.g., Downtown Studio"
+                value={formData.centerName || ''}
+                onChange={(e) => setFormData({ ...formData, centerName: e.target.value })}
+              />
+              <Input
+                label="Center Reference Number *"
+                placeholder="e.g., CTR-001"
+                value={formData.referenceNumber || ''}
+                onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
+              />
+            </Grid>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+              {editingItem && (
+                <Button variant="secondary" onClick={handleCancelEdit}>
+                  Cancel
+                </Button>
+              )}
+              <Button onClick={handleSave} loading={isSaving}>
+                {editingItem ? 'Update Center' : 'Add Center'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card padding={false}>
+          <CardHeader>
+            <CardTitle subtitle={`${centers.length} centers registered`}>
+              All Centers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <LoadingState text="Loading centers..." />
+            ) : centers.length === 0 ? (
+              <EmptyState
+                icon={<Icons.FileText />}
+                title="No centers yet"
+                description="Add your first center using the form above"
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Center Name</TableHead>
+                    <TableHead>Reference Number</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {centers.map((center) => (
+                    <TableRow key={center.id}>
+                      <TableCell><span style={{ fontWeight: 500 }}>{center.centerName}</span></TableCell>
+                      <TableCell>{center.referenceNumber || '-'}</TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+                          <Button variant="ghost" size="small" onClick={() => handleEdit(center)}>
+                            <Icons.Edit />
+                          </Button>
+                          <Button variant="ghost" size="small" onClick={() => handleDeleteClick(center, 'centers')}>
+                            <Icons.Trash />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Modal>
+
+      {/* Rooms Modal */}
+      <Modal
+        isOpen={activeModal === 'rooms'}
+        onClose={handleCloseModal}
+        title="Rooms"
+        subtitle="Manage rooms within centers"
+        size="large"
+      >
+        <Card style={{ marginBottom: '24px' }}>
+          <CardHeader>
+            <CardTitle>
+              {editingItem ? 'Edit Room' : 'Add New Room'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <div style={{ 
+                padding: '12px', 
+                background: 'rgba(239, 68, 68, 0.1)', 
+                color: '#dc2626',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '0.875rem'
+              }}>
+                {error}
+              </div>
+            )}
+            <Grid cols={2} gap="default">
+              <Input
+                label="Room Name *"
+                placeholder="e.g., Room A"
+                value={formData.roomName || ''}
+                onChange={(e) => setFormData({ ...formData, roomName: e.target.value })}
+              />
+              <Input
+                label="Room Reference Number *"
+                placeholder="e.g., RM-001"
+                value={formData.referenceNumber || ''}
+                onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
+              />
+              <Select
+                label="Associated Center *"
+                options={centerOptions}
+                placeholder="Select center"
+                value={formData.centerId || ''}
+                onChange={(e) => setFormData({ ...formData, centerId: e.target.value })}
+              />
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 500 }}>
+                  Room Picture
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleRoomPictureChange}
+                  style={{ fontSize: '0.875rem' }}
+                />
+                {(roomPicturePreview || formData.pictureKey) && (
+                  <div style={{ marginTop: '12px' }}>
+                    {roomPicturePreview ? (
+                      <img
+                        src={roomPicturePreview}
+                        alt="Room preview"
+                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                      />
+                    ) : (
+                      <RoomPictureThumb pictureKey={formData.pictureKey} />
+                    )}
+                  </div>
+                )}
+              </div>
+            </Grid>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+              {editingItem && (
+                <Button variant="secondary" onClick={handleCancelEdit}>
+                  Cancel
+                </Button>
+              )}
+              <Button onClick={handleSave} loading={isSaving}>
+                {editingItem ? 'Update Room' : 'Add Room'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card padding={false}>
+          <CardHeader>
+            <CardTitle subtitle={`${rooms.length} rooms registered`}>
+              All Rooms
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <LoadingState text="Loading rooms..." />
+            ) : rooms.length === 0 ? (
+              <EmptyState
+                icon={<Icons.FileText />}
+                title="No rooms yet"
+                description="Add your first room using the form above"
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Picture</TableHead>
+                    <TableHead>Room Name</TableHead>
+                    <TableHead>Reference Number</TableHead>
+                    <TableHead>Center</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rooms.map((room) => (
+                    <TableRow key={room.id}>
+                      <TableCell>
+                        <RoomPictureThumb pictureKey={room.pictureKey} />
+                      </TableCell>
+                      <TableCell><span style={{ fontWeight: 500 }}>{room.roomName}</span></TableCell>
+                      <TableCell>{room.referenceNumber || '-'}</TableCell>
+                      <TableCell>{room.centerName || '-'}</TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+                          <Button variant="ghost" size="small" onClick={() => handleEdit(room)}>
+                            <Icons.Edit />
+                          </Button>
+                          <Button variant="ghost" size="small" onClick={() => handleDeleteClick(room, 'rooms')}>
+                            <Icons.Trash />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Modal>
+
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteConfirm.open}
@@ -579,6 +967,8 @@ const StaticData = () => {
           deleteConfirm.item?.serviceName || 
           deleteConfirm.item?.costName || 
           deleteConfirm.item?.staffName || 
+          deleteConfirm.item?.centerName ||
+          deleteConfirm.item?.roomName ||
           'this item'
         }"? This action cannot be undone.`}
         confirmText="Delete"

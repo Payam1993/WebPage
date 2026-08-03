@@ -79,6 +79,33 @@ const schema = a.schema({
       allow.authenticated(), // Staff portal can review, confirm, decline
     ]),
 
+  // Center model - physical locations
+  Center: a
+    .model({
+      centerName: a.string().required(),
+      referenceNumber: a.string().required(),
+    })
+    .authorization((allow) => [
+      allow.group("Admin_Confession"),
+      allow.authenticated().to(["read"]),
+      allow.publicApiKey().to(["read"]), // Public booking form
+    ]),
+
+  // Room model - rooms belonging to a center
+  Room: a
+    .model({
+      roomName: a.string().required(),
+      referenceNumber: a.string().required(),
+      centerId: a.string().required(),
+      centerName: a.string(),
+      pictureKey: a.string(), // S3 path for room picture
+    })
+    .authorization((allow) => [
+      allow.group("Admin_Confession"),
+      allow.authenticated().to(["read"]),
+      allow.publicApiKey().to(["read"]), // Public booking form
+    ]),
+
   // ============================================
   // Daily Data Models (Admin only)
   // ============================================
@@ -139,6 +166,11 @@ const schema = a.schema({
       // Therapist (optional - ID reference or name)
       therapistId: a.string(),
       therapistName: a.string(),
+      // Center & Room
+      centerId: a.string(),
+      centerName: a.string(),
+      roomId: a.string(),
+      roomName: a.string(),
       // Date and time
       date: a.date().required(),
       reservedTime: a.time().required(),
@@ -165,6 +197,11 @@ const schema = a.schema({
       // Service
       serviceId: a.string().required(),
       serviceName: a.string().required(),
+      // Center & Room
+      centerId: a.string(),
+      centerName: a.string(),
+      roomId: a.string(),
+      roomName: a.string(),
       // Date and time
       date: a.date().required(),
       reservedTime: a.time().required(),

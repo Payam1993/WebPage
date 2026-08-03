@@ -212,6 +212,167 @@ export const staffAPI = {
 }
 
 // ============================================
+// Center CRUD (Local Configuration)
+// ============================================
+export const centerAPI = {
+  async list() {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.Center.list()
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error listing centers:', error)
+      throw error
+    }
+  },
+
+  async create(centerData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.Center.create({
+        centerName: centerData.centerName,
+        referenceNumber: centerData.referenceNumber,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating center:', error)
+      throw error
+    }
+  },
+
+  async update(id, centerData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.Center.update({
+        id,
+        centerName: centerData.centerName,
+        referenceNumber: centerData.referenceNumber,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error updating center:', error)
+      throw error
+    }
+  },
+
+  async delete(id) {
+    try {
+      const client = getClient()
+      const { errors } = await client.models.Center.delete({ id })
+      if (errors) throw new Error(errors[0].message)
+      return true
+    } catch (error) {
+      console.error('Error deleting center:', error)
+      throw error
+    }
+  },
+}
+
+// ============================================
+// Room CRUD (Local Configuration)
+// ============================================
+export const roomAPI = {
+  async list(centerId = null) {
+    try {
+      const client = getClient()
+      const result = centerId
+        ? await client.models.Room.list({ filter: { centerId: { eq: centerId } } })
+        : await client.models.Room.list()
+      const { data, errors } = result
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error listing rooms:', error)
+      throw error
+    }
+  },
+
+  async create(roomData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.Room.create({
+        roomName: roomData.roomName,
+        referenceNumber: roomData.referenceNumber,
+        centerId: roomData.centerId,
+        centerName: roomData.centerName || null,
+        pictureKey: roomData.pictureKey || null,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating room:', error)
+      throw error
+    }
+  },
+
+  async update(id, roomData) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.Room.update({
+        id,
+        roomName: roomData.roomName,
+        referenceNumber: roomData.referenceNumber,
+        centerId: roomData.centerId,
+        centerName: roomData.centerName || null,
+        pictureKey: roomData.pictureKey || null,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error updating room:', error)
+      throw error
+    }
+  },
+
+  async delete(id) {
+    try {
+      const client = getClient()
+      const { errors } = await client.models.Room.delete({ id })
+      if (errors) throw new Error(errors[0].message)
+      return true
+    } catch (error) {
+      console.error('Error deleting room:', error)
+      throw error
+    }
+  },
+}
+
+/**
+ * Upload / resolve room picture URLs via Amplify Storage
+ */
+export const roomPictureAPI = {
+  async upload(file) {
+    const { uploadData } = await import('aws-amplify/storage')
+    const safeName = (file.name || 'room').replace(/[^a-zA-Z0-9._-]/g, '_')
+    const path = `room-pictures/${Date.now()}-${safeName}`
+    await uploadData({
+      path,
+      data: file,
+      options: { contentType: file.type || 'image/jpeg' },
+    }).result
+    return path
+  },
+
+  async getUrl(pictureKey) {
+    if (!pictureKey) return null
+    if (pictureKey.startsWith('data:') || pictureKey.startsWith('http')) {
+      return pictureKey
+    }
+    try {
+      const { getUrl } = await import('aws-amplify/storage')
+      const result = await getUrl({ path: pictureKey })
+      return result.url.toString()
+    } catch (error) {
+      console.error('Error getting room picture URL:', error)
+      return null
+    }
+  },
+}
+
+// ============================================
 // DailyService CRUD (Daily Data)
 // ============================================
 export const dailyServiceAPI = {
@@ -417,7 +578,14 @@ export const dailyCostAPI = {
  * Build Amplify list filter for bookings
  * @param {{ fromDate?: string|null, toDate?: string|null, therapistId?: string|null, status?: string|null }} options
  */
-const buildBookingFilter = ({ fromDate = null, toDate = null, therapistId = null, status = null } = {}) => {
+const buildBookingFilter = ({
+  fromDate = null,
+  toDate = null,
+  therapistId = null,
+  status = null,
+  centerId = null,
+  roomId = null,
+} = {}) => {
   const conditions = []
 
   if (status) {
@@ -432,6 +600,14 @@ const buildBookingFilter = ({ fromDate = null, toDate = null, therapistId = null
 
   if (therapistId) {
     conditions.push({ therapistId: { eq: therapistId } })
+  }
+
+  if (centerId) {
+    conditions.push({ centerId: { eq: centerId } })
+  }
+
+  if (roomId) {
+    conditions.push({ roomId: { eq: roomId } })
   }
 
   if (conditions.length === 0) return undefined
@@ -458,10 +634,10 @@ export const resolveStaffByEmail = async (email) => {
 
 export const bookingAPI = {
   /**
-   * List bookings, optionally filtered by date range and therapist
+   * List bookings, optionally filtered by date range, therapist, center, room
    * @param {string} fromDate - Start date (YYYY-MM-DD)
    * @param {string} toDate - End date (YYYY-MM-DD)
-   * @param {{ therapistId?: string|null }} options
+   * @param {{ therapistId?: string|null, centerId?: string|null, roomId?: string|null }} options
    */
   async list(fromDate = null, toDate = null, options = {}) {
     try {
@@ -470,6 +646,8 @@ export const bookingAPI = {
         fromDate,
         toDate,
         therapistId: options.therapistId || null,
+        centerId: options.centerId || null,
+        roomId: options.roomId || null,
       })
 
       const result = filter
@@ -490,7 +668,7 @@ export const bookingAPI = {
    * Only Pending reservations appear in the calendar
    * @param {string} fromDate - Start date (YYYY-MM-DD)
    * @param {string} toDate - End date (YYYY-MM-DD)
-   * @param {{ therapistId?: string|null }} options
+   * @param {{ therapistId?: string|null, centerId?: string|null, roomId?: string|null }} options
    */
   async listPending(fromDate = null, toDate = null, options = {}) {
     try {
@@ -499,6 +677,8 @@ export const bookingAPI = {
         fromDate,
         toDate,
         therapistId: options.therapistId || null,
+        centerId: options.centerId || null,
+        roomId: options.roomId || null,
         status: 'Pending',
       })
 
@@ -521,6 +701,10 @@ export const bookingAPI = {
         serviceName: bookingData.serviceName || null,
         therapistId: bookingData.therapistId || null,
         therapistName: bookingData.therapistName || null,
+        centerId: bookingData.centerId || null,
+        centerName: bookingData.centerName || null,
+        roomId: bookingData.roomId || null,
+        roomName: bookingData.roomName || null,
         date: bookingData.date,
         reservedTime: bookingData.reservedTime,
         durationMinutes: bookingData.durationMinutes,
@@ -546,6 +730,10 @@ export const bookingAPI = {
         serviceName: bookingData.serviceName || null,
         therapistId: bookingData.therapistId || null,
         therapistName: bookingData.therapistName || null,
+        centerId: bookingData.centerId || null,
+        centerName: bookingData.centerName || null,
+        roomId: bookingData.roomId || null,
+        roomName: bookingData.roomName || null,
         date: bookingData.date,
         reservedTime: bookingData.reservedTime,
         durationMinutes: bookingData.durationMinutes,
@@ -620,6 +808,10 @@ export const notConfirmedReservationAPI = {
         clientPhone: reservationData.clientPhone,
         serviceId: reservationData.serviceId,
         serviceName: reservationData.serviceName,
+        centerId: reservationData.centerId || null,
+        centerName: reservationData.centerName || null,
+        roomId: reservationData.roomId || null,
+        roomName: reservationData.roomName || null,
         date: reservationData.date,
         reservedTime: reservationData.reservedTime,
         durationMinutes: reservationData.durationMinutes,
@@ -642,6 +834,10 @@ export const notConfirmedReservationAPI = {
         clientPhone: reservationData.clientPhone,
         serviceId: reservationData.serviceId,
         serviceName: reservationData.serviceName,
+        centerId: reservationData.centerId || null,
+        centerName: reservationData.centerName || null,
+        roomId: reservationData.roomId || null,
+        roomName: reservationData.roomName || null,
         date: reservationData.date,
         reservedTime: reservationData.reservedTime,
         durationMinutes: reservationData.durationMinutes,
@@ -680,6 +876,10 @@ export const notConfirmedReservationAPI = {
         serviceName: notConfirmedReservation.serviceName,
         therapistId: additionalData.therapistId || null,
         therapistName: additionalData.therapistName || null,
+        centerId: additionalData.centerId ?? notConfirmedReservation.centerId ?? null,
+        centerName: additionalData.centerName ?? notConfirmedReservation.centerName ?? null,
+        roomId: additionalData.roomId ?? notConfirmedReservation.roomId ?? null,
+        roomName: additionalData.roomName ?? notConfirmedReservation.roomName ?? null,
         date: notConfirmedReservation.date,
         reservedTime: notConfirmedReservation.reservedTime,
         durationMinutes: notConfirmedReservation.durationMinutes,
@@ -716,6 +916,10 @@ export const publicAPI = {
         clientPhone: reservationData.clientPhone,
         serviceId: reservationData.serviceId,
         serviceName: reservationData.serviceName,
+        centerId: reservationData.centerId || null,
+        centerName: reservationData.centerName || null,
+        roomId: reservationData.roomId || null,
+        roomName: reservationData.roomName || null,
         date: reservationData.date,
         reservedTime: reservationData.reservedTime,
         durationMinutes: reservationData.durationMinutes,
@@ -764,6 +968,39 @@ export const publicAPI = {
       return data || []
     } catch (error) {
       console.error('Error fetching services:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get centers (guest access)
+   */
+  async getCenters() {
+    try {
+      const client = generateClient({ authMode: 'apiKey' })
+      const { data, errors } = await client.models.Center.list()
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error fetching centers:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get rooms (guest access), optionally filtered by center
+   */
+  async getRooms(centerId = null) {
+    try {
+      const client = generateClient({ authMode: 'apiKey' })
+      const result = centerId
+        ? await client.models.Room.list({ filter: { centerId: { eq: centerId } } })
+        : await client.models.Room.list()
+      const { data, errors } = result
+      if (errors) throw new Error(errors[0].message)
+      return data || []
+    } catch (error) {
+      console.error('Error fetching rooms:', error)
       throw error
     }
   },

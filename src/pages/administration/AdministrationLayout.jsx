@@ -51,7 +51,7 @@ const AdministrationLayout = () => {
   const getPageTitle = () => {
     const path = location.pathname
     if (path.includes('/reporting')) return 'Reporting'
-    if (path.includes('/static-data')) return 'Master Data'
+    if (path.includes('/static-data')) return 'Local Configuration'
     if (path.includes('/daily-data')) return 'Daily Entry'
     if (path.includes('/daily-confirmation')) return 'Confirmation'
     if (path.includes('/staff')) return 'Staff'
@@ -71,7 +71,7 @@ const AdministrationLayout = () => {
     },
     {
       path: '/administration/static-data',
-      label: 'Master Data',
+      label: 'Local Configuration',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>

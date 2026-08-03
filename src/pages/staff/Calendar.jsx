@@ -7,8 +7,9 @@ import {
   PageHeader,
   Icons,
   LoadingState,
+  Select,
 } from '../../components/admin/ui'
-import { bookingAPI } from '../../services/dataService'
+import { bookingAPI, centerAPI, roomAPI } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 
 /**
@@ -22,15 +23,36 @@ const Calendar = () => {
   const [viewMode, setViewMode] = useState('week') // 'day', 'week', 'month'
   const [events, setEvents] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [centers, setCenters] = useState([])
+  const [rooms, setRooms] = useState([])
+  const [filterCenterId, setFilterCenterId] = useState('')
+  const [filterRoomId, setFilterRoomId] = useState('')
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   const hours = Array.from({ length: 12 }, (_, i) => i + 9) // 9 AM to 8 PM
 
-  // Load confirmed bookings when date/view changes
+  useEffect(() => {
+    loadCentersAndRooms()
+  }, [])
+
+  // Load confirmed bookings when date/view/filters change
   useEffect(() => {
     if (authLoading) return
     loadEvents()
-  }, [currentDate, viewMode, authLoading, isAdmin, staffProfile?.id])
+  }, [currentDate, viewMode, authLoading, isAdmin, staffProfile?.id, filterCenterId, filterRoomId])
+
+  const loadCentersAndRooms = async () => {
+    try {
+      const [centersData, roomsData] = await Promise.all([
+        centerAPI.list(),
+        roomAPI.list(),
+      ])
+      setCenters(centersData)
+      setRooms(roomsData)
+    } catch (err) {
+      console.error('Error loading centers/rooms:', err)
+    }
+  }
 
   const loadEvents = async () => {
     setIsLoading(true)
@@ -41,10 +63,12 @@ const Calendar = () => {
       }
 
       const dateRange = getDateRange()
-      const therapistOptions = !isAdmin && staffProfile?.id
-        ? { therapistId: staffProfile.id }
-        : {}
-      const bookings = await bookingAPI.listPending(dateRange.from, dateRange.to, therapistOptions)
+      const filterOptions = {
+        ...(!isAdmin && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
+        ...(filterCenterId ? { centerId: filterCenterId } : {}),
+        ...(filterRoomId ? { roomId: filterRoomId } : {}),
+      }
+      const bookings = await bookingAPI.listPending(dateRange.from, dateRange.to, filterOptions)
       
       // Transform bookings to calendar events
       const calendarEvents = bookings.map(booking => ({
@@ -54,6 +78,8 @@ const Calendar = () => {
         duration: booking.durationMinutes || 60,
         therapist: booking.therapistName || 'Unassigned',
         service: booking.serviceName || null,
+        center: booking.centerName || null,
+        room: booking.roomName || null,
         date: booking.date,
         color: getTherapistColor(booking.therapistName),
         clientPhone: booking.clientPhone,
@@ -65,6 +91,35 @@ const Calendar = () => {
       console.error('Error loading calendar events:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const centerOptions = [
+    { value: '', label: 'All Centers' },
+    ...centers.map((c) => ({
+      value: c.id,
+      label: `${c.centerName}${c.referenceNumber ? ` (${c.referenceNumber})` : ''}`,
+    })),
+  ]
+
+  const roomOptions = [
+    { value: '', label: 'All Rooms' },
+    ...rooms
+      .filter((r) => !filterCenterId || r.centerId === filterCenterId)
+      .map((r) => ({
+        value: r.id,
+        label: `${r.roomName}${r.referenceNumber ? ` (${r.referenceNumber})` : ''}`,
+      })),
+  ]
+
+  const handleCenterFilterChange = (centerId) => {
+    setFilterCenterId(centerId)
+    // Reset room if it no longer belongs to selected center
+    if (centerId && filterRoomId) {
+      const room = rooms.find((r) => r.id === filterRoomId)
+      if (room && room.centerId !== centerId) {
+        setFilterRoomId('')
+      }
     }
   }
 
@@ -236,7 +291,7 @@ const Calendar = () => {
           </div>
 
           {/* View Mode Toggle */}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
             {['day', 'week', 'month'].map((mode) => (
               <Button
                 key={mode}
@@ -247,6 +302,22 @@ const Calendar = () => {
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </Button>
             ))}
+            <Select
+              label="Center"
+              options={centerOptions}
+              value={filterCenterId}
+              onChange={(e) => handleCenterFilterChange(e.target.value)}
+              containerClassName="ui-mb-0"
+              style={{ minWidth: '160px' }}
+            />
+            <Select
+              label="Room"
+              options={roomOptions}
+              value={filterRoomId}
+              onChange={(e) => setFilterRoomId(e.target.value)}
+              containerClassName="ui-mb-0"
+              style={{ minWidth: '160px' }}
+            />
           </div>
         </div>
       </Card>

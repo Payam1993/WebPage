@@ -26,6 +26,8 @@ export const EroticBookingProvider = ({ children }) => {
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [preselectedService, setPreselectedService] = useState(null)
   const [services, setServices] = useState([])
+  const [centers, setCenters] = useState([])
+  const [rooms, setRooms] = useState([])
   const [isLoadingServices, setIsLoadingServices] = useState(false)
   const [servicesError, setServicesError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,15 +40,20 @@ export const EroticBookingProvider = ({ children }) => {
     clientPhone: '',
     serviceId: '',
     serviceName: '',
+    centerId: '',
+    centerName: '',
+    roomId: '',
+    roomName: '',
     date: '',
     reservedTime: '',
     durationMinutes: 60,
   })
 
-  // Load services when modal opens
+  // Load services/centers when modal opens
   useEffect(() => {
-    if (showBookingModal && services.length === 0) {
+    if (showBookingModal) {
       loadServices()
+      loadCentersAndRooms()
     }
   }, [showBookingModal])
 
@@ -68,6 +75,19 @@ export const EroticBookingProvider = ({ children }) => {
     }
   }, [preselectedService, services])
 
+  // Default center when only one exists
+  useEffect(() => {
+    if (centers.length === 1 && !formData.centerId) {
+      setFormData((prev) => ({
+        ...prev,
+        centerId: centers[0].id,
+        centerName: centers[0].centerName,
+        roomId: '',
+        roomName: '',
+      }))
+    }
+  }, [centers, formData.centerId])
+
   const loadServices = async () => {
     setIsLoadingServices(true)
     setServicesError(null)
@@ -79,6 +99,19 @@ export const EroticBookingProvider = ({ children }) => {
       setServicesError('Unable to load services. Please try again later.')
     } finally {
       setIsLoadingServices(false)
+    }
+  }
+
+  const loadCentersAndRooms = async () => {
+    try {
+      const [centersData, roomsData] = await Promise.all([
+        publicAPI.getCenters(),
+        publicAPI.getRooms(),
+      ])
+      setCenters(centersData)
+      setRooms(roomsData)
+    } catch (err) {
+      console.error('Error loading centers/rooms:', err)
     }
   }
 
@@ -95,6 +128,10 @@ export const EroticBookingProvider = ({ children }) => {
       clientPhone: '',
       serviceId: serviceInfo?.id || '',
       serviceName: serviceInfo?.name || '',
+      centerId: '',
+      centerName: '',
+      roomId: '',
+      roomName: '',
       date: dateStr,
       reservedTime: '',
       durationMinutes: serviceInfo?.duration || 60,
@@ -117,6 +154,26 @@ export const EroticBookingProvider = ({ children }) => {
     })
   }
 
+  const handleCenterSelect = (centerId) => {
+    const center = centers.find((c) => c.id === centerId)
+    setFormData({
+      ...formData,
+      centerId,
+      centerName: center?.centerName || '',
+      roomId: '',
+      roomName: '',
+    })
+  }
+
+  const handleRoomSelect = (roomId) => {
+    const room = rooms.find((r) => r.id === roomId)
+    setFormData({
+      ...formData,
+      roomId,
+      roomName: room?.roomName || '',
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -127,6 +184,7 @@ export const EroticBookingProvider = ({ children }) => {
       if (!formData.clientName?.trim()) throw new Error(t.booking.errors?.nameRequired || 'Name is required')
       if (!formData.clientPhone?.trim()) throw new Error(t.booking.errors?.phoneRequired || 'Phone is required')
       if (!formData.serviceId) throw new Error(t.booking.errors?.serviceRequired || 'Service is required')
+      if (!formData.centerId) throw new Error(t.booking.errors?.centerRequired || 'Center is required')
       if (!formData.date) throw new Error(t.booking.errors?.dateRequired || 'Date is required')
       if (!formData.reservedTime) throw new Error(t.booking.errors?.timeRequired || 'Time is required')
       
@@ -136,6 +194,10 @@ export const EroticBookingProvider = ({ children }) => {
         clientPhone: formData.clientPhone.trim(),
         serviceId: formData.serviceId,
         serviceName: formData.serviceName,
+        centerId: formData.centerId,
+        centerName: formData.centerName,
+        roomId: formData.roomId || null,
+        roomName: formData.roomName || null,
         date: formData.date,
         reservedTime: formData.reservedTime,
         durationMinutes: formData.durationMinutes,
@@ -148,6 +210,8 @@ export const EroticBookingProvider = ({ children }) => {
       setIsSubmitting(false)
     }
   }
+
+  const roomsForCenter = rooms.filter((r) => r.centerId === formData.centerId)
 
   // Duration options
   const durationOptions = [
@@ -282,6 +346,50 @@ export const EroticBookingProvider = ({ children }) => {
                           ))}
                         </select>
                       )}
+                    </div>
+
+                    <div className="erotic-form-row">
+                      <div className="erotic-form-group">
+                        <label>{t.booking.fields.center || 'Center'} *</label>
+                        <select
+                          value={formData.centerId}
+                          onChange={(e) => handleCenterSelect(e.target.value)}
+                          required
+                        >
+                          <option value="">{t.booking.placeholders.center || 'Select a center'}</option>
+                          {centers.map((center) => (
+                            <option key={center.id} value={center.id}>
+                              {center.centerName}
+                              {center.referenceNumber ? ` (${center.referenceNumber})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="erotic-form-group">
+                        <label>
+                          {t.booking.fields.room || 'Room'}
+                          <span style={{ fontWeight: 400, opacity: 0.7, marginLeft: '0.35rem' }}>
+                            {t.booking.fields.optional || '(Optional)'}
+                          </span>
+                        </label>
+                        <select
+                          value={formData.roomId}
+                          onChange={(e) => handleRoomSelect(e.target.value)}
+                          disabled={!formData.centerId}
+                        >
+                          <option value="">
+                            {!formData.centerId
+                              ? (t.booking.placeholders.roomSelectCenterFirst || 'Select a center first')
+                              : (t.booking.placeholders.room || 'Select a room (optional)')}
+                          </option>
+                          {roomsForCenter.map((room) => (
+                            <option key={room.id} value={room.id}>
+                              {room.roomName}
+                              {room.referenceNumber ? ` (${room.referenceNumber})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     <div className="erotic-form-row">
