@@ -103,6 +103,14 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
               <Route path="reservations" element={<Reservations />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="assigned-task" element={<AssignedTask />} />
+              <Route
+                path="staff-management"
+                element={
+                  <AdminProtectedRoute>
+                    <StaffManagement />
+                  </AdminProtectedRoute>
+                }
+              />
               <Route path="profile" element={<ProfileSettings />} />
             </Route>
 
@@ -188,6 +196,14 @@ function EroticAppContent({ loading, setCursorVariant }) {
                 <Route path="reservations" element={<Reservations />} />
                 <Route path="calendar" element={<Calendar />} />
                 <Route path="assigned-task" element={<AssignedTask />} />
+                <Route
+                  path="staff-management"
+                  element={
+                    <AdminProtectedRoute>
+                      <StaffManagement />
+                    </AdminProtectedRoute>
+                  }
+                />
                 <Route path="profile" element={<ProfileSettings />} />
               </Route>
 

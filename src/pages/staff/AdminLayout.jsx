@@ -59,6 +59,7 @@ const AdminLayout = () => {
     if (path.includes('/reservations')) return 'Reservations'
     if (path.includes('/calendar')) return 'Calendar'
     if (path.includes('/assigned-task')) return 'Assigned Task'
+    if (path.includes('/staff-management')) return 'Staff'
     if (path.includes('/profile')) return 'Profile Settings'
     return 'Dashboard'
   }
@@ -120,6 +121,20 @@ const AdminLayout = () => {
         </svg>
       ),
     },
+    // Staff management (Work With Us requests) - admin only
+    ...(isAdmin ? [{
+      path: '/staff/staff-management',
+      label: 'Staff',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      ),
+      isAdmin: true,
+    }] : []),
   ]
 
   const bottomNavItems = [
@@ -204,10 +219,11 @@ const AdminLayout = () => {
                 <li key={item.path}>
                   <NavLink 
                     to={item.path}
-                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''} ${item.isAdmin ? 'nav-link--admin' : ''}`}
                   >
                     <span className="nav-icon">{item.icon}</span>
                     <span className="nav-label">{item.label}</span>
+                    {item.isAdmin && <span className="nav-badge">Admin</span>}
                   </NavLink>
                 </li>
               ))}
