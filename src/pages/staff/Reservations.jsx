@@ -959,7 +959,8 @@ const Reservations = () => {
               />
             </Grid>
 
-            <AvailabilityCalendar
+            <div style={{ marginTop: '16px' }} className="availability-calendar--admin">
+              <AvailabilityCalendar
                 centerId={formData.centerId || ''}
                 roomId={formData.roomId || ''}
                 roomIds={roomsList
