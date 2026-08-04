@@ -1068,59 +1068,113 @@ export const publicAPI = {
 
   /**
    * Get busy slots for availability calendar (sanitized — no client PII)
+   * Central room calendar + optional therapist calendar (merged).
+   * Never filter by roomId when loading — room conflicts are computed client-side
+   * so the calendar always sees the full center occupancy.
    */
-  async listBusySlots({ fromDate = null, toDate = null, centerId = null, roomId = null } = {}) {
+  async listBusySlots({
+    fromDate = null,
+    toDate = null,
+    centerId = null,
+    therapistId = null,
+  } = {}) {
     try {
       const client = generateClient({ authMode: 'apiKey' })
-      const andFilters = []
+      const selectionSet = [
+        'id',
+        'date',
+        'reservedTime',
+        'durationMinutes',
+        'roomId',
+        'centerId',
+        'therapistId',
+        'status',
+      ]
 
+      const dateParts = []
       if (fromDate && toDate) {
-        andFilters.push({ date: { between: [fromDate, toDate] } })
+        dateParts.push({ date: { between: [fromDate, toDate] } })
       } else if (fromDate) {
-        andFilters.push({ date: { eq: fromDate } })
+        dateParts.push({ date: { eq: fromDate } })
       }
-      if (centerId) andFilters.push({ centerId: { eq: centerId } })
-      if (roomId) andFilters.push({ roomId: { eq: roomId } })
 
-      const bookingFilter = andFilters.length
-        ? andFilters.length === 1
-          ? andFilters[0]
-          : { and: andFilters }
-        : undefined
+      const buildAnd = (extra = []) => {
+        const parts = [...dateParts, ...extra]
+        if (parts.length === 0) return undefined
+        if (parts.length === 1) return parts[0]
+        return { and: parts }
+      }
 
-      const pendingFilter = bookingFilter
-        ? {
-            and: [
-              ...(andFilters.length ? andFilters : []),
+      const listAll = async (model, filter) => {
+        const items = []
+        let nextToken
+        do {
+          const result = await client.models[model].list({
+            filter,
+            selectionSet,
+            limit: 1000,
+            nextToken,
+          })
+          if (result.errors) throw new Error(result.errors[0].message)
+          items.push(...(result.data || []))
+          nextToken = result.nextToken
+        } while (nextToken)
+        return items
+      }
+
+      const queries = []
+
+      // Center / room occupancy (all rooms in center)
+      if (centerId) {
+        queries.push(listAll('Booking', buildAnd([{ centerId: { eq: centerId } }])))
+        queries.push(
+          listAll(
+            'NotConfirmedReservation',
+            buildAnd([
+              { centerId: { eq: centerId } },
               { status: { eq: 'NotConfirmed' } },
-            ],
-          }
-        : { status: { eq: 'NotConfirmed' } }
+            ])
+          )
+        )
+      } else {
+        queries.push(listAll('Booking', buildAnd()))
+        queries.push(
+          listAll('NotConfirmedReservation', buildAnd([{ status: { eq: 'NotConfirmed' } }]))
+        )
+      }
 
-      const [bookingsResult, pendingResult] = await Promise.all([
-        bookingFilter
-          ? client.models.Booking.list({ filter: bookingFilter })
-          : client.models.Booking.list(),
-        client.models.NotConfirmedReservation.list({ filter: pendingFilter }),
-      ])
+      // Therapist occupancy (any room / center) — staff cannot double-book
+      if (therapistId) {
+        queries.push(listAll('Booking', buildAnd([{ therapistId: { eq: therapistId } }])))
+        queries.push(
+          listAll(
+            'NotConfirmedReservation',
+            buildAnd([
+              { therapistId: { eq: therapistId } },
+              { status: { eq: 'NotConfirmed' } },
+            ])
+          )
+        )
+      }
 
-      if (bookingsResult.errors) throw new Error(bookingsResult.errors[0].message)
-      if (pendingResult.errors) throw new Error(pendingResult.errors[0].message)
+      const results = await Promise.all(queries)
+      const merged = new Map()
+      results.flat().forEach((item) => {
+        if (!item || item.status === 'Canceled') return
+        const key = item.id || `${item.date}|${item.reservedTime}|${item.roomId}|${item.therapistId}`
+        merged.set(key, {
+          id: item.id,
+          date: item.date,
+          reservedTime: item.reservedTime,
+          durationMinutes: item.durationMinutes,
+          roomId: item.roomId || null,
+          centerId: item.centerId || null,
+          therapistId: item.therapistId || null,
+          status: item.status,
+        })
+      })
 
-      const sanitize = (items) =>
-        (items || [])
-          .filter((item) => item.status !== 'Canceled')
-          .map((item) => ({
-            date: item.date,
-            reservedTime: item.reservedTime,
-            durationMinutes: item.durationMinutes,
-            roomId: item.roomId || null,
-            centerId: item.centerId || null,
-            therapistId: item.therapistId || null,
-            status: item.status,
-          }))
-
-      return [...sanitize(bookingsResult.data), ...sanitize(pendingResult.data)]
+      return Array.from(merged.values())
     } catch (error) {
       console.error('Error listing busy slots:', error)
       throw error

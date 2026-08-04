@@ -5,12 +5,18 @@ import '../components/AvailabilityCalendar.css'
 import {
   staffBookingLinkAPI,
   publicAPI,
-  roomAPI,
 } from '../services/dataService'
+import {
+  toBusyIntervals,
+  getSlotConflictReasons,
+  pickFreeRoomId,
+  getAvailableSlots,
+} from '../utils/availability'
 
 /**
  * Public page: /book-link/:token
  * Customer books against staff availability (+ optional fixed room or any room)
+ * Central rules: therapist cannot double-book; room cannot hold two services.
  */
 const StaffLinkBooking = () => {
   const { token } = useParams()
@@ -53,7 +59,7 @@ const StaffLinkBooking = () => {
       const client = generateClient({ authMode: 'apiKey' })
       const [servicesResult, roomsData] = await Promise.all([
         client.models.Service.list(),
-        roomAPI.list(found.centerId).catch(() => []),
+        publicAPI.getRooms(found.centerId),
       ])
       setServices(servicesResult.data || [])
       setRooms(roomsData || [])
@@ -117,24 +123,59 @@ const StaffLinkBooking = () => {
       setSubmitError('Please select an available date and time')
       return
     }
-    if (!link?.roomId && !formData.roomId && roomsForCenter.length > 0) {
-      // Any room: pick first free room at submit time by leaving room empty —
-      // assign first room in center as placeholder; staff can adjust on confirm
-      // Better: require selecting a room from free ones, or auto-assign
-    }
-
-    let roomId = link?.roomId || formData.roomId || null
-    let roomName = link?.roomId ? link.roomName : formData.roomName || null
-
-    // If any-room and no room picked, leave null — mini-admin assigns on confirm
-    // Or auto-pick first room of center for inventory clarity
-    if (!roomId && roomsForCenter.length === 1) {
-      roomId = roomsForCenter[0].id
-      roomName = roomsForCenter[0].roomName
-    }
 
     setIsSubmitting(true)
     try {
+      const busyRaw = await publicAPI.listBusySlots({
+        fromDate: formData.date,
+        toDate: formData.date,
+        centerId: link.centerId || null,
+        therapistId: link.therapistId || null,
+      })
+      const busyIntervals = toBusyIntervals(busyRaw)
+
+      let roomId = link?.roomId || formData.roomId || null
+      let roomName = link?.roomId ? link.roomName : formData.roomName || null
+
+      if (!roomId) {
+        const freeId = pickFreeRoomId({
+          dateKey: formData.date,
+          startTime: formData.reservedTime,
+          durationMinutes: formData.durationMinutes,
+          busyIntervals,
+          roomIds,
+        })
+        if (!freeId) {
+          throw new Error('No room is free at this time. Please choose another slot.')
+        }
+        const room = roomsForCenter.find((r) => r.id === freeId)
+        roomId = freeId
+        roomName = room?.roomName || 'Assigned room'
+      }
+
+      const stillAvailable = getAvailableSlots({
+        dateKey: formData.date,
+        durationMinutes: formData.durationMinutes,
+        busyIntervals,
+        roomId,
+        roomIds,
+        therapistId: link.therapistId,
+      }).includes(formData.reservedTime.substring(0, 5))
+
+      if (!stillAvailable) {
+        const reasons = getSlotConflictReasons({
+          dateKey: formData.date,
+          startTime: formData.reservedTime,
+          durationMinutes: formData.durationMinutes,
+          busyIntervals,
+          roomId,
+          therapistId: link.therapistId,
+        })
+        throw new Error(
+          reasons[0] || 'This time is no longer available. Please pick another slot.'
+        )
+      }
+
       await publicAPI.createBookingRequest({
         clientName: formData.clientName.trim(),
         clientPhone: formData.clientPhone.trim(),
@@ -143,7 +184,7 @@ const StaffLinkBooking = () => {
         centerId: link.centerId,
         centerName: link.centerName,
         roomId,
-        roomName: roomName || (link?.roomId ? null : 'Any room'),
+        roomName,
         therapistId: link.therapistId,
         therapistName: link.therapistName,
         date: formData.date,
@@ -180,7 +221,10 @@ const StaffLinkBooking = () => {
     return (
       <div style={pageStyle}>
         <h1 style={{ fontFamily: 'Georgia, serif' }}>Request sent</h1>
-        <p>Thank you. Your reservation request with {link.therapistName} was submitted and will be confirmed shortly.</p>
+        <p>
+          Thank you. Your reservation request with {link.therapistName} was submitted and will be
+          confirmed shortly.
+        </p>
         <Link to="/">Back to home</Link>
       </div>
     )
@@ -202,7 +246,15 @@ const StaffLinkBooking = () => {
 
         <form onSubmit={handleSubmit}>
           {submitError && (
-            <div style={{ padding: 12, marginBottom: 16, background: '#fef2f2', color: '#dc2626', borderRadius: 8 }}>
+            <div
+              style={{
+                padding: 12,
+                marginBottom: 16,
+                background: '#fef2f2',
+                color: '#dc2626',
+                borderRadius: 8,
+              }}
+            >
               {submitError}
             </div>
           )}
@@ -278,6 +330,9 @@ const StaffLinkBooking = () => {
           </select>
 
           <label style={labelStyle}>Availability *</label>
+          <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#666' }}>
+            Times already booked for this therapist or room are hidden.
+          </p>
           <AvailabilityCalendar
             centerId={link.centerId || ''}
             roomId={effectiveRoomId}

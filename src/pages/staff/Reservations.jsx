@@ -26,6 +26,7 @@ import { bookingAPI, staffAPI, serviceAPI, centerAPI, roomAPI, getTodayDate, get
 import { useAuth } from '../../context/AuthContext'
 import AvailabilityCalendar from '../../components/AvailabilityCalendar'
 import '../../components/AvailabilityCalendar.css'
+import { toBusyIntervals, getSlotConflictReasons } from '../../utils/availability'
 
 /**
  * Reservations - Manage client bookings and reservations
@@ -376,6 +377,44 @@ const Reservations = () => {
               therapistName: staffDisplayName,
             }
           : {}),
+      }
+
+      // Central calendar conflict check (therapist + room) before create/update
+      if (!editingItem || editingItem.status === 'Pending') {
+        const [dayBookings, pending] = await Promise.all([
+          bookingAPI.list(formData.date, formData.date, {
+            ...(formData.centerId ? { centerId: formData.centerId } : {}),
+          }),
+          notConfirmedReservationAPI.list(formData.date, formData.date),
+        ])
+        const therapistBookings = payload.therapistId
+          ? await bookingAPI.list(formData.date, formData.date, {
+              therapistId: payload.therapistId,
+            })
+          : []
+        const byId = new Map()
+        ;[...dayBookings, ...therapistBookings].forEach((b) => {
+          if (b?.id && b.id !== editingItem?.id) byId.set(b.id, b)
+        })
+        const busyIntervals = toBusyIntervals([
+          ...byId.values(),
+          ...pending.filter(
+            (p) =>
+              (!formData.centerId || p.centerId === formData.centerId) ||
+              (payload.therapistId && p.therapistId === payload.therapistId)
+          ),
+        ])
+        const reasons = getSlotConflictReasons({
+          dateKey: formData.date,
+          startTime: formData.reservedTime,
+          durationMinutes: formData.durationMinutes,
+          busyIntervals,
+          roomId: formData.roomId || null,
+          therapistId: payload.therapistId || null,
+        })
+        if (reasons.length) {
+          throw new Error(reasons[0])
+        }
       }
 
       if (editingItem) {

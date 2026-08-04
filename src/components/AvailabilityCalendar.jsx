@@ -60,22 +60,34 @@ const AvailabilityCalendar = ({
       const toDate = toLocalDateKey(monthEnd)
       let raw = []
       if (authMode === 'staff') {
-        const [bookings, pending] = await Promise.all([
+        // Center occupancy + this therapist's bookings (central calendar rules)
+        const [centerBookings, therapistBookings, pending] = await Promise.all([
           bookingAPI.list(fromDate, toDate, {
             ...(centerId ? { centerId } : {}),
           }),
+          therapistId
+            ? bookingAPI.list(fromDate, toDate, { therapistId })
+            : Promise.resolve([]),
           notConfirmedReservationAPI.list(fromDate, toDate),
         ])
+        const byId = new Map()
+        ;[...centerBookings, ...therapistBookings].forEach((b) => {
+          if (b?.id) byId.set(b.id, b)
+        })
         raw = [
-          ...bookings,
-          ...pending.filter((p) => !centerId || p.centerId === centerId),
+          ...byId.values(),
+          ...pending.filter(
+            (p) =>
+              (!centerId || p.centerId === centerId) ||
+              (therapistId && p.therapistId === therapistId)
+          ),
         ]
       } else {
         raw = await publicAPI.listBusySlots({
           fromDate,
           toDate,
           centerId: centerId || null,
-          roomId: null,
+          therapistId: therapistId || null,
         })
       }
       setBusyIntervals(toBusyIntervals(raw))

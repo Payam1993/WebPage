@@ -34,6 +34,7 @@ export const toBusyIntervals = (reservations = []) => {
       const start = timeToMinutes(r.reservedTime)
       const duration = Number(r.durationMinutes) || 60
       return {
+        id: r.id || null,
         date: r.date,
         start,
         end: start + duration,
@@ -44,16 +45,20 @@ export const toBusyIntervals = (reservations = []) => {
     })
 }
 
-const intervalsOverlap = (aStart, aEnd, bStart, bEnd) => aStart < bEnd && bStart < aEnd
+export const intervalsOverlap = (aStart, aEnd, bStart, bEnd) => aStart < bEnd && bStart < aEnd
 
-const isRoomBlocked = (dayBusy, roomId, start, end) =>
-  dayBusy.some(
+/** Same room cannot hold two overlapping services */
+export const isRoomBlocked = (dayBusy, roomId, start, end) => {
+  if (!roomId) return false
+  return dayBusy.some(
     (b) =>
-      (!b.roomId || b.roomId === roomId) &&
+      b.roomId === roomId &&
       intervalsOverlap(start, end, b.start, b.end)
   )
+}
 
-const isTherapistBlocked = (dayBusy, therapistId, start, end) => {
+/** Same therapist cannot take two overlapping reservations (any room) */
+export const isTherapistBlocked = (dayBusy, therapistId, start, end) => {
   if (!therapistId) return false
   return dayBusy.some(
     (b) =>
@@ -63,8 +68,20 @@ const isTherapistBlocked = (dayBusy, therapistId, start, end) => {
 }
 
 /**
- * Generate available start times for a given day / room / duration
- * @param {string|null} options.therapistId - when set, that therapist's bookings block all rooms
+ * Unassigned-room bookings (roomId null) block every room in the center
+ * so "any room" leftovers still reserve capacity.
+ */
+export const isUnassignedRoomBlocked = (dayBusy, start, end) =>
+  dayBusy.some(
+    (b) => !b.roomId && intervalsOverlap(start, end, b.start, b.end)
+  )
+
+/**
+ * Generate available start times
+ * Rules:
+ * - Therapist busy → slot unavailable (cannot double-book the same staff)
+ * - Specific room busy → slot unavailable for that room
+ * - Any-room mode → need at least one free room (and not blocked by unassigned bookings)
  */
 export const getAvailableSlots = ({
   dateKey,
@@ -84,30 +101,81 @@ export const getAvailableSlots = ({
   for (let start = open; start + duration <= close; start += stepMinutes) {
     const end = start + duration
 
-    // Therapist is busy → never offer this slot (any room)
     if (isTherapistBlocked(dayBusy, therapistId, start, end)) {
       continue
     }
 
     if (roomId) {
-      if (!isRoomBlocked(dayBusy, roomId, start, end)) {
+      if (
+        !isRoomBlocked(dayBusy, roomId, start, end) &&
+        !isUnassignedRoomBlocked(dayBusy, start, end)
+      ) {
         slots.push(minutesToTime(start))
       }
-    } else {
-      // Need at least one free room among candidates
-      const candidates = roomIds.length ? roomIds : [null]
-      const hasFreeRoom = candidates.some((rid) => {
-        if (!rid) {
-          return !dayBusy.some((b) => intervalsOverlap(start, end, b.start, b.end))
-        }
-        return !isRoomBlocked(dayBusy, rid, start, end)
-      })
-      if (hasFreeRoom) {
-        slots.push(minutesToTime(start))
-      }
+      continue
+    }
+
+    const candidates = roomIds.length ? roomIds : []
+    if (candidates.length === 0) {
+      // No room list → treat any overlapping booking as busy (safe fallback)
+      const anyBusy = dayBusy.some((b) => intervalsOverlap(start, end, b.start, b.end))
+      if (!anyBusy) slots.push(minutesToTime(start))
+      continue
+    }
+
+    if (isUnassignedRoomBlocked(dayBusy, start, end)) {
+      continue
+    }
+
+    const hasFreeRoom = candidates.some(
+      (rid) => !isRoomBlocked(dayBusy, rid, start, end)
+    )
+    if (hasFreeRoom) {
+      slots.push(minutesToTime(start))
     }
   }
   return slots
+}
+
+/** Pick first free room for an any-room booking */
+export const pickFreeRoomId = ({
+  dateKey,
+  startTime,
+  durationMinutes,
+  busyIntervals,
+  roomIds = [],
+}) => {
+  const start = timeToMinutes(startTime)
+  const end = start + (Number(durationMinutes) || 60)
+  const dayBusy = busyIntervals.filter((b) => b.date === dateKey)
+  if (isUnassignedRoomBlocked(dayBusy, start, end)) return null
+  return (
+    roomIds.find((rid) => !isRoomBlocked(dayBusy, rid, start, end)) || null
+  )
+}
+
+export const getSlotConflictReasons = ({
+  dateKey,
+  startTime,
+  durationMinutes,
+  busyIntervals,
+  roomId = null,
+  therapistId = null,
+}) => {
+  const start = timeToMinutes(startTime)
+  const end = start + (Number(durationMinutes) || 60)
+  const dayBusy = busyIntervals.filter((b) => b.date === dateKey)
+  const reasons = []
+  if (isTherapistBlocked(dayBusy, therapistId, start, end)) {
+    reasons.push('This staff member is already booked at this time')
+  }
+  if (roomId && isRoomBlocked(dayBusy, roomId, start, end)) {
+    reasons.push('This room is already reserved at this time')
+  }
+  if (roomId && isUnassignedRoomBlocked(dayBusy, start, end)) {
+    reasons.push('The center has an unassigned reservation covering this time')
+  }
+  return reasons
 }
 
 /**

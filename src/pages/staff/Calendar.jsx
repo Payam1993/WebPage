@@ -610,8 +610,8 @@ const Calendar = () => {
           <CardTitle
             subtitle={
               isIndividualView
-                ? 'Your upcoming pending bookings'
-                : 'All staff upcoming pending bookings'
+                ? 'Services booked for you (pending)'
+                : 'All staff booked services (pending)'
             }
           >
             To Do
@@ -628,6 +628,7 @@ const Calendar = () => {
                 <TableRow>
                   <TableHead>Therapist</TableHead>
                   <TableHead>Client</TableHead>
+                  <TableHead>Service</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Start</TableHead>
@@ -649,6 +650,7 @@ const Calendar = () => {
                           {b.clientPhone || 'No phone'}
                         </div>
                       </TableCell>
+                      <TableCell>{b.serviceName || '-'}</TableCell>
                       <TableCell>{formatDisplayDate(b.date)}</TableCell>
                       <TableCell>{b.durationMinutes || 60} min</TableCell>
                       <TableCell>{start}</TableCell>
