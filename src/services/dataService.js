@@ -299,6 +299,10 @@ export const roomAPI = {
         centerId: roomData.centerId,
         centerName: roomData.centerName || null,
         pictureKey: roomData.pictureKey || null,
+        roomPrice:
+          roomData.roomPrice === '' || roomData.roomPrice === undefined || roomData.roomPrice === null
+            ? null
+            : Number(roomData.roomPrice),
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -318,6 +322,10 @@ export const roomAPI = {
         centerId: roomData.centerId,
         centerName: roomData.centerName || null,
         pictureKey: roomData.pictureKey || null,
+        roomPrice:
+          roomData.roomPrice === '' || roomData.roomPrice === undefined || roomData.roomPrice === null
+            ? null
+            : Number(roomData.roomPrice),
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -696,7 +704,7 @@ export const bookingAPI = {
       const client = getClient()
       const { data, errors } = await client.models.Booking.create({
         clientName: bookingData.clientName,
-        clientPhone: bookingData.clientPhone,
+        clientPhone: bookingData.clientPhone?.trim() || null,
         serviceId: bookingData.serviceId || null,
         serviceName: bookingData.serviceName || null,
         therapistId: bookingData.therapistId || null,
@@ -726,7 +734,7 @@ export const bookingAPI = {
       const { data, errors } = await client.models.Booking.update({
         id,
         clientName: bookingData.clientName,
-        clientPhone: bookingData.clientPhone,
+        clientPhone: bookingData.clientPhone?.trim() || null,
         serviceId: bookingData.serviceId || null,
         serviceName: bookingData.serviceName || null,
         therapistId: bookingData.therapistId || null,

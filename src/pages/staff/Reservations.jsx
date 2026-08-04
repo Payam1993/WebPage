@@ -33,7 +33,7 @@ import '../../components/AvailabilityCalendar.css'
  * Users: individual view of bookings assigned to their Staff profile
  */
 const Reservations = () => {
-  const { isAdmin, isUser, staffProfile, isLoading: authLoading } = useAuth()
+  const { isAdmin, isUser, staffProfile, userEmail, isLoading: authLoading } = useAuth()
   const isIndividualView = isUser
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -57,6 +57,12 @@ const Reservations = () => {
   const [editingItem, setEditingItem] = useState(null)
   const [formData, setFormData] = useState({})
   const [isSaving, setIsSaving] = useState(false)
+  const [legalAccepted, setLegalAccepted] = useState(false)
+
+  const staffDisplayName = [
+    staffProfile?.staffName,
+    staffProfile?.lastName,
+  ].filter(Boolean).join(' ') || userEmail || 'Staff'
 
   // Delete confirmation
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, item: null })
@@ -178,9 +184,11 @@ const Reservations = () => {
   }
 
   const handleOpenModal = (item = null) => {
+    setLegalAccepted(false)
     if (item) {
       setEditingItem(item)
       setFormData({ ...item })
+      setLegalAccepted(true)
     } else {
       setEditingItem(null)
       const defaultCenter = centersList.length === 1 ? centersList[0] : null
@@ -188,13 +196,15 @@ const Reservations = () => {
         date: getTodayDate(),
         status: 'Pending',
         durationMinutes: 60,
+        priceAgreement: 0,
+        clientPhone: '',
         ...(defaultCenter
           ? { centerId: defaultCenter.id, centerName: defaultCenter.centerName }
           : {}),
         ...((isIndividualView && staffProfile)
           ? {
               therapistId: staffProfile.id,
-              therapistName: staffProfile.staffName,
+              therapistName: staffDisplayName,
             }
           : {}),
       })
@@ -207,6 +217,7 @@ const Reservations = () => {
     setShowModal(false)
     setEditingItem(null)
     setFormData({})
+    setLegalAccepted(false)
     setError(null)
   }
 
@@ -241,10 +252,16 @@ const Reservations = () => {
 
   const handleRoomSelect = (roomId) => {
     const room = roomsList.find((r) => r.id === roomId)
+    const roomPrice =
+      room?.roomPrice != null && room.roomPrice !== ''
+        ? Number(room.roomPrice)
+        : null
     setFormData({
       ...formData,
       roomId,
       roomName: room?.roomName || '',
+      reservedTime: '',
+      ...(roomPrice != null ? { priceAgreement: roomPrice } : {}),
       ...(room?.centerId && !formData.centerId
         ? {
             centerId: room.centerId,
@@ -334,19 +351,37 @@ const Reservations = () => {
     setIsSaving(true)
     setError(null)
     try {
-      // Validate required fields
       if (!formData.clientName?.trim()) throw new Error('Client Name is required')
-      if (!formData.clientPhone?.trim()) throw new Error('Client Phone is required')
       if (!formData.date) throw new Error('Date is required')
-      if (!formData.reservedTime) throw new Error('Reserved Time is required')
+      if (!formData.reservedTime) throw new Error('Please select an available time from the calendar')
       if (!formData.durationMinutes) throw new Error('Duration is required')
-      if (!formData.priceAgreement && formData.priceAgreement !== 0) throw new Error('Price Agreement is required')
+      if (isIndividualView && !formData.roomId) {
+        throw new Error('Room selection is required')
+      }
+      if (isIndividualView && !legalAccepted) {
+        throw new Error('You must accept the local massage license declaration')
+      }
+      if (formData.priceAgreement == null || formData.priceAgreement === '') {
+        throw new Error('Price Agreement is required')
+      }
       if (!formData.status) throw new Error('Status is required')
 
+      const payload = {
+        ...formData,
+        clientPhone: formData.clientPhone?.trim() || null,
+        priceAgreement: Number(formData.priceAgreement) || 0,
+        ...(isIndividualView && staffProfile
+          ? {
+              therapistId: staffProfile.id,
+              therapistName: staffDisplayName,
+            }
+          : {}),
+      }
+
       if (editingItem) {
-        await bookingAPI.update(editingItem.id, formData)
+        await bookingAPI.update(editingItem.id, payload)
       } else {
-        await bookingAPI.create(formData)
+        await bookingAPI.create(payload)
       }
       
       await loadBookings()
@@ -458,10 +493,16 @@ const Reservations = () => {
 
   const roomFormOptions = roomsList
     .filter((r) => !formData.centerId || r.centerId === formData.centerId)
-    .map((r) => ({
-      value: r.id,
-      label: `${r.roomName}${r.referenceNumber ? ` (${r.referenceNumber})` : ''}`,
-    }))
+    .map((r) => {
+      const priceLabel =
+        r.roomPrice != null && r.roomPrice !== ''
+          ? ` · €${Number(r.roomPrice).toFixed(2)}`
+          : ' · custom price'
+      return {
+        value: r.id,
+        label: `${r.roomName}${r.referenceNumber ? ` (${r.referenceNumber})` : ''}${priceLabel}`,
+      }
+    })
 
   // Duration options
   const durationOptions = [
@@ -657,7 +698,9 @@ const Reservations = () => {
                       <TableCell>
                         <div>
                           <div style={{ fontWeight: 500 }}>{booking.clientName}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>{booking.clientPhone}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
+                            {booking.clientPhone || 'No phone'}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -701,8 +744,14 @@ const Reservations = () => {
         isOpen={showModal}
         onClose={handleCloseModal}
         title={editingItem ? 'Edit Booking' : 'New Booking'}
-        subtitle={editingItem ? 'Update booking details' : 'Create a new client reservation'}
-        size="default"
+        subtitle={
+          isIndividualView
+            ? 'Book with room availability from the general calendar'
+            : editingItem
+              ? 'Update booking details'
+              : 'Create a new client reservation'
+        }
+        size="large"
       >
         {error && (
           <div style={{ 
@@ -716,96 +765,217 @@ const Reservations = () => {
             {error}
           </div>
         )}
-        
-        <Grid cols={2} gap="default">
-          <Input
-            label="Client Name *"
-            placeholder="Enter client name"
-            value={formData.clientName || ''}
-            onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-          />
-          <Input
-            label="Client Phone *"
-            placeholder="+34 612 345 678"
-            value={formData.clientPhone || ''}
-            onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
-          />
-          <Select
-            label="Service"
-            options={serviceOptions}
-            placeholder="Select service (optional)"
-            value={formData.serviceId || ''}
-            onChange={(e) => handleServiceSelect(e.target.value)}
-          />
-          <Select
-            label="Therapist"
-            options={
-              isIndividualView
-                ? staffOptions.filter((s) => s.value === staffProfile?.id)
-                : staffOptions
-            }
-            placeholder={isIndividualView ? 'Assigned to you' : 'Select therapist (optional)'}
-            value={formData.therapistId || ''}
-            onChange={(e) => handleTherapistSelect(e.target.value)}
-            disabled={isIndividualView}
-          />
-          <Select
-            label="Center"
-            options={centerFormOptions}
-            placeholder="Select center"
-            value={formData.centerId || ''}
-            onChange={(e) => handleCenterSelect(e.target.value)}
-          />
-          <Select
-            label="Room (optional)"
-            options={roomFormOptions}
-            placeholder="Select room (optional)"
-            value={formData.roomId || ''}
-            onChange={(e) => handleRoomSelect(e.target.value)}
-          />
-          <Select
-            label="Duration *"
-            options={durationOptions}
-            value={formData.durationMinutes || ''}
-            onChange={(e) => setFormData({
-              ...formData,
-              durationMinutes: parseInt(e.target.value),
-              reservedTime: '',
-            })}
-          />
-          <Input
-            label="Price Agreement (€) *"
-            type="number"
-            step="0.01"
-            placeholder="0.00"
-            value={formData.priceAgreement || ''}
-            onChange={(e) => setFormData({ ...formData, priceAgreement: e.target.value ? parseFloat(e.target.value) : null })}
-          />
-          <Select
-            label="Status *"
-            options={statusOptions}
-            value={formData.status || 'Pending'}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          />
-        </Grid>
 
-        <div style={{ marginTop: '16px' }} className="availability-calendar--admin">
-          <AvailabilityCalendar
-            centerId={formData.centerId || ''}
-            roomId={formData.roomId || ''}
-            roomIds={roomsList
-              .filter((r) => !formData.centerId || r.centerId === formData.centerId)
-              .map((r) => r.id)}
-            durationMinutes={formData.durationMinutes || 60}
-            selectedDate={formData.date || ''}
-            selectedTime={formData.reservedTime || ''}
-            onSelectDate={(date) => setFormData((prev) => ({ ...prev, date, reservedTime: '' }))}
-            onSelectTime={(time) => setFormData((prev) => ({ ...prev, reservedTime: time }))}
-            authMode="staff"
-          />
-        </div>
+        {isIndividualView ? (
+          <>
+            <Grid cols={2} gap="default">
+              <Input
+                label="Client Name *"
+                placeholder="Enter client name"
+                value={formData.clientName || ''}
+                onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+              />
+              <Input
+                label="Client Phone"
+                placeholder="Optional"
+                value={formData.clientPhone || ''}
+                onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
+              />
+              <Select
+                label="Duration *"
+                options={durationOptions}
+                value={formData.durationMinutes || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  durationMinutes: parseInt(e.target.value),
+                  reservedTime: '',
+                })}
+              />
+              {centersList.length > 1 && (
+                <Select
+                  label="Center"
+                  options={centerFormOptions}
+                  placeholder="Select center"
+                  value={formData.centerId || ''}
+                  onChange={(e) => handleCenterSelect(e.target.value)}
+                />
+              )}
+              <Select
+                label="Room *"
+                options={roomFormOptions}
+                placeholder="Select room"
+                value={formData.roomId || ''}
+                onChange={(e) => handleRoomSelect(e.target.value)}
+              />
+              <Input
+                label="Therapist / Staff"
+                value={formData.therapistName || staffDisplayName}
+                readOnly
+                disabled
+              />
+              {roomsList.find((r) => r.id === formData.roomId)?.roomPrice == null && (
+                <Input
+                  label="Price Agreement (€) *"
+                  type="number"
+                  step="0.01"
+                  placeholder="Custom room price"
+                  value={formData.priceAgreement ?? ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      priceAgreement: e.target.value === '' ? 0 : parseFloat(e.target.value),
+                    })
+                  }
+                />
+              )}
+            </Grid>
 
-        {/* Keep date/time fields synced for save validation */}
+            <div style={{ marginTop: '20px' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', fontSize: '0.9375rem' }}>
+                Select date & time *
+              </div>
+              <p style={{ margin: '0 0 12px', fontSize: '0.8125rem', color: 'var(--ui-text-muted)' }}>
+                Connected to the general calendar — free slots depend on room availability
+                {formData.roomName ? ` for ${formData.roomName}` : '. Select a room first for accurate slots.'}
+              </p>
+              <div className="availability-calendar--admin">
+                <AvailabilityCalendar
+                  centerId={formData.centerId || ''}
+                  roomId={formData.roomId || ''}
+                  roomIds={
+                    formData.roomId
+                      ? [formData.roomId]
+                      : roomsList
+                          .filter((r) => !formData.centerId || r.centerId === formData.centerId)
+                          .map((r) => r.id)
+                  }
+                  durationMinutes={formData.durationMinutes || 60}
+                  selectedDate={formData.date || ''}
+                  selectedTime={formData.reservedTime || ''}
+                  onSelectDate={(date) => setFormData((prev) => ({ ...prev, date, reservedTime: '' }))}
+                  onSelectTime={(time) => setFormData((prev) => ({ ...prev, reservedTime: time }))}
+                  authMode="staff"
+                />
+              </div>
+            </div>
+
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                marginTop: '20px',
+                padding: '14px 16px',
+                borderRadius: 10,
+                border: '1px solid var(--ui-border)',
+                background: 'var(--ui-bg)',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                lineHeight: 1.5,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={legalAccepted}
+                onChange={(e) => setLegalAccepted(e.target.checked)}
+                style={{ marginTop: 3, flexShrink: 0 }}
+              />
+              <span>
+                <strong>Legal license confirmation *</strong>
+                <br />
+                I accept the local license compliance: this booking is for massage services only
+                and is not erotic in nature. / Acepto el cumplimiento legal de la licencia del local:
+                se trata de masajes y nada erótico.
+              </span>
+            </label>
+          </>
+        ) : (
+          <>
+            <Grid cols={2} gap="default">
+              <Input
+                label="Client Name *"
+                placeholder="Enter client name"
+                value={formData.clientName || ''}
+                onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+              />
+              <Input
+                label="Client Phone"
+                placeholder="Optional"
+                value={formData.clientPhone || ''}
+                onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
+              />
+              <Select
+                label="Service"
+                options={serviceOptions}
+                placeholder="Select service (optional)"
+                value={formData.serviceId || ''}
+                onChange={(e) => handleServiceSelect(e.target.value)}
+              />
+              <Select
+                label="Therapist"
+                options={staffOptions}
+                placeholder="Select therapist (optional)"
+                value={formData.therapistId || ''}
+                onChange={(e) => handleTherapistSelect(e.target.value)}
+              />
+              <Select
+                label="Center"
+                options={centerFormOptions}
+                placeholder="Select center"
+                value={formData.centerId || ''}
+                onChange={(e) => handleCenterSelect(e.target.value)}
+              />
+              <Select
+                label="Room (optional)"
+                options={roomFormOptions}
+                placeholder="Select room (optional)"
+                value={formData.roomId || ''}
+                onChange={(e) => handleRoomSelect(e.target.value)}
+              />
+              <Select
+                label="Duration *"
+                options={durationOptions}
+                value={formData.durationMinutes || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  durationMinutes: parseInt(e.target.value),
+                  reservedTime: '',
+                })}
+              />
+              <Input
+                label="Price Agreement (€) *"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={formData.priceAgreement ?? ''}
+                onChange={(e) => setFormData({ ...formData, priceAgreement: e.target.value ? parseFloat(e.target.value) : 0 })}
+              />
+              <Select
+                label="Status *"
+                options={statusOptions}
+                value={formData.status || 'Pending'}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              />
+            </Grid>
+
+            <div style={{ marginTop: '16px' }} className="availability-calendar--admin">
+              <AvailabilityCalendar
+                centerId={formData.centerId || ''}
+                roomId={formData.roomId || ''}
+                roomIds={roomsList
+                  .filter((r) => !formData.centerId || r.centerId === formData.centerId)
+                  .map((r) => r.id)}
+                durationMinutes={formData.durationMinutes || 60}
+                selectedDate={formData.date || ''}
+                selectedTime={formData.reservedTime || ''}
+                onSelectDate={(date) => setFormData((prev) => ({ ...prev, date, reservedTime: '' }))}
+                onSelectTime={(time) => setFormData((prev) => ({ ...prev, reservedTime: time }))}
+                authMode="staff"
+              />
+            </div>
+          </>
+        )}
+
         <div style={{ display: 'none' }}>
           <Input label="Date *" type="date" value={formData.date || ''} readOnly />
           <Input label="Reserved Time *" type="time" value={formData.reservedTime || ''} readOnly />

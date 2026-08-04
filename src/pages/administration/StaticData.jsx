@@ -236,6 +236,10 @@ const StaticData = () => {
           ...formData,
           centerName: center?.centerName,
           pictureKey,
+          roomPrice:
+            formData.roomPrice === '' || formData.roomPrice === undefined || formData.roomPrice === null
+              ? null
+              : Number(formData.roomPrice),
         }
         if (editingItem) {
           await roomAPI.update(editingItem.id, roomPayload)
@@ -865,6 +869,20 @@ const StaticData = () => {
                 value={formData.centerId || ''}
                 onChange={(e) => setFormData({ ...formData, centerId: e.target.value })}
               />
+              <Input
+                label="Price of Room"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Leave empty for custom / depending"
+                value={formData.roomPrice ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    roomPrice: e.target.value === '' ? null : e.target.value,
+                  })
+                }
+              />
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 500 }}>
                   Room Picture
@@ -926,6 +944,7 @@ const StaticData = () => {
                     <TableHead>Room Name</TableHead>
                     <TableHead>Reference Number</TableHead>
                     <TableHead>Center</TableHead>
+                    <TableHead>Price</TableHead>
                     <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -938,6 +957,11 @@ const StaticData = () => {
                       <TableCell><span style={{ fontWeight: 500 }}>{room.roomName}</span></TableCell>
                       <TableCell>{room.referenceNumber || '-'}</TableCell>
                       <TableCell>{room.centerName || '-'}</TableCell>
+                      <TableCell>
+                        {room.roomPrice != null && room.roomPrice !== ''
+                          ? `€${Number(room.roomPrice).toFixed(2)}`
+                          : 'Custom / depending'}
+                      </TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
                           <Button variant="ghost" size="small" onClick={() => handleEdit(room)}>

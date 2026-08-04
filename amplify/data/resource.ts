@@ -99,6 +99,8 @@ const schema = a.schema({
       centerId: a.string().required(),
       centerName: a.string(),
       pictureKey: a.string(), // S3 path for room picture
+      // Fixed room price; null = custom / depending
+      roomPrice: a.float(),
     })
     .authorization((allow) => [
       allow.group("Admin_Confession"),
@@ -159,7 +161,7 @@ const schema = a.schema({
     .model({
       // Client information
       clientName: a.string().required(),
-      clientPhone: a.string().required(),
+      clientPhone: a.string(), // optional for staff-created bookings
       // Service (optional - ID reference and name)
       serviceId: a.string(),
       serviceName: a.string(),
