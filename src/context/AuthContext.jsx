@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { fetchAuthSession, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth'
+import { fetchAuthSession, getCurrentUser, fetchUserAttributes, signOut } from 'aws-amplify/auth'
 import { Hub } from 'aws-amplify/utils'
 import { resolveStaffByEmail } from '../services/dataService'
 
@@ -19,6 +19,79 @@ export const ROLES = {
 export const GROUP_ADMIN = 'Admin_Confession'
 export const GROUP_MINI_ADMIN = 'Mini_Admin'
 export const GROUP_USERS = 'Users'
+
+/** Per-tab session marker — cleared when the browser tab/window is closed */
+const TAB_SESSION_KEY = 'confession_staff_tab_session'
+
+/**
+ * Sync-clear Cognito / Amplify tokens from localStorage.
+ * Used on window close where async signOut may not finish.
+ */
+export const clearPersistedAuthTokens = () => {
+  try {
+    const keys = []
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i)
+      if (!key) continue
+      if (
+        key.includes('CognitoIdentityServiceProvider') ||
+        key.includes('amplify-') ||
+        key.startsWith('amplify')
+      ) {
+        keys.push(key)
+      }
+    }
+    keys.forEach((key) => localStorage.removeItem(key))
+  } catch {
+    // ignore storage errors during unload
+  }
+}
+
+const markTabSessionActive = () => {
+  try {
+    sessionStorage.setItem(TAB_SESSION_KEY, '1')
+  } catch {
+    // ignore
+  }
+}
+
+const clearTabSession = () => {
+  try {
+    sessionStorage.removeItem(TAB_SESSION_KEY)
+  } catch {
+    // ignore
+  }
+}
+
+const hasTabSession = () => {
+  try {
+    return sessionStorage.getItem(TAB_SESSION_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Force logout for Admin / Mini Admin / Users when the browser window/tab was closed.
+ * sessionStorage survives refresh but not tab close; Cognito tokens in localStorage would otherwise persist.
+ */
+const forceLogoutIfTabWasClosed = async () => {
+  if (hasTabSession()) return false
+  try {
+    await getCurrentUser()
+    // Tokens still present after a closed tab — wipe them
+    clearPersistedAuthTokens()
+    try {
+      await signOut({ global: false })
+    } catch {
+      // already cleared locally
+    }
+    return true
+  } catch {
+    clearPersistedAuthTokens()
+    return false
+  }
+}
 
 const AuthContext = createContext({
   user: null,
@@ -96,12 +169,14 @@ export const AuthProvider = ({ children }) => {
     setStaffProfile(null)
     setGroups([])
     setRole(ROLES.USER)
+    clearTabSession()
   }
 
   const refreshAuth = useCallback(async () => {
     try {
       const currentUser = await getCurrentUser()
       setUser(currentUser)
+      markTabSessionActive()
 
       const nextGroups = await getGroupsFromSession()
       setGroups(nextGroups)
@@ -120,11 +195,21 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    refreshAuth()
+    let cancelled = false
+
+    const boot = async () => {
+      await forceLogoutIfTabWasClosed()
+      if (!cancelled) {
+        await refreshAuth()
+      }
+    }
+
+    boot()
 
     const hubListener = Hub.listen('auth', ({ payload }) => {
       switch (payload.event) {
         case 'signedIn':
+          markTabSessionActive()
           refreshAuth()
           break
         case 'signedOut':
@@ -139,6 +224,7 @@ export const AuthProvider = ({ children }) => {
     })
 
     return () => {
+      cancelled = true
       hubListener()
     }
   }, [refreshAuth])
