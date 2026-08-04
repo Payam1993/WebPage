@@ -26,7 +26,6 @@ export const getDayHours = (dateKey) => {
 
 /**
  * Normalize bookings / pending requests into busy intervals
- * @param {Array} reservations - items with date, reservedTime, durationMinutes, roomId?, status?
  */
 export const toBusyIntervals = (reservations = []) => {
   return reservations
@@ -40,21 +39,32 @@ export const toBusyIntervals = (reservations = []) => {
         end: start + duration,
         roomId: r.roomId || null,
         centerId: r.centerId || null,
+        therapistId: r.therapistId || null,
       }
     })
 }
 
 const intervalsOverlap = (aStart, aEnd, bStart, bEnd) => aStart < bEnd && bStart < aEnd
 
+const isRoomBlocked = (dayBusy, roomId, start, end) =>
+  dayBusy.some(
+    (b) =>
+      (!b.roomId || b.roomId === roomId) &&
+      intervalsOverlap(start, end, b.start, b.end)
+  )
+
+const isTherapistBlocked = (dayBusy, therapistId, start, end) => {
+  if (!therapistId) return false
+  return dayBusy.some(
+    (b) =>
+      b.therapistId === therapistId &&
+      intervalsOverlap(start, end, b.start, b.end)
+  )
+}
+
 /**
  * Generate available start times for a given day / room / duration
- * @param {object} options
- * @param {string} options.dateKey - YYYY-MM-DD
- * @param {number} options.durationMinutes
- * @param {Array} options.busyIntervals - from toBusyIntervals
- * @param {string|null} options.roomId - if set, only that room's bookings block; if null, slot needs any free room among roomIds
- * @param {string[]} options.roomIds - rooms in the center (required when roomId is null)
- * @param {number} [options.stepMinutes=30]
+ * @param {string|null} options.therapistId - when set, that therapist's bookings block all rooms
  */
 export const getAvailableSlots = ({
   dateKey,
@@ -62,6 +72,7 @@ export const getAvailableSlots = ({
   busyIntervals = [],
   roomId = null,
   roomIds = [],
+  therapistId = null,
   stepMinutes = 30,
 }) => {
   if (!dateKey) return []
@@ -73,32 +84,23 @@ export const getAvailableSlots = ({
   for (let start = open; start + duration <= close; start += stepMinutes) {
     const end = start + duration
 
+    // Therapist is busy → never offer this slot (any room)
+    if (isTherapistBlocked(dayBusy, therapistId, start, end)) {
+      continue
+    }
+
     if (roomId) {
-      const blocked = dayBusy.some(
-        (b) =>
-          (!b.roomId || b.roomId === roomId) &&
-          intervalsOverlap(start, end, b.start, b.end)
-      )
-      // Also block unassigned room bookings on same center? handled if roomId matches or null roomId blocks all
-      const blockedUnassigned = dayBusy.some(
-        (b) => !b.roomId && intervalsOverlap(start, end, b.start, b.end)
-      )
-      if (!blocked && !blockedUnassigned) {
+      if (!isRoomBlocked(dayBusy, roomId, start, end)) {
         slots.push(minutesToTime(start))
       }
     } else {
-      // Need at least one room free for this slot
+      // Need at least one free room among candidates
       const candidates = roomIds.length ? roomIds : [null]
       const hasFreeRoom = candidates.some((rid) => {
         if (!rid) {
           return !dayBusy.some((b) => intervalsOverlap(start, end, b.start, b.end))
         }
-        const roomBlocked = dayBusy.some(
-          (b) =>
-            (b.roomId === rid || !b.roomId) &&
-            intervalsOverlap(start, end, b.start, b.end)
-        )
-        return !roomBlocked
+        return !isRoomBlocked(dayBusy, rid, start, end)
       })
       if (hasFreeRoom) {
         slots.push(minutesToTime(start))
@@ -117,6 +119,7 @@ export const getDayAvailabilityStatus = ({
   busyIntervals,
   roomId,
   roomIds,
+  therapistId = null,
 }) => {
   const today = toLocalDateKey(new Date())
   if (dateKey < today) return 'past'
@@ -126,6 +129,7 @@ export const getDayAvailabilityStatus = ({
     busyIntervals,
     roomId,
     roomIds,
+    therapistId,
   })
   if (slots.length === 0) return 'full'
   if (slots.length <= 2) return 'limited'

@@ -181,6 +181,8 @@ const schema = a.schema({
       priceAgreement: a.float().required(),
       // Status: Done | Pending | Canceled
       status: a.enum(["Done", "Pending", "Canceled"]),
+      // Reason when status is Canceled
+      cancelReason: a.string(),
       // Payment after service is confirmed done
       paymentStatus: a.enum(["None", "PaymentPending", "PaymentApproved"]),
     })
@@ -207,6 +209,9 @@ const schema = a.schema({
       centerName: a.string(),
       roomId: a.string(),
       roomName: a.string(),
+      // Optional therapist (staff booking links)
+      therapistId: a.string(),
+      therapistName: a.string(),
       // Date and time
       date: a.date().required(),
       reservedTime: a.time().required(),
@@ -217,6 +222,26 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.publicApiKey().to(["create", "read"]), // Public create + read for availability
       allow.authenticated(), // Staff can read, update, delete
+    ]),
+
+  // ============================================
+  // Staff shareable booking links for customers
+  // ============================================
+  StaffBookingLink: a
+    .model({
+      token: a.string().required(),
+      therapistId: a.string().required(),
+      therapistName: a.string().required(),
+      centerId: a.string(),
+      centerName: a.string(),
+      // null roomId = any available room
+      roomId: a.string(),
+      roomName: a.string(),
+      active: a.boolean().default(true),
+    })
+    .authorization((allow) => [
+      allow.authenticated(),
+      allow.publicApiKey().to(["read"]),
     ]),
 
   // ============================================

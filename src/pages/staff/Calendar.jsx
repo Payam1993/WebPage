@@ -1,60 +1,102 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Card,
   CardHeader,
   CardTitle,
+  CardContent,
   Button,
   PageHeader,
   Icons,
   LoadingState,
   Select,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  Badge,
+  EmptyState,
+  Modal,
+  Input,
 } from '../../components/admin/ui'
-import { bookingAPI, centerAPI, roomAPI } from '../../services/dataService'
+import { bookingAPI, centerAPI, roomAPI, formatDisplayDate, getTodayDate, getDateFromToday } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 import { toLocalDateKey } from '../../utils/dates'
+import { timeToMinutes, minutesToTime } from '../../utils/availability'
+
+const HOUR_START = 9
+const HOUR_END = 22 // exclusive end for grid labels through 21:00
+const HOUR_HEIGHT_WEEK = 56
+const HOUR_HEIGHT_DAY = 72
 
 /**
- * Calendar - Visual calendar view of pending bookings
- * Shows bookings with status "Pending" from the Booking model
- * Done and Canceled bookings do not appear in the calendar
+ * Calendar - pending bookings spanning full duration + To Do list with cancel
  */
 const Calendar = () => {
-  const { isUser, staffProfile, isLoading: authLoading } = useAuth()
+  const { isUser, isAdmin, isMiniAdmin, staffProfile, isLoading: authLoading } = useAuth()
   const isIndividualView = isUser
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [viewMode, setViewMode] = useState('week') // 'day', 'week', 'month'
+  const [viewMode, setViewMode] = useState('week')
   const [events, setEvents] = useState([])
+  const [todoBookings, setTodoBookings] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingTodo, setIsLoadingTodo] = useState(false)
   const [centers, setCenters] = useState([])
   const [rooms, setRooms] = useState([])
   const [filterCenterId, setFilterCenterId] = useState('')
   const [filterRoomId, setFilterRoomId] = useState('')
+  const [cancelModal, setCancelModal] = useState({ open: false, item: null })
+  const [cancelReason, setCancelReason] = useState('')
+  const [isCanceling, setIsCanceling] = useState(false)
+  const [cancelError, setCancelError] = useState(null)
 
+  const hours = useMemo(
+    () => Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i),
+    []
+  )
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  const hours = Array.from({ length: 12 }, (_, i) => i + 9) // 9 AM to 8 PM
 
   useEffect(() => {
     loadCentersAndRooms()
   }, [])
 
-  // Load confirmed bookings when date/view/filters change
   useEffect(() => {
     if (authLoading) return
     loadEvents()
   }, [currentDate, viewMode, authLoading, isIndividualView, staffProfile?.id, filterCenterId, filterRoomId])
 
+  useEffect(() => {
+    if (authLoading) return
+    loadTodo()
+  }, [authLoading, isIndividualView, staffProfile?.id])
+
   const loadCentersAndRooms = async () => {
     try {
-      const [centersData, roomsData] = await Promise.all([
-        centerAPI.list(),
-        roomAPI.list(),
-      ])
+      const [centersData, roomsData] = await Promise.all([centerAPI.list(), roomAPI.list()])
       setCenters(centersData)
       setRooms(roomsData)
     } catch (err) {
       console.error('Error loading centers/rooms:', err)
     }
   }
+
+  const mapBookingEvent = (booking) => ({
+    id: booking.id,
+    title: booking.clientName,
+    time: booking.reservedTime?.substring(0, 5) || '00:00',
+    duration: Number(booking.durationMinutes) || 60,
+    therapist: booking.therapistName || 'Unassigned',
+    therapistId: booking.therapistId,
+    service: booking.serviceName || null,
+    center: booking.centerName || null,
+    room: booking.roomName || '-',
+    date: booking.date,
+    color: getTherapistColor(booking.therapistName),
+    clientPhone: booking.clientPhone,
+    price: booking.priceAgreement,
+    raw: booking,
+  })
 
   const loadEvents = async () => {
     setIsLoading(true)
@@ -63,7 +105,6 @@ const Calendar = () => {
         setEvents([])
         return
       }
-
       const dateRange = getDateRange()
       const filterOptions = {
         ...(isIndividualView && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
@@ -71,28 +112,36 @@ const Calendar = () => {
         ...(filterRoomId ? { roomId: filterRoomId } : {}),
       }
       const bookings = await bookingAPI.listPending(dateRange.from, dateRange.to, filterOptions)
-      
-      // Transform bookings to calendar events
-      const calendarEvents = bookings.map(booking => ({
-        id: booking.id,
-        title: `${booking.clientName}`,
-        time: booking.reservedTime?.substring(0, 5) || '00:00',
-        duration: booking.durationMinutes || 60,
-        therapist: booking.therapistName || 'Unassigned',
-        service: booking.serviceName || null,
-        center: booking.centerName || null,
-        room: booking.roomName || null,
-        date: booking.date,
-        color: getTherapistColor(booking.therapistName),
-        clientPhone: booking.clientPhone,
-        price: booking.priceAgreement,
-      }))
-      
-      setEvents(calendarEvents)
+      setEvents(bookings.map(mapBookingEvent))
     } catch (error) {
       console.error('Error loading calendar events:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadTodo = async () => {
+    setIsLoadingTodo(true)
+    try {
+      if (isIndividualView && !staffProfile?.id) {
+        setTodoBookings([])
+        return
+      }
+      const from = getTodayDate()
+      const to = getDateFromToday(60)
+      const filterOptions = {
+        ...(isIndividualView && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
+      }
+      const data = await bookingAPI.listPending(from, to, filterOptions)
+      data.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date)
+        return (a.reservedTime || '').localeCompare(b.reservedTime || '')
+      })
+      setTodoBookings(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsLoadingTodo(false)
     }
   }
 
@@ -116,42 +165,28 @@ const Calendar = () => {
 
   const handleCenterFilterChange = (centerId) => {
     setFilterCenterId(centerId)
-    // Reset room if it no longer belongs to selected center
     if (centerId && filterRoomId) {
       const room = rooms.find((r) => r.id === filterRoomId)
-      if (room && room.centerId !== centerId) {
-        setFilterRoomId('')
-      }
+      if (room && room.centerId !== centerId) setFilterRoomId('')
     }
   }
 
-  // Get date range based on current view
   const getDateRange = () => {
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
-    
     if (viewMode === 'month') {
-      const firstDay = new Date(year, month, 1)
-      const lastDay = new Date(year, month + 1, 0)
       return {
-        from: formatDateKey(firstDay),
-        to: formatDateKey(lastDay)
-      }
-    } else if (viewMode === 'week') {
-      const weekDays = getWeekDays()
-      return {
-        from: formatDateKey(weekDays[0]),
-        to: formatDateKey(weekDays[6])
-      }
-    } else {
-      return {
-        from: formatDateKey(currentDate),
-        to: formatDateKey(currentDate)
+        from: formatDateKey(new Date(year, month, 1)),
+        to: formatDateKey(new Date(year, month + 1, 0)),
       }
     }
+    if (viewMode === 'week') {
+      const weekDays = getWeekDays()
+      return { from: formatDateKey(weekDays[0]), to: formatDateKey(weekDays[6]) }
+    }
+    return { from: formatDateKey(currentDate), to: formatDateKey(currentDate) }
   }
 
-  // Assign colors based on therapist name
   const getTherapistColor = (therapistName) => {
     if (!therapistName) return '#6b7280'
     const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
@@ -165,34 +200,25 @@ const Calendar = () => {
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
     const days = []
-    
-    // Add padding for days before the first of the month
-    const startPadding = (firstDay.getDay() + 6) % 7 // Adjust for Monday start
+    const startPadding = (firstDay.getDay() + 6) % 7
     for (let i = startPadding - 1; i >= 0; i--) {
-      const date = new Date(year, month, -i)
-      days.push({ date, isCurrentMonth: false })
+      days.push({ date: new Date(year, month, -i), isCurrentMonth: false })
     }
-    
-    // Add all days of the current month
     for (let i = 1; i <= lastDay.getDate(); i++) {
       days.push({ date: new Date(year, month, i), isCurrentMonth: true })
     }
-    
-    // Add padding for remaining cells
-    const endPadding = 42 - days.length // 6 weeks * 7 days
+    const endPadding = 42 - days.length
     for (let i = 1; i <= endPadding; i++) {
       days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false })
     }
-    
     return days
   }
 
   const getWeekDays = () => {
     const startOfWeek = new Date(currentDate)
     const dayOfWeek = startOfWeek.getDay()
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // Adjust for Monday start
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
     startOfWeek.setDate(startOfWeek.getDate() + diff)
-    
     return Array.from({ length: 7 }, (_, i) => {
       const date = new Date(startOfWeek)
       date.setDate(startOfWeek.getDate() + i)
@@ -204,94 +230,138 @@ const Calendar = () => {
 
   const navigateDate = (direction) => {
     const newDate = new Date(currentDate)
-    if (viewMode === 'month') {
-      newDate.setMonth(newDate.getMonth() + direction)
-    } else if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() + (direction * 7))
-    } else {
-      newDate.setDate(newDate.getDate() + direction)
-    }
+    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + direction)
+    else if (viewMode === 'week') newDate.setDate(newDate.getDate() + direction * 7)
+    else newDate.setDate(newDate.getDate() + direction)
     setCurrentDate(newDate)
   }
 
-  const isToday = (date) => {
-    const today = new Date()
-    return date.toDateString() === today.toDateString()
-  }
+  const isToday = (date) => date.toDateString() === new Date().toDateString()
 
   const getEventsForDate = (date) => {
     const dateKey = formatDateKey(date)
-    return events.filter(event => event.date === dateKey)
+    return events.filter((event) => event.date === dateKey)
   }
 
-  // Calculate end time for display
   const getEndTime = (startTime, durationMinutes) => {
     if (!startTime) return ''
-    const [hours, minutes] = startTime.split(':').map(Number)
-    const totalMinutes = hours * 60 + minutes + durationMinutes
-    const endHours = Math.floor(totalMinutes / 60) % 24
-    const endMinutes = totalMinutes % 60
-    return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
+    return minutesToTime(timeToMinutes(startTime) + (Number(durationMinutes) || 60))
+  }
+
+  const eventLayout = (event, hourHeight) => {
+    const startMin = timeToMinutes(event.time)
+    const gridStart = HOUR_START * 60
+    const top = ((startMin - gridStart) / 60) * hourHeight
+    const height = Math.max(((Number(event.duration) || 60) / 60) * hourHeight, hourHeight * 0.35)
+    return { top, height }
+  }
+
+  const openCancel = (item) => {
+    setCancelModal({ open: true, item })
+    setCancelReason('')
+    setCancelError(null)
+  }
+
+  const handleCancelConfirm = async () => {
+    if (!cancelReason.trim()) {
+      setCancelError('Please explain the reason for canceling')
+      return
+    }
+    setIsCanceling(true)
+    setCancelError(null)
+    try {
+      await bookingAPI.cancel(cancelModal.item, cancelReason.trim())
+      setCancelModal({ open: false, item: null })
+      await Promise.all([loadEvents(), loadTodo()])
+    } catch (err) {
+      setCancelError(err.message || 'Failed to cancel')
+    } finally {
+      setIsCanceling(false)
+    }
+  }
+
+  const gridHeight = hours.length * HOUR_HEIGHT_WEEK
+  const dayGridHeight = hours.length * HOUR_HEIGHT_DAY
+
+  const renderSpanningEvent = (event, hourHeight) => {
+    const { top, height } = eventLayout(event, hourHeight)
+    return (
+      <div
+        key={event.id}
+        style={{
+          position: 'absolute',
+          left: 4,
+          right: 4,
+          top,
+          height: height - 2,
+          padding: '6px 8px',
+          background: event.color,
+          color: 'white',
+          borderRadius: 6,
+          fontSize: '0.75rem',
+          overflow: 'hidden',
+          zIndex: 2,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+          cursor: 'default',
+        }}
+        title={`${event.title}\n${event.time} – ${getEndTime(event.time, event.duration)}\n${event.duration} min\n${event.room}\n${event.therapist}`}
+      >
+        <div style={{ fontWeight: 600, lineHeight: 1.2 }}>{event.title}</div>
+        <div style={{ opacity: 0.9, fontSize: '0.6875rem', marginTop: 2 }}>
+          {event.time} – {getEndTime(event.time, event.duration)}
+        </div>
+        {height > 48 && (
+          <div style={{ opacity: 0.85, fontSize: '0.6875rem' }}>
+            {event.duration} min · {event.room}
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
     <div>
-      <PageHeader 
+      <PageHeader
         title={isIndividualView ? 'My Calendar' : 'Calendar'}
         subtitle={
           isIndividualView
-            ? 'View your pending appointments awaiting completion'
-            : 'View pending appointments awaiting completion'
+            ? 'Your pending appointments — blocks show full duration'
+            : 'Pending appointments — blocks show full duration'
         }
         actions={
-          <Button variant="secondary" onClick={loadEvents}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              loadEvents()
+              loadTodo()
+            }}
+          >
             <Icons.Search /> Refresh
           </Button>
         }
       />
 
-      {/* Calendar Controls */}
-      <Card style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          {/* Navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Button 
-              variant="secondary" 
-              size="small"
-              onClick={() => navigateDate(-1)}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M15 18l-6-6 6-6"/>
-              </svg>
+      <Card style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Button variant="secondary" size="small" onClick={() => navigateDate(-1)}>
+              ‹
             </Button>
-            <h2 style={{ margin: 0, minWidth: '200px', textAlign: 'center', fontSize: '1rem', fontWeight: 600 }}>
-              {viewMode === 'month' 
+            <h2 style={{ margin: 0, minWidth: 200, textAlign: 'center', fontSize: '1rem', fontWeight: 600 }}>
+              {viewMode === 'month'
                 ? currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
                 : viewMode === 'week'
                   ? `Week of ${getWeekDays()[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                  : currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-              }
+                  : currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </h2>
-            <Button 
-              variant="secondary" 
-              size="small"
-              onClick={() => navigateDate(1)}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
+            <Button variant="secondary" size="small" onClick={() => navigateDate(1)}>
+              ›
             </Button>
-            <Button 
-              variant="ghost" 
-              size="small"
-              onClick={() => setCurrentDate(new Date())}
-            >
+            <Button variant="ghost" size="small" onClick={() => setCurrentDate(new Date())}>
               Today
             </Button>
           </div>
-
-          {/* View Mode Toggle */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             {['day', 'week', 'month'].map((mode) => (
               <Button
                 key={mode}
@@ -302,104 +372,99 @@ const Calendar = () => {
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </Button>
             ))}
-            <Select
-              label="Center"
-              options={centerOptions}
-              value={filterCenterId}
-              onChange={(e) => handleCenterFilterChange(e.target.value)}
-              containerClassName="ui-mb-0"
-              style={{ minWidth: '160px' }}
-            />
-            <Select
-              label="Room"
-              options={roomOptions}
-              value={filterRoomId}
-              onChange={(e) => setFilterRoomId(e.target.value)}
-              containerClassName="ui-mb-0"
-              style={{ minWidth: '160px' }}
-            />
+            {(isAdmin || isMiniAdmin) && (
+              <>
+                <Select
+                  label="Center"
+                  options={centerOptions}
+                  value={filterCenterId}
+                  onChange={(e) => handleCenterFilterChange(e.target.value)}
+                  containerClassName="ui-mb-0"
+                  style={{ minWidth: 160 }}
+                />
+                <Select
+                  label="Room"
+                  options={roomOptions}
+                  value={filterRoomId}
+                  onChange={(e) => setFilterRoomId(e.target.value)}
+                  containerClassName="ui-mb-0"
+                  style={{ minWidth: 160 }}
+                />
+              </>
+            )}
           </div>
         </div>
       </Card>
 
-      {/* Calendar View */}
       <Card padding={false}>
         {isLoading ? (
-          <div style={{ padding: '48px' }}>
+          <div style={{ padding: 48 }}>
             <LoadingState text="Loading calendar..." />
           </div>
         ) : viewMode === 'month' ? (
-          /* Month View */
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', background: 'var(--ui-border)' }}>
-            {/* Day Headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--ui-border)' }}>
             {daysOfWeek.map((day) => (
-              <div 
-                key={day} 
-                style={{ 
-                  padding: '12px', 
-                  textAlign: 'center', 
-                  fontWeight: 600, 
+              <div
+                key={day}
+                style={{
+                  padding: 12,
+                  textAlign: 'center',
+                  fontWeight: 600,
                   fontSize: '0.75rem',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
                   background: 'var(--ui-bg)',
-                  color: 'var(--ui-text-muted)'
+                  color: 'var(--ui-text-muted)',
                 }}
               >
                 {day}
               </div>
             ))}
-            
-            {/* Calendar Days */}
             {getMonthDays().map(({ date, isCurrentMonth }, index) => {
               const dayEvents = getEventsForDate(date)
               return (
-                <div 
+                <div
                   key={index}
-                  style={{ 
-                    minHeight: '100px',
-                    padding: '8px',
+                  style={{
+                    minHeight: 100,
+                    padding: 8,
                     background: 'var(--ui-bg-card)',
-                    opacity: isCurrentMonth ? 1 : 0.4
+                    opacity: isCurrentMonth ? 1 : 0.4,
                   }}
                 >
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center',
-                    marginBottom: '8px'
-                  }}>
-                    <span style={{ 
-                      width: '28px',
-                      height: '28px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '50%',
-                      fontSize: '0.8125rem',
-                      fontWeight: isToday(date) ? 600 : 400,
-                      background: isToday(date) ? 'var(--ui-primary)' : 'transparent',
-                      color: isToday(date) ? 'white' : 'inherit'
-                    }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+                    <span
+                      style={{
+                        width: 28,
+                        height: 28,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '50%',
+                        fontSize: '0.8125rem',
+                        fontWeight: isToday(date) ? 600 : 400,
+                        background: isToday(date) ? 'var(--ui-primary)' : 'transparent',
+                        color: isToday(date) ? 'white' : 'inherit',
+                      }}
+                    >
                       {date.getDate()}
                     </span>
                   </div>
                   {dayEvents.slice(0, 2).map((event) => (
-                    <div 
+                    <div
                       key={event.id}
-                      style={{ 
+                      style={{
                         padding: '4px 8px',
-                        marginBottom: '4px',
+                        marginBottom: 4,
                         background: `${event.color}15`,
                         borderLeft: `3px solid ${event.color}`,
-                        borderRadius: '4px',
+                        borderRadius: 4,
                         fontSize: '0.6875rem',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
-                        color: 'var(--ui-text)'
                       }}
                     >
-                      {event.time} {event.title}
+                      {event.time}–{getEndTime(event.time, event.duration)} {event.title}
                     </div>
                   ))}
                   {dayEvents.length > 2 && (
@@ -412,171 +477,240 @@ const Calendar = () => {
             })}
           </div>
         ) : viewMode === 'week' ? (
-          /* Week View */
           <div style={{ overflowX: 'auto' }}>
-            <div style={{ minWidth: '800px' }}>
-              {/* Header */}
-              <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', borderBottom: '1px solid var(--ui-border)' }}>
-                <div style={{ padding: '16px', borderRight: '1px solid var(--ui-border)' }}></div>
+            <div style={{ minWidth: 900 }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '64px repeat(7, 1fr)',
+                  borderBottom: '1px solid var(--ui-border)',
+                }}
+              >
+                <div style={{ borderRight: '1px solid var(--ui-border)' }} />
                 {getWeekDays().map((date, index) => (
-                  <div 
+                  <div
                     key={index}
-                    style={{ 
-                      padding: '16px', 
+                    style={{
+                      padding: 12,
                       textAlign: 'center',
                       borderRight: index < 6 ? '1px solid var(--ui-border)' : 'none',
-                      background: isToday(date) ? 'var(--ui-primary-light)' : 'transparent'
+                      background: isToday(date) ? 'var(--ui-primary-light)' : 'transparent',
                     }}
                   >
-                    <div style={{ fontSize: '0.6875rem', textTransform: 'uppercase', color: 'var(--ui-text-muted)', letterSpacing: '0.05em' }}>
+                    <div style={{ fontSize: '0.6875rem', textTransform: 'uppercase', color: 'var(--ui-text-muted)' }}>
                       {daysOfWeek[index]}
                     </div>
-                    <div style={{ 
-                      fontSize: '1.25rem',
-                      fontWeight: isToday(date) ? 600 : 400,
-                      color: isToday(date) ? 'var(--ui-primary)' : 'var(--ui-text)'
-                    }}>
+                    <div
+                      style={{
+                        fontSize: '1.25rem',
+                        fontWeight: isToday(date) ? 600 : 400,
+                        color: isToday(date) ? 'var(--ui-primary)' : 'var(--ui-text)',
+                      }}
+                    >
                       {date.getDate()}
                     </div>
                   </div>
                 ))}
               </div>
-              
-              {/* Time slots */}
-              {hours.map((hour) => (
-                <div 
-                  key={hour}
-                  style={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', borderBottom: '1px solid var(--ui-border-light)' }}
-                >
-                  <div style={{ 
-                    padding: '8px 16px', 
-                    fontSize: '0.75rem', 
-                    color: 'var(--ui-text-muted)',
-                    textAlign: 'right',
-                    borderRight: '1px solid var(--ui-border)'
-                  }}>
-                    {hour}:00
-                  </div>
-                  {getWeekDays().map((date, dayIndex) => {
-                    const dayEvents = getEventsForDate(date).filter(e => parseInt(e.time) === hour)
-                    return (
-                      <div 
-                        key={dayIndex}
-                        style={{ 
-                          minHeight: '60px',
-                          padding: '4px',
-                          borderRight: dayIndex < 6 ? '1px solid var(--ui-border)' : 'none',
-                          background: isToday(date) ? 'rgba(37, 99, 235, 0.02)' : 'transparent'
-                        }}
-                      >
-                        {dayEvents.map((event) => (
-                          <div 
-                            key={event.id}
-                            style={{ 
-                              padding: '8px',
-                              background: event.color,
-                              color: 'white',
-                              borderRadius: '6px',
-                              fontSize: '0.75rem',
-                              cursor: 'pointer'
-                            }}
-                            title={`${event.title}\n${event.time} - ${getEndTime(event.time, event.duration)}\n${event.service ? `Service: ${event.service}\n` : ''}Therapist: ${event.therapist}\nPrice: €${event.price?.toFixed(2) || '0.00'}`}
-                          >
-                            <div style={{ fontWeight: 500 }}>{event.title}</div>
-                            <div style={{ opacity: 0.85, fontSize: '0.6875rem' }}>
-                              {event.service && <span>{event.service} • </span>}
-                              {event.duration} min • {event.therapist}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  })}
+              <div style={{ display: 'grid', gridTemplateColumns: '64px repeat(7, 1fr)' }}>
+                <div style={{ position: 'relative', height: gridHeight, borderRight: '1px solid var(--ui-border)' }}>
+                  {hours.map((hour) => (
+                    <div
+                      key={hour}
+                      style={{
+                        height: HOUR_HEIGHT_WEEK,
+                        padding: '4px 8px',
+                        fontSize: '0.7rem',
+                        color: 'var(--ui-text-muted)',
+                        textAlign: 'right',
+                        borderBottom: '1px solid var(--ui-border-light)',
+                      }}
+                    >
+                      {hour}:00
+                    </div>
+                  ))}
                 </div>
-              ))}
+                {getWeekDays().map((date, dayIndex) => (
+                  <div
+                    key={dayIndex}
+                    style={{
+                      position: 'relative',
+                      height: gridHeight,
+                      borderRight: dayIndex < 6 ? '1px solid var(--ui-border)' : 'none',
+                      background: isToday(date) ? 'rgba(37, 99, 235, 0.02)' : 'transparent',
+                    }}
+                  >
+                    {hours.map((hour) => (
+                      <div
+                        key={hour}
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          right: 0,
+                          top: (hour - HOUR_START) * HOUR_HEIGHT_WEEK,
+                          height: HOUR_HEIGHT_WEEK,
+                          borderBottom: '1px solid var(--ui-border-light)',
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    ))}
+                    {getEventsForDate(date).map((event) => renderSpanningEvent(event, HOUR_HEIGHT_WEEK))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         ) : (
-          /* Day View */
-          <div>
-            {events.length === 0 && !isLoading && (
-              <div style={{ padding: '48px', textAlign: 'center', color: 'var(--ui-text-muted)' }}>
-                No pending appointments for this day
-              </div>
-            )}
-            {hours.map((hour) => {
-              const hourEvents = events.filter(e => e.date === formatDateKey(currentDate) && parseInt(e.time) === hour)
-              return (
-                <div 
+          <div style={{ display: 'flex' }}>
+            <div style={{ width: 64, flexShrink: 0, borderRight: '1px solid var(--ui-border)' }}>
+              {hours.map((hour) => (
+                <div
                   key={hour}
-                  style={{ 
-                    display: 'flex',
+                  style={{
+                    height: HOUR_HEIGHT_DAY,
+                    padding: '8px',
+                    fontSize: '0.75rem',
+                    color: 'var(--ui-text-muted)',
+                    textAlign: 'right',
                     borderBottom: '1px solid var(--ui-border-light)',
-                    minHeight: '80px'
                   }}
                 >
-                  <div style={{ 
-                    width: '80px',
-                    padding: '16px',
-                    fontSize: '0.8125rem',
-                    color: 'var(--ui-text-muted)',
-                    flexShrink: 0,
-                    borderRight: '1px solid var(--ui-border)'
-                  }}>
-                    {hour}:00
-                  </div>
-                  <div style={{ flex: 1, padding: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {hourEvents.map((event) => (
-                      <div 
-                        key={event.id}
-                        style={{ 
-                          padding: '16px',
-                          background: event.color,
-                          color: 'white',
-                          borderRadius: '8px',
-                          minWidth: '200px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <div style={{ fontWeight: 500, marginBottom: '4px' }}>{event.title}</div>
-                        {event.service && (
-                          <div style={{ fontSize: '0.8125rem', opacity: 0.9, fontStyle: 'italic' }}>
-                            {event.service}
-                          </div>
-                        )}
-                        <div style={{ fontSize: '0.8125rem', opacity: 0.9 }}>
-                          {event.time} - {getEndTime(event.time, event.duration)}
-                        </div>
-                        <div style={{ fontSize: '0.8125rem', opacity: 0.9 }}>
-                          {event.duration} min • {event.therapist}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '4px' }}>
-                          €{event.price?.toFixed(2) || '0.00'}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  {hour}:00
                 </div>
-              )
-            })}
+              ))}
+            </div>
+            <div style={{ flex: 1, position: 'relative', height: dayGridHeight }}>
+              {hours.map((hour) => (
+                <div
+                  key={hour}
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: (hour - HOUR_START) * HOUR_HEIGHT_DAY,
+                    height: HOUR_HEIGHT_DAY,
+                    borderBottom: '1px solid var(--ui-border-light)',
+                  }}
+                />
+              ))}
+              {getEventsForDate(currentDate).length === 0 && (
+                <div style={{ padding: 48, textAlign: 'center', color: 'var(--ui-text-muted)' }}>
+                  No pending appointments for this day
+                </div>
+              )}
+              {getEventsForDate(currentDate).map((event) => renderSpanningEvent(event, HOUR_HEIGHT_DAY))}
+            </div>
           </div>
         )}
       </Card>
 
-      {/* Legend */}
-      <Card style={{ marginTop: '24px' }}>
+      {/* To Do */}
+      <Card padding={false} style={{ marginTop: 24 }}>
         <CardHeader>
-          <CardTitle>Calendar Info</CardTitle>
+          <CardTitle
+            subtitle={
+              isIndividualView
+                ? 'Your upcoming pending bookings'
+                : 'All staff upcoming pending bookings'
+            }
+          >
+            To Do
+          </CardTitle>
         </CardHeader>
-        <div style={{ fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
-          <p style={{ margin: '0 0 8px 0' }}>
-            <strong>Note:</strong> Only bookings with status "Pending" are displayed on the calendar.
-          </p>
-          <p style={{ margin: 0 }}>
-            When a reservation is marked as "Done" or "Canceled", it will disappear from the calendar.
-          </p>
-        </div>
+        <CardContent>
+          {isLoadingTodo ? (
+            <LoadingState text="Loading to-do list..." />
+          ) : todoBookings.length === 0 ? (
+            <EmptyState title="Nothing to do" description="No pending reservations in the next 60 days" />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Therapist</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Start</TableHead>
+                  <TableHead>Finish</TableHead>
+                  <TableHead>Room</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {todoBookings.map((b) => {
+                  const start = b.reservedTime?.substring(0, 5) || '-'
+                  const finish = getEndTime(start, b.durationMinutes)
+                  return (
+                    <TableRow key={b.id}>
+                      <TableCell>{b.therapistName || '-'}</TableCell>
+                      <TableCell>
+                        <div style={{ fontWeight: 500 }}>{b.clientName}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
+                          {b.clientPhone || 'No phone'}
+                        </div>
+                      </TableCell>
+                      <TableCell>{formatDisplayDate(b.date)}</TableCell>
+                      <TableCell>{b.durationMinutes || 60} min</TableCell>
+                      <TableCell>{start}</TableCell>
+                      <TableCell>{finish}</TableCell>
+                      <TableCell>{b.roomName || '-'}</TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        <Button variant="danger" size="small" onClick={() => openCancel(b)}>
+                          Cancel service
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
       </Card>
+
+      <Modal
+        isOpen={cancelModal.open}
+        onClose={() => setCancelModal({ open: false, item: null })}
+        title="Cancel service"
+        subtitle="Are you sure you want to cancel this reservation?"
+        size="default"
+      >
+        {cancelModal.item && (
+          <div style={{ marginBottom: 16, fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
+            <Badge variant="warning">Pending</Badge>{' '}
+            <strong>{cancelModal.item.clientName}</strong> · {formatDisplayDate(cancelModal.item.date)} ·{' '}
+            {cancelModal.item.reservedTime?.substring(0, 5)}
+          </div>
+        )}
+        {cancelError && (
+          <div
+            style={{
+              padding: 12,
+              marginBottom: 12,
+              background: 'rgba(239,68,68,0.1)',
+              color: '#dc2626',
+              borderRadius: 8,
+              fontSize: '0.875rem',
+            }}
+          >
+            {cancelError}
+          </div>
+        )}
+        <Input
+          label="Reason for cancel *"
+          placeholder="Explain why this service is canceled"
+          value={cancelReason}
+          onChange={(e) => setCancelReason(e.target.value)}
+        />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+          <Button variant="secondary" onClick={() => setCancelModal({ open: false, item: null })}>
+            No, keep it
+          </Button>
+          <Button variant="danger" loading={isCanceling} onClick={handleCancelConfirm}>
+            Yes, cancel
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }

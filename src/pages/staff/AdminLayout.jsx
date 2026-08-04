@@ -54,6 +54,13 @@ const iconStaff = (
   </svg>
 )
 
+const iconLink = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </svg>
+)
+
 const AdminLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -105,6 +112,7 @@ const AdminLayout = () => {
       return 'Pending Confirmations'
     }
     if (path.includes('/staff-management')) return 'Staff'
+    if (path.includes('/create-link')) return 'Create Link'
     if (path.includes('/profile')) return 'Profile Settings'
     return 'Dashboard'
   }
@@ -114,6 +122,7 @@ const AdminLayout = () => {
     { path: '/staff/costs', label: 'Costs', icon: iconCosts },
     { path: '/staff/reservations', label: 'Reservations', icon: iconReservations },
     { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
+    { path: '/staff/create-link', label: 'Create Link', icon: iconLink },
     { path: '/staff/pending-confirmations', label: 'Pending Confirmations', icon: iconPending },
     { path: '/staff/staff-management', label: 'Staff', icon: iconStaff },
   ]
@@ -121,6 +130,7 @@ const AdminLayout = () => {
   const miniAdminNavItems = [
     { path: '/staff/reports', label: 'Dashboard', icon: iconDashboard },
     { path: '/staff/costs', label: 'Costs', icon: iconCosts },
+    { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
     { path: '/staff/pending-confirmations', label: 'Pending Confirmations', icon: iconPending },
   ]
 
@@ -128,6 +138,7 @@ const AdminLayout = () => {
     { path: '/staff/reports', label: 'Dashboard', icon: iconDashboard },
     { path: '/staff/reservations', label: 'Reservations', icon: iconReservations },
     { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
+    { path: '/staff/create-link', label: 'Create Link', icon: iconLink },
   ]
 
   const navItems = isAdmin

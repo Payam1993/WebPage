@@ -33,7 +33,9 @@ import CostsManagement from './pages/staff/CostsManagement'
 import Reservations from './pages/staff/Reservations'
 import Calendar from './pages/staff/Calendar'
 import PendingConfirmations from './pages/staff/PendingConfirmations'
+import CreateLink from './pages/staff/CreateLink'
 import ProfileSettings from './pages/staff/ProfileSettings'
+import StaffLinkBooking from './pages/StaffLinkBooking'
 
 // Administration Pages (Admin-only)
 import AdministrationLayout from './pages/administration/AdministrationLayout'
@@ -120,8 +122,16 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
               <Route
                 path="calendar"
                 element={
-                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN, ROLES.USER]}>
                     <Calendar />
+                  </RoleProtectedRoute>
+                }
+              />
+              <Route
+                path="create-link"
+                element={
+                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                    <CreateLink />
                   </RoleProtectedRoute>
                 }
               />
@@ -181,6 +191,7 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
                       <Route path="/" element={<HomePage setCursorVariant={setCursorVariant} />} />
                       <Route path="/service/:serviceId" element={<ServiceDetail setCursorVariant={setCursorVariant} />} />
                       <Route path="/work-with-us" element={<WorkWithUs setCursorVariant={setCursorVariant} />} />
+                      <Route path="/book-link/:token" element={<StaffLinkBooking />} />
                     </Routes>
                   </main>
                   <Footer setCursorVariant={setCursorVariant} />
@@ -245,8 +256,16 @@ function EroticAppContent({ loading, setCursorVariant }) {
                 <Route
                   path="calendar"
                   element={
-                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN, ROLES.USER]}>
                       <Calendar />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="create-link"
+                  element={
+                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
+                      <CreateLink />
                     </RoleProtectedRoute>
                   }
                 />

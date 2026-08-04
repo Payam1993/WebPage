@@ -702,6 +702,9 @@ export const bookingAPI = {
   async create(bookingData) {
     try {
       const client = getClient()
+      const reservedTime = bookingData.reservedTime?.substring(0, 5)
+        ? `${bookingData.reservedTime.substring(0, 5)}:00`
+        : bookingData.reservedTime
       const { data, errors } = await client.models.Booking.create({
         clientName: bookingData.clientName,
         clientPhone: bookingData.clientPhone?.trim() || null,
@@ -714,10 +717,11 @@ export const bookingAPI = {
         roomId: bookingData.roomId || null,
         roomName: bookingData.roomName || null,
         date: bookingData.date,
-        reservedTime: bookingData.reservedTime,
-        durationMinutes: bookingData.durationMinutes,
+        reservedTime,
+        durationMinutes: Number(bookingData.durationMinutes) || 60,
         priceAgreement: bookingData.priceAgreement,
         status: bookingData.status || 'Pending',
+        cancelReason: bookingData.cancelReason || null,
         paymentStatus: bookingData.paymentStatus || 'None',
       })
       if (errors) throw new Error(errors[0].message)
@@ -731,6 +735,9 @@ export const bookingAPI = {
   async update(id, bookingData) {
     try {
       const client = getClient()
+      const reservedTime = bookingData.reservedTime?.substring(0, 5)
+        ? `${bookingData.reservedTime.substring(0, 5)}:00`
+        : bookingData.reservedTime
       const { data, errors } = await client.models.Booking.update({
         id,
         clientName: bookingData.clientName,
@@ -744,10 +751,11 @@ export const bookingAPI = {
         roomId: bookingData.roomId || null,
         roomName: bookingData.roomName || null,
         date: bookingData.date,
-        reservedTime: bookingData.reservedTime,
-        durationMinutes: bookingData.durationMinutes,
+        reservedTime,
+        durationMinutes: Number(bookingData.durationMinutes) || 60,
         priceAgreement: bookingData.priceAgreement,
         status: bookingData.status,
+        cancelReason: bookingData.cancelReason || null,
         paymentStatus: bookingData.paymentStatus || 'None',
       })
       if (errors) throw new Error(errors[0].message)
@@ -756,6 +764,17 @@ export const bookingAPI = {
       console.error('Error updating booking:', error)
       throw error
     }
+  },
+
+  /**
+   * Cancel a booking with a required reason
+   */
+  async cancel(booking, reason) {
+    return this.update(booking.id, {
+      ...booking,
+      status: 'Canceled',
+      cancelReason: reason,
+    })
   },
 
   /**
@@ -835,6 +854,9 @@ export const notConfirmedReservationAPI = {
   async create(reservationData) {
     try {
       const client = getClient()
+      const reservedTime = reservationData.reservedTime?.substring(0, 5)
+        ? `${reservationData.reservedTime.substring(0, 5)}:00`
+        : reservationData.reservedTime
       const { data, errors } = await client.models.NotConfirmedReservation.create({
         clientName: reservationData.clientName,
         clientPhone: reservationData.clientPhone,
@@ -844,9 +866,11 @@ export const notConfirmedReservationAPI = {
         centerName: reservationData.centerName || null,
         roomId: reservationData.roomId || null,
         roomName: reservationData.roomName || null,
+        therapistId: reservationData.therapistId || null,
+        therapistName: reservationData.therapistName || null,
         date: reservationData.date,
-        reservedTime: reservationData.reservedTime,
-        durationMinutes: reservationData.durationMinutes,
+        reservedTime,
+        durationMinutes: Number(reservationData.durationMinutes) || 60,
         status: 'NotConfirmed',
       })
       if (errors) throw new Error(errors[0].message)
@@ -906,8 +930,8 @@ export const notConfirmedReservationAPI = {
         clientPhone: notConfirmedReservation.clientPhone,
         serviceId: notConfirmedReservation.serviceId,
         serviceName: notConfirmedReservation.serviceName,
-        therapistId: additionalData.therapistId || null,
-        therapistName: additionalData.therapistName || null,
+        therapistId: additionalData.therapistId ?? notConfirmedReservation.therapistId ?? null,
+        therapistName: additionalData.therapistName ?? notConfirmedReservation.therapistName ?? null,
         centerId: additionalData.centerId ?? notConfirmedReservation.centerId ?? null,
         centerName: additionalData.centerName ?? notConfirmedReservation.centerName ?? null,
         roomId: additionalData.roomId ?? notConfirmedReservation.roomId ?? null,
@@ -943,6 +967,9 @@ export const publicAPI = {
     try {
       // Use API key auth for public access
       const client = generateClient({ authMode: 'apiKey' })
+      const reservedTime = reservationData.reservedTime?.substring(0, 5)
+        ? `${reservationData.reservedTime.substring(0, 5)}:00`
+        : reservationData.reservedTime
       const { data, errors } = await client.models.NotConfirmedReservation.create({
         clientName: reservationData.clientName,
         clientPhone: reservationData.clientPhone,
@@ -952,9 +979,11 @@ export const publicAPI = {
         centerName: reservationData.centerName || null,
         roomId: reservationData.roomId || null,
         roomName: reservationData.roomName || null,
+        therapistId: reservationData.therapistId || null,
+        therapistName: reservationData.therapistName || null,
         date: reservationData.date,
-        reservedTime: reservationData.reservedTime,
-        durationMinutes: reservationData.durationMinutes,
+        reservedTime,
+        durationMinutes: Number(reservationData.durationMinutes) || 60,
         status: 'NotConfirmed',
       })
       if (errors) throw new Error(errors[0].message)
@@ -1087,6 +1116,7 @@ export const publicAPI = {
             durationMinutes: item.durationMinutes,
             roomId: item.roomId || null,
             centerId: item.centerId || null,
+            therapistId: item.therapistId || null,
             status: item.status,
           }))
 
@@ -1245,6 +1275,99 @@ export const notConfirmedCostAPI = {
       return newDailyCost
     } catch (error) {
       console.error('Error confirming cost:', error)
+      throw error
+    }
+  },
+}
+
+// ============================================
+// Staff Booking Links (shareable customer URLs)
+// ============================================
+export const staffBookingLinkAPI = {
+  async list(therapistId = null) {
+    try {
+      const client = getClient()
+      const result = therapistId
+        ? await client.models.StaffBookingLink.list({
+            filter: { therapistId: { eq: therapistId } },
+          })
+        : await client.models.StaffBookingLink.list()
+      if (result.errors) throw new Error(result.errors[0].message)
+      return result.data || []
+    } catch (error) {
+      console.error('Error listing booking links:', error)
+      throw error
+    }
+  },
+
+  async getByToken(token) {
+    try {
+      const client = generateClient({ authMode: 'apiKey' })
+      const { data, errors } = await client.models.StaffBookingLink.list({
+        filter: {
+          and: [
+            { token: { eq: token } },
+            { active: { eq: true } },
+          ],
+        },
+      })
+      if (errors) throw new Error(errors[0].message)
+      return (data && data[0]) || null
+    } catch (error) {
+      console.error('Error loading booking link:', error)
+      throw error
+    }
+  },
+
+  async create(linkData) {
+    try {
+      const client = getClient()
+      const token =
+        linkData.token ||
+        (typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID().replace(/-/g, '')
+          : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`)
+      const { data, errors } = await client.models.StaffBookingLink.create({
+        token,
+        therapistId: linkData.therapistId,
+        therapistName: linkData.therapistName,
+        centerId: linkData.centerId || null,
+        centerName: linkData.centerName || null,
+        roomId: linkData.roomId || null,
+        roomName: linkData.roomName || null,
+        active: linkData.active !== false,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error creating booking link:', error)
+      throw error
+    }
+  },
+
+  async deactivate(id) {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.StaffBookingLink.update({
+        id,
+        active: false,
+      })
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error deactivating booking link:', error)
+      throw error
+    }
+  },
+
+  async delete(id) {
+    try {
+      const client = getClient()
+      const { errors } = await client.models.StaffBookingLink.delete({ id })
+      if (errors) throw new Error(errors[0].message)
+      return true
+    } catch (error) {
+      console.error('Error deleting booking link:', error)
       throw error
     }
   },

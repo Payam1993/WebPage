@@ -855,6 +855,7 @@ const Reservations = () => {
                   onSelectDate={(date) => setFormData((prev) => ({ ...prev, date, reservedTime: '' }))}
                   onSelectTime={(time) => setFormData((prev) => ({ ...prev, reservedTime: time }))}
                   authMode="staff"
+                  therapistId={isIndividualView ? staffProfile?.id || '' : ''}
                 />
               </div>
             </div>
@@ -958,8 +959,7 @@ const Reservations = () => {
               />
             </Grid>
 
-            <div style={{ marginTop: '16px' }} className="availability-calendar--admin">
-              <AvailabilityCalendar
+            <AvailabilityCalendar
                 centerId={formData.centerId || ''}
                 roomId={formData.roomId || ''}
                 roomIds={roomsList

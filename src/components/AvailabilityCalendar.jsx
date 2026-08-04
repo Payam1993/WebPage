@@ -20,6 +20,7 @@ const AvailabilityCalendar = ({
   centerId = '',
   roomId = '',
   roomIds = [],
+  therapistId = '',
   durationMinutes = 60,
   selectedDate = '',
   selectedTime = '',
@@ -49,7 +50,7 @@ const AvailabilityCalendar = ({
 
   useEffect(() => {
     loadBusy()
-  }, [centerId, roomId, monthCursor, authMode])
+  }, [centerId, roomId, therapistId, monthCursor, authMode])
 
   const loadBusy = async () => {
     setIsLoading(true)
@@ -70,7 +71,6 @@ const AvailabilityCalendar = ({
           ...pending.filter((p) => !centerId || p.centerId === centerId),
         ]
       } else {
-        // Load all center busy slots (room filter applied in availability math)
         raw = await publicAPI.listBusySlots({
           fromDate,
           toDate,
@@ -111,8 +111,9 @@ const AvailabilityCalendar = ({
       busyIntervals,
       roomId: roomId || null,
       roomIds,
+      therapistId: therapistId || null,
     })
-  }, [selectedDate, durationMinutes, busyIntervals, roomId, roomIds])
+  }, [selectedDate, durationMinutes, busyIntervals, roomId, roomIds, therapistId])
 
   const navigateMonth = (delta) => {
     setMonthCursor(
@@ -125,7 +126,6 @@ const AvailabilityCalendar = ({
     const key = toLocalDateKey(date)
     if (key < todayKey) return
     onSelectDate?.(key)
-    // Clear time if no longer valid for new day — parent can re-pick
     if (selectedTime) {
       const nextSlots = getAvailableSlots({
         dateKey: key,
@@ -133,6 +133,7 @@ const AvailabilityCalendar = ({
         busyIntervals,
         roomId: roomId || null,
         roomIds,
+        therapistId: therapistId || null,
       })
       if (!nextSlots.includes(selectedTime.substring(0, 5))) {
         onSelectTime?.('')
@@ -178,6 +179,7 @@ const AvailabilityCalendar = ({
                 busyIntervals,
                 roomId: roomId || null,
                 roomIds,
+                therapistId: therapistId || null,
               })
             : 'disabled'
           const isSelected = selectedDate === key
