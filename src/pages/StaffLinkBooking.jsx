@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import AvailabilityCalendar from '../../components/AvailabilityCalendar'
-import '../../components/AvailabilityCalendar.css'
+import AvailabilityCalendar from '../components/AvailabilityCalendar'
+import '../components/AvailabilityCalendar.css'
 import {
   staffBookingLinkAPI,
   publicAPI,
   roomAPI,
-} from '../../services/dataService'
+} from '../services/dataService'
 
 /**
  * Public page: /book-link/:token
