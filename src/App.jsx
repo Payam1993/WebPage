@@ -32,6 +32,7 @@ import Reports from './pages/staff/Reports'
 import CostsManagement from './pages/staff/CostsManagement'
 import Reservations from './pages/staff/Reservations'
 import Calendar from './pages/staff/Calendar'
+import Todo from './pages/staff/Todo'
 import PendingConfirmations from './pages/staff/PendingConfirmations'
 import CreateLink from './pages/staff/CreateLink'
 import ProfileSettings from './pages/staff/ProfileSettings'
@@ -128,6 +129,14 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
                 }
               />
               <Route
+                path="to-do"
+                element={
+                  <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN, ROLES.USER]}>
+                    <Todo />
+                  </RoleProtectedRoute>
+                }
+              />
+              <Route
                 path="create-link"
                 element={
                   <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.USER]}>
@@ -214,6 +223,17 @@ function EroticAppContent({ loading, setCursorVariant }) {
   
   // Staff/Admin routes are shared between both brands
   const isStaffRoute = location.pathname.startsWith('/staff') || location.pathname.startsWith('/administration')
+  const isBookLinkRoute = location.pathname.startsWith('/book-link')
+
+  if (isBookLinkRoute) {
+    return (
+      <div className="app noise-overlay">
+        <Routes>
+          <Route path="/book-link/:token" element={<StaffLinkBooking />} />
+        </Routes>
+      </div>
+    )
+  }
   
   if (isStaffRoute) {
     // Render staff routes without erotic styling
@@ -258,6 +278,14 @@ function EroticAppContent({ loading, setCursorVariant }) {
                   element={
                     <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN, ROLES.USER]}>
                       <Calendar />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="to-do"
+                  element={
+                    <RoleProtectedRoute roles={[ROLES.ADMIN, ROLES.MINI_ADMIN, ROLES.USER]}>
+                      <Todo />
                     </RoleProtectedRoute>
                   }
                 />

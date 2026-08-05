@@ -817,30 +817,26 @@ export const bookingAPI = {
 // ============================================
 export const notConfirmedReservationAPI = {
   /**
-   * List not confirmed reservations, optionally filtered by date range
+   * List not confirmed reservations, optionally filtered by date range and therapist
    * @param {string} fromDate - Start date (YYYY-MM-DD)
    * @param {string} toDate - End date (YYYY-MM-DD)
+   * @param {{ therapistId?: string }} options
    */
-  async list(fromDate = null, toDate = null) {
+  async list(fromDate = null, toDate = null, options = {}) {
     try {
       const client = getClient()
-      let filter = { status: { eq: 'NotConfirmed' } }
+      const conditions = [{ status: { eq: 'NotConfirmed' } }]
       
       if (fromDate && toDate) {
-        filter = {
-          and: [
-            { status: { eq: 'NotConfirmed' } },
-            { date: { between: [fromDate, toDate] } }
-          ]
-        }
+        conditions.push({ date: { between: [fromDate, toDate] } })
       } else if (fromDate) {
-        filter = {
-          and: [
-            { status: { eq: 'NotConfirmed' } },
-            { date: { eq: fromDate } }
-          ]
-        }
+        conditions.push({ date: { eq: fromDate } })
       }
+      if (options.therapistId) {
+        conditions.push({ therapistId: { eq: options.therapistId } })
+      }
+
+      const filter = conditions.length === 1 ? conditions[0] : { and: conditions }
       
       const { data, errors } = await client.models.NotConfirmedReservation.list({ filter })
       if (errors) throw new Error(errors[0].message)
@@ -990,6 +986,10 @@ export const publicAPI = {
       return data
     } catch (error) {
       console.error('Error creating public booking request:', error)
+      const msg = error?.message || String(error)
+      if (/session|unauth|NoValidAuthTokens|not authorized|signed.?out|UserUnAuthenticated/i.test(msg)) {
+        throw new Error('Unable to submit booking. Please refresh the page and try again.')
+      }
       throw error
     }
   },

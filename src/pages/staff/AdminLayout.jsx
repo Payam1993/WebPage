@@ -61,6 +61,13 @@ const iconLink = (
   </svg>
 )
 
+const iconTodo = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M9 11l3 3L22 4"/>
+    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+  </svg>
+)
+
 const AdminLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -108,6 +115,7 @@ const AdminLayout = () => {
     if (path.includes('/costs')) return 'Costs Management'
     if (path.includes('/reservations')) return isUser ? 'My Reservations' : 'Reservations'
     if (path.includes('/calendar')) return isUser ? 'My Calendar' : 'Calendar'
+    if (path.includes('/to-do')) return 'To Do'
     if (path.includes('/pending-confirmations') || path.includes('/assigned-task')) {
       return 'Pending Confirmations'
     }
@@ -122,6 +130,7 @@ const AdminLayout = () => {
     { path: '/staff/costs', label: 'Costs', icon: iconCosts },
     { path: '/staff/reservations', label: 'Reservations', icon: iconReservations },
     { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
+    { path: '/staff/to-do', label: 'To Do', icon: iconTodo },
     { path: '/staff/create-link', label: 'Create Link', icon: iconLink },
     { path: '/staff/pending-confirmations', label: 'Pending Confirmations', icon: iconPending },
     { path: '/staff/staff-management', label: 'Staff', icon: iconStaff },
@@ -131,6 +140,7 @@ const AdminLayout = () => {
     { path: '/staff/reports', label: 'Dashboard', icon: iconDashboard },
     { path: '/staff/costs', label: 'Costs', icon: iconCosts },
     { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
+    { path: '/staff/to-do', label: 'To Do', icon: iconTodo },
     { path: '/staff/pending-confirmations', label: 'Pending Confirmations', icon: iconPending },
   ]
 
@@ -138,6 +148,7 @@ const AdminLayout = () => {
     { path: '/staff/reports', label: 'Dashboard', icon: iconDashboard },
     { path: '/staff/reservations', label: 'Reservations', icon: iconReservations },
     { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
+    { path: '/staff/to-do', label: 'To Do', icon: iconTodo },
     { path: '/staff/create-link', label: 'Create Link', icon: iconLink },
   ]
 

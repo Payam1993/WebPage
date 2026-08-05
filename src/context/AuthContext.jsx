@@ -24,8 +24,8 @@ export const GROUP_USERS = 'Users'
 const TAB_SESSION_KEY = 'confession_staff_tab_session'
 
 /**
- * Sync-clear Cognito / Amplify tokens from localStorage.
- * Used on window close where async signOut may not finish.
+ * Sync-clear Cognito user-pool tokens only.
+ * Do NOT wipe amplify-* keys — that breaks public API-key booking (/book-link).
  */
 export const clearPersistedAuthTokens = () => {
   try {
@@ -33,11 +33,7 @@ export const clearPersistedAuthTokens = () => {
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i)
       if (!key) continue
-      if (
-        key.includes('CognitoIdentityServiceProvider') ||
-        key.includes('amplify-') ||
-        key.startsWith('amplify')
-      ) {
+      if (key.includes('CognitoIdentityServiceProvider')) {
         keys.push(key)
       }
     }
@@ -77,9 +73,13 @@ const hasTabSession = () => {
  */
 const forceLogoutIfTabWasClosed = async () => {
   if (hasTabSession()) return false
+  // Public booking links must never trigger staff session cleanup
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/book-link')) {
+    return false
+  }
   try {
     await getCurrentUser()
-    // Tokens still present after a closed tab — wipe them
+    // Tokens still present after a closed tab — wipe Cognito only
     clearPersistedAuthTokens()
     try {
       await signOut({ global: false })
@@ -88,7 +88,7 @@ const forceLogoutIfTabWasClosed = async () => {
     }
     return true
   } catch {
-    clearPersistedAuthTokens()
+    // Guest / already signed out — do not touch Amplify storage
     return false
   }
 }

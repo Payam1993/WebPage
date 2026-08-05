@@ -90,25 +90,29 @@ const Reservations = () => {
     if (authLoading) return
     if (isAdmin) {
       loadNotConfirmedReservations()
+    } else if (isIndividualView && staffProfile?.id) {
+      loadNotConfirmedReservations()
     } else {
       setNotConfirmedList([])
     }
-  }, [authLoading, isAdmin])
+  }, [authLoading, isAdmin, isIndividualView, staffProfile?.id])
 
   useEffect(() => {
     if (authLoading) return
     loadBookings()
   }, [appliedFilter.fromDate, appliedFilter.toDate, authLoading, isIndividualView, staffProfile?.id, filterCenterId, filterRoomId])
 
-  // Auto-refresh not confirmed reservations every 30 seconds (admin only)
+  // Auto-refresh not confirmed reservations every 30 seconds
   useEffect(() => {
-    if (!isAdmin) return undefined
+    const canLoad =
+      isAdmin || (isIndividualView && staffProfile?.id)
+    if (!canLoad) return undefined
     const intervalId = setInterval(() => {
       loadNotConfirmedReservations()
     }, 30000)
 
     return () => clearInterval(intervalId)
-  }, [isAdmin])
+  }, [isAdmin, isIndividualView, staffProfile?.id])
 
   const loadStaticData = async () => {
     try {
@@ -130,11 +134,15 @@ const Reservations = () => {
   const loadNotConfirmedReservations = async () => {
     setIsLoadingNotConfirmed(true)
     try {
-      const data = await notConfirmedReservationAPI.list()
+      const options =
+        isIndividualView && staffProfile?.id
+          ? { therapistId: staffProfile.id }
+          : {}
+      const data = await notConfirmedReservationAPI.list(null, null, options)
       // Sort by date ascending (oldest first)
       data.sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date)
-        return a.reservedTime.localeCompare(b.reservedTime)
+        return (a.reservedTime || '').localeCompare(b.reservedTime || '')
       })
       setNotConfirmedList(data)
     } catch (err) {
@@ -284,12 +292,19 @@ const Reservations = () => {
 
   // Confirm modal handlers
   const handleOpenConfirmModal = (item) => {
+    const defaultTherapistId =
+      item.therapistId ||
+      (isIndividualView && staffProfile?.id ? staffProfile.id : '')
+    const defaultTherapistName =
+      item.therapistName ||
+      (isIndividualView ? staffDisplayName : '')
     setConfirmModal({ open: true, item })
     setConfirmFormData({
-      therapistId: '',
-      therapistName: '',
-      priceAgreement: item.serviceName ? 
-        (servicesList.find(s => s.id === item.serviceId)?.fixedPrice || 0) : 0,
+      therapistId: defaultTherapistId,
+      therapistName: defaultTherapistName,
+      priceAgreement: item.serviceName
+        ? servicesList.find((s) => s.id === item.serviceId)?.fixedPrice || 0
+        : 0,
     })
   }
 
@@ -1031,12 +1046,18 @@ const Reservations = () => {
         </div>
       </Modal>
 
-      {/* Not Confirmed Reservations Section - admin (global) only */}
-      {isAdmin && (
+      {/* Not Confirmed Reservations — admin (all) + users (own link requests) */}
+      {(isAdmin || (isIndividualView && staffProfile?.id)) && (
       <Card style={{ marginTop: '32px' }}>
         <CardHeader style={{ paddingBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <CardTitle subtitle={`${notConfirmedList.length} pending requests from public website (auto-refreshes every 30s)`}>
+            <CardTitle
+              subtitle={
+                isIndividualView
+                  ? `${notConfirmedList.length} booking request(s) from your shareable link (auto-refreshes every 30s)`
+                  : `${notConfirmedList.length} pending requests from public website / booking links (auto-refreshes every 30s)`
+              }
+            >
               Not Confirmed Reservations
             </CardTitle>
             <Button 
@@ -1056,7 +1077,11 @@ const Reservations = () => {
             <EmptyState
               icon={<Icons.Calendar />}
               title="No pending booking requests"
-              description="Booking requests from the public website will appear here"
+              description={
+                isIndividualView
+                  ? 'Requests from your Create Link page will appear here'
+                  : 'Booking requests from the public website and staff links will appear here'
+              }
             />
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -1067,6 +1092,8 @@ const Reservations = () => {
                     <TableHead>Time</TableHead>
                     <TableHead>Client</TableHead>
                     <TableHead>Service</TableHead>
+                    <TableHead>Therapist</TableHead>
+                    <TableHead>Room</TableHead>
                     <TableHead>Duration</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
@@ -1096,6 +1123,8 @@ const Reservations = () => {
                       <TableCell>
                         <Badge variant="info" size="small">{reservation.serviceName}</Badge>
                       </TableCell>
+                      <TableCell>{reservation.therapistName || '-'}</TableCell>
+                      <TableCell>{reservation.roomName || '-'}</TableCell>
                       <TableCell>{reservation.durationMinutes} min</TableCell>
                       <TableCell style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
                         {reservation.createdAt ? new Date(reservation.createdAt).toLocaleDateString('en-GB') : '-'}
@@ -1124,7 +1153,11 @@ const Reservations = () => {
         isOpen={confirmModal.open}
         onClose={handleCloseConfirmModal}
         title="Confirm Reservation"
-        subtitle="Assign therapist and set price to create booking"
+        subtitle={
+          isIndividualView
+            ? 'Set price to create the booking'
+            : 'Assign therapist and set price to create booking'
+        }
         size="default"
       >
         {confirmModal.item && (
@@ -1152,6 +1185,14 @@ const Reservations = () => {
                   <span style={{ color: 'var(--ui-text-muted)' }}>Time:</span>{' '}
                   {formatTime(confirmModal.item.reservedTime)} ({confirmModal.item.durationMinutes} min)
                 </div>
+                <div>
+                  <span style={{ color: 'var(--ui-text-muted)' }}>Room:</span>{' '}
+                  {confirmModal.item.roomName || '-'}
+                </div>
+                <div>
+                  <span style={{ color: 'var(--ui-text-muted)' }}>Therapist:</span>{' '}
+                  {confirmModal.item.therapistName || confirmFormData.therapistName || '-'}
+                </div>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <span style={{ color: 'var(--ui-text-muted)' }}>Service:</span>{' '}
                   <Badge variant="info" size="small">{confirmModal.item.serviceName}</Badge>
@@ -1160,13 +1201,15 @@ const Reservations = () => {
             </div>
 
             <Grid cols={2} gap="default">
-              <Select
-                label="Assign Therapist"
-                options={staffOptions}
-                placeholder="Select therapist (optional)"
-                value={confirmFormData.therapistId || ''}
-                onChange={(e) => handleConfirmTherapistSelect(e.target.value)}
-              />
+              {!isIndividualView && (
+                <Select
+                  label="Assign Therapist"
+                  options={staffOptions}
+                  placeholder="Select therapist (optional)"
+                  value={confirmFormData.therapistId || ''}
+                  onChange={(e) => handleConfirmTherapistSelect(e.target.value)}
+                />
+              )}
               <Input
                 label="Price Agreement (€) *"
                 type="number"

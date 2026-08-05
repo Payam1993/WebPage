@@ -1,26 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
   Button,
   PageHeader,
   Icons,
   LoadingState,
   Select,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-  Badge,
-  EmptyState,
-  Modal,
-  Input,
 } from '../../components/admin/ui'
-import { bookingAPI, centerAPI, roomAPI, formatDisplayDate, getTodayDate, getDateFromToday } from '../../services/dataService'
+import { bookingAPI, centerAPI, roomAPI } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 import { toLocalDateKey } from '../../utils/dates'
 import { timeToMinutes, minutesToTime } from '../../utils/availability'
@@ -31,7 +18,7 @@ const HOUR_HEIGHT_WEEK = 56
 const HOUR_HEIGHT_DAY = 72
 
 /**
- * Calendar - pending bookings spanning full duration + To Do list with cancel
+ * Calendar - pending bookings spanning full duration
  */
 const Calendar = () => {
   const { isUser, isAdmin, isMiniAdmin, staffProfile, isLoading: authLoading } = useAuth()
@@ -39,17 +26,11 @@ const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState('week')
   const [events, setEvents] = useState([])
-  const [todoBookings, setTodoBookings] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingTodo, setIsLoadingTodo] = useState(false)
   const [centers, setCenters] = useState([])
   const [rooms, setRooms] = useState([])
   const [filterCenterId, setFilterCenterId] = useState('')
   const [filterRoomId, setFilterRoomId] = useState('')
-  const [cancelModal, setCancelModal] = useState({ open: false, item: null })
-  const [cancelReason, setCancelReason] = useState('')
-  const [isCanceling, setIsCanceling] = useState(false)
-  const [cancelError, setCancelError] = useState(null)
 
   const hours = useMemo(
     () => Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i),
@@ -65,11 +46,6 @@ const Calendar = () => {
     if (authLoading) return
     loadEvents()
   }, [currentDate, viewMode, authLoading, isIndividualView, staffProfile?.id, filterCenterId, filterRoomId])
-
-  useEffect(() => {
-    if (authLoading) return
-    loadTodo()
-  }, [authLoading, isIndividualView, staffProfile?.id])
 
   const loadCentersAndRooms = async () => {
     try {
@@ -117,31 +93,6 @@ const Calendar = () => {
       console.error('Error loading calendar events:', error)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const loadTodo = async () => {
-    setIsLoadingTodo(true)
-    try {
-      if (isIndividualView && !staffProfile?.id) {
-        setTodoBookings([])
-        return
-      }
-      const from = getTodayDate()
-      const to = getDateFromToday(60)
-      const filterOptions = {
-        ...(isIndividualView && staffProfile?.id ? { therapistId: staffProfile.id } : {}),
-      }
-      const data = await bookingAPI.listPending(from, to, filterOptions)
-      data.sort((a, b) => {
-        if (a.date !== b.date) return a.date.localeCompare(b.date)
-        return (a.reservedTime || '').localeCompare(b.reservedTime || '')
-      })
-      setTodoBookings(data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setIsLoadingTodo(false)
     }
   }
 
@@ -256,30 +207,6 @@ const Calendar = () => {
     return { top, height }
   }
 
-  const openCancel = (item) => {
-    setCancelModal({ open: true, item })
-    setCancelReason('')
-    setCancelError(null)
-  }
-
-  const handleCancelConfirm = async () => {
-    if (!cancelReason.trim()) {
-      setCancelError('Please explain the reason for canceling')
-      return
-    }
-    setIsCanceling(true)
-    setCancelError(null)
-    try {
-      await bookingAPI.cancel(cancelModal.item, cancelReason.trim())
-      setCancelModal({ open: false, item: null })
-      await Promise.all([loadEvents(), loadTodo()])
-    } catch (err) {
-      setCancelError(err.message || 'Failed to cancel')
-    } finally {
-      setIsCanceling(false)
-    }
-  }
-
   const gridHeight = hours.length * HOUR_HEIGHT_WEEK
   const dayGridHeight = hours.length * HOUR_HEIGHT_DAY
 
@@ -329,13 +256,7 @@ const Calendar = () => {
             : 'Pending appointments — blocks show full duration'
         }
         actions={
-          <Button
-            variant="secondary"
-            onClick={() => {
-              loadEvents()
-              loadTodo()
-            }}
-          >
+          <Button variant="secondary" onClick={loadEvents}>
             <Icons.Search /> Refresh
           </Button>
         }
@@ -603,116 +524,6 @@ const Calendar = () => {
           </div>
         )}
       </Card>
-
-      {/* To Do */}
-      <Card padding={false} style={{ marginTop: 24 }}>
-        <CardHeader>
-          <CardTitle
-            subtitle={
-              isIndividualView
-                ? 'Services booked for you (pending)'
-                : 'All staff booked services (pending)'
-            }
-          >
-            To Do
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoadingTodo ? (
-            <LoadingState text="Loading to-do list..." />
-          ) : todoBookings.length === 0 ? (
-            <EmptyState title="Nothing to do" description="No pending reservations in the next 60 days" />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Therapist</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Start</TableHead>
-                  <TableHead>Finish</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {todoBookings.map((b) => {
-                  const start = b.reservedTime?.substring(0, 5) || '-'
-                  const finish = getEndTime(start, b.durationMinutes)
-                  return (
-                    <TableRow key={b.id}>
-                      <TableCell>{b.therapistName || '-'}</TableCell>
-                      <TableCell>
-                        <div style={{ fontWeight: 500 }}>{b.clientName}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
-                          {b.clientPhone || 'No phone'}
-                        </div>
-                      </TableCell>
-                      <TableCell>{b.serviceName || '-'}</TableCell>
-                      <TableCell>{formatDisplayDate(b.date)}</TableCell>
-                      <TableCell>{b.durationMinutes || 60} min</TableCell>
-                      <TableCell>{start}</TableCell>
-                      <TableCell>{finish}</TableCell>
-                      <TableCell>{b.roomName || '-'}</TableCell>
-                      <TableCell style={{ textAlign: 'right' }}>
-                        <Button variant="danger" size="small" onClick={() => openCancel(b)}>
-                          Cancel service
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Modal
-        isOpen={cancelModal.open}
-        onClose={() => setCancelModal({ open: false, item: null })}
-        title="Cancel service"
-        subtitle="Are you sure you want to cancel this reservation?"
-        size="default"
-      >
-        {cancelModal.item && (
-          <div style={{ marginBottom: 16, fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
-            <Badge variant="warning">Pending</Badge>{' '}
-            <strong>{cancelModal.item.clientName}</strong> · {formatDisplayDate(cancelModal.item.date)} ·{' '}
-            {cancelModal.item.reservedTime?.substring(0, 5)}
-          </div>
-        )}
-        {cancelError && (
-          <div
-            style={{
-              padding: 12,
-              marginBottom: 12,
-              background: 'rgba(239,68,68,0.1)',
-              color: '#dc2626',
-              borderRadius: 8,
-              fontSize: '0.875rem',
-            }}
-          >
-            {cancelError}
-          </div>
-        )}
-        <Input
-          label="Reason for cancel *"
-          placeholder="Explain why this service is canceled"
-          value={cancelReason}
-          onChange={(e) => setCancelReason(e.target.value)}
-        />
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-          <Button variant="secondary" onClick={() => setCancelModal({ open: false, item: null })}>
-            No, keep it
-          </Button>
-          <Button variant="danger" loading={isCanceling} onClick={handleCancelConfirm}>
-            Yes, cancel
-          </Button>
-        </div>
-      </Modal>
     </div>
   )
 }
