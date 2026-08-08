@@ -6,8 +6,8 @@ import { servicesData, serviceTranslations } from '../data/services'
 import './Services.css'
 
 const CorporateModal = ({ isOpen, onClose, serviceText, setCursorVariant, t }) => {
-  const phoneNumber = '+34 678 902 765'
-  const whatsappLink = 'https://wa.me/34678902765'
+  const phoneNumber = '+34 691 846 476'
+  const whatsappLink = 'https://wa.me/34691846476'
 
   if (!isOpen) return null
 

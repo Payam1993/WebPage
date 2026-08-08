@@ -7,8 +7,8 @@ import './Contact.css'
  * Exclusive booking invitation with contact options
  */
 const Contact: React.FC = () => {
-  const phoneNumber = '+34 678 902 765'
-  const whatsappLink = 'https://wa.me/34678902765'
+  const phoneNumber = '+34 691 846 476'
+  const whatsappLink = 'https://wa.me/34691846476'
 
   return (
     <section id="contact" className="erotic-contact">

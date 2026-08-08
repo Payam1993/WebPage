@@ -29,8 +29,8 @@ const Footer: React.FC = () => {
 
           {/* Contact */}
           <div className="erotic-footer-contact">
-            <a href="tel:+34678902765" className="erotic-footer-link">
-              +34 678 902 765
+            <a href="tel:+34691846476" className="erotic-footer-link">
+              +34 691 846 476
             </a>
             <span className="erotic-footer-separator">•</span>
             <span className="erotic-footer-location">Barcelona</span>

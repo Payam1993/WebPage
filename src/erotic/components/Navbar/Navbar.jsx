@@ -222,7 +222,7 @@ const Navbar = ({ setCursorVariant }) => {
                   transition={{ delay: 0.7 }}
                 >
                   <p>{t.nav.location}</p>
-                  <p>+34 678 902 765</p>
+                  <p>+34 691 846 476</p>
                 </motion.div>
               </div>
             </motion.div>

@@ -20,9 +20,27 @@ const Navbar = ({ setCursorVariant }) => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Close drawer on route change and lock body scroll while open
+  useEffect(() => {
+    setIsMenuOpen(false)
+    setIsLangOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      document.body.classList.remove('mobile-menu-open')
+      return undefined
+    }
+    document.body.classList.add('mobile-menu-open')
+    return () => document.body.classList.remove('mobile-menu-open')
+  }, [isMenuOpen])
+
+  const closeMenu = () => setIsMenuOpen(false)
+
   const handleNavClick = (e, sectionId) => {
     e.preventDefault()
-    
+    closeMenu()
+
     if (location.pathname !== '/') {
       // Navigate to home page first, then scroll to section
       navigate('/')
@@ -239,7 +257,8 @@ const Navbar = ({ setCursorVariant }) => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             onMouseEnter={() => setCursorVariant('hover')}
             onMouseLeave={() => setCursorVariant('default')}
-            aria-label="Toggle menu"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
           >
             <span></span>
             <span></span>
@@ -256,7 +275,7 @@ const Navbar = ({ setCursorVariant }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={closeMenu}
             />
             <motion.div 
               className="mobile-menu"
@@ -264,6 +283,9 @@ const Navbar = ({ setCursorVariant }) => {
               initial="closed"
               animate="open"
               exit="closed"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
             >
               <div className="mobile-menu-content">
                 {/* Mobile Language Selector */}
@@ -271,6 +293,7 @@ const Navbar = ({ setCursorVariant }) => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
+                      type="button"
                       className={`mobile-lang-btn ${language === lang.code ? 'active' : ''}`}
                       onClick={() => changeLanguage(lang.code)}
                     >
@@ -290,10 +313,7 @@ const Navbar = ({ setCursorVariant }) => {
                   >
                     <a 
                       href={navLinks[0].href}
-                      onClick={(e) => {
-                        handleNavClick(e, navLinks[0].href.replace('#', ''))
-                        setIsMenuOpen(false)
-                      }}
+                      onClick={(e) => handleNavClick(e, navLinks[0].href.replace('#', ''))}
                       onMouseEnter={() => setCursorVariant('hover')}
                       onMouseLeave={() => setCursorVariant('default')}
                     >
@@ -310,7 +330,7 @@ const Navbar = ({ setCursorVariant }) => {
                   >
                     <Link 
                       to="/work-with-us"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={closeMenu}
                       onMouseEnter={() => setCursorVariant('hover')}
                       onMouseLeave={() => setCursorVariant('default')}
                     >
@@ -329,10 +349,7 @@ const Navbar = ({ setCursorVariant }) => {
                     >
                       <a 
                         href={link.href}
-                        onClick={(e) => {
-                          handleNavClick(e, link.href.replace('#', ''))
-                          setIsMenuOpen(false)
-                        }}
+                        onClick={(e) => handleNavClick(e, link.href.replace('#', ''))}
                         onMouseEnter={() => setCursorVariant('hover')}
                         onMouseLeave={() => setCursorVariant('default')}
                       >
@@ -351,7 +368,7 @@ const Navbar = ({ setCursorVariant }) => {
                     <Link 
                       to="/staff"
                       className="mobile-staff-link"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={closeMenu}
                       onMouseEnter={() => setCursorVariant('hover')}
                       onMouseLeave={() => setCursorVariant('default')}
                     >
@@ -364,10 +381,10 @@ const Navbar = ({ setCursorVariant }) => {
                   className="mobile-menu-footer"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
+                  transition={{ delay: 0.45 }}
                 >
                   <p>{t.nav.location}</p>
-                  <p>+34 678 902 765</p>
+                  <a href="tel:+34691846476">+34 691 846 476</a>
                 </motion.div>
               </div>
             </motion.div>

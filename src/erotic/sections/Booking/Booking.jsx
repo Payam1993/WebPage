@@ -51,7 +51,7 @@ const Booking = () => {
                 </div>
                 <div className="erotic-info-text">
                   <span className="erotic-info-label">{t.booking.phone}</span>
-                  <a href="tel:+34678902765" className="erotic-info-value">+34 678 902 765</a>
+                  <a href="tel:+34691846476" className="erotic-info-value">+34 691 846 476</a>
                 </div>
               </div>
 
@@ -63,7 +63,7 @@ const Booking = () => {
                 </div>
                 <div className="erotic-info-text">
                   <span className="erotic-info-label">WhatsApp</span>
-                  <a href="https://wa.me/34678902765" target="_blank" rel="noopener noreferrer" className="erotic-info-value">
+                  <a href="https://wa.me/34691846476" target="_blank" rel="noopener noreferrer" className="erotic-info-value">
                     Send Message
                   </a>
                 </div>
