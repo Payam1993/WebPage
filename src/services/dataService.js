@@ -697,6 +697,40 @@ export const resolveStaffByEmail = async (email) => {
   }
 }
 
+/**
+ * Normalize booking payment fields.
+ * - totalPayment: optional (client pays)
+ * - localPayment: required by staff UI
+ * - priceAgreement: kept for schema + legacy reporting (defaults to total or local)
+ */
+export const normalizeBookingPayments = (data = {}) => {
+  const parseOptional = (value) => {
+    if (value === '' || value === undefined || value === null) return null
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
+  }
+  const totalPayment = parseOptional(data.totalPayment)
+  const localPayment = parseOptional(data.localPayment)
+  const legacy = parseOptional(data.priceAgreement)
+  const priceAgreement =
+    totalPayment != null ? totalPayment : localPayment != null ? localPayment : legacy != null ? legacy : 0
+  return { totalPayment, localPayment, priceAgreement }
+}
+
+export const getBookingLocalPayment = (booking) => {
+  if (booking?.localPayment != null && booking.localPayment !== '') {
+    return Number(booking.localPayment) || 0
+  }
+  return Number(booking?.priceAgreement) || 0
+}
+
+export const getBookingTotalPayment = (booking) => {
+  if (booking?.totalPayment != null && booking.totalPayment !== '') {
+    return Number(booking.totalPayment)
+  }
+  return null
+}
+
 export const bookingAPI = {
   /**
    * List bookings, optionally filtered by date range, therapist, center, room
@@ -762,6 +796,7 @@ export const bookingAPI = {
       const reservedTime = bookingData.reservedTime?.substring(0, 5)
         ? `${bookingData.reservedTime.substring(0, 5)}:00`
         : bookingData.reservedTime
+      const payments = normalizeBookingPayments(bookingData)
       const { data, errors } = await client.models.Booking.create({
         clientName: bookingData.clientName,
         clientPhone: bookingData.clientPhone?.trim() || null,
@@ -776,7 +811,9 @@ export const bookingAPI = {
         date: bookingData.date,
         reservedTime,
         durationMinutes: Number(bookingData.durationMinutes) || 60,
-        priceAgreement: bookingData.priceAgreement,
+        priceAgreement: payments.priceAgreement,
+        totalPayment: payments.totalPayment,
+        localPayment: payments.localPayment,
         status: bookingData.status || 'Pending',
         cancelReason: bookingData.cancelReason || null,
         paymentStatus: bookingData.paymentStatus || 'None',
@@ -795,6 +832,7 @@ export const bookingAPI = {
       const reservedTime = bookingData.reservedTime?.substring(0, 5)
         ? `${bookingData.reservedTime.substring(0, 5)}:00`
         : bookingData.reservedTime
+      const payments = normalizeBookingPayments(bookingData)
       const { data, errors } = await client.models.Booking.update({
         id,
         clientName: bookingData.clientName,
@@ -810,7 +848,9 @@ export const bookingAPI = {
         date: bookingData.date,
         reservedTime,
         durationMinutes: Number(bookingData.durationMinutes) || 60,
-        priceAgreement: bookingData.priceAgreement,
+        priceAgreement: payments.priceAgreement,
+        totalPayment: payments.totalPayment,
+        localPayment: payments.localPayment,
         status: bookingData.status,
         cancelReason: bookingData.cancelReason || null,
         paymentStatus: bookingData.paymentStatus || 'None',
@@ -993,6 +1033,8 @@ export const notConfirmedReservationAPI = {
         reservedTime: notConfirmedReservation.reservedTime,
         durationMinutes: notConfirmedReservation.durationMinutes,
         priceAgreement: additionalData.priceAgreement || 0,
+        totalPayment: additionalData.totalPayment ?? null,
+        localPayment: additionalData.localPayment ?? additionalData.priceAgreement ?? null,
         status: 'Pending',
       }
       
@@ -1494,6 +1536,59 @@ export const staffBookingLinkAPI = {
       return true
     } catch (error) {
       console.error('Error deleting booking link:', error)
+      throw error
+    }
+  },
+}
+
+// ============================================
+// Business KPI (Local Configuration)
+// ============================================
+const BUSINESS_KPI_KEY = 'default'
+
+export const businessKpiAPI = {
+  async get() {
+    try {
+      const client = getClient()
+      const { data, errors } = await client.models.BusinessKpi.list({
+        filter: { key: { eq: BUSINESS_KPI_KEY } },
+      })
+      if (errors) throw new Error(errors[0].message)
+      return (data && data[0]) || null
+    } catch (error) {
+      console.error('Error loading business KPI:', error)
+      throw error
+    }
+  },
+
+  async save({ dailyTargetKpi, dailySafeKpi }) {
+    try {
+      const client = getClient()
+      const existing = await this.get()
+      const payload = {
+        key: BUSINESS_KPI_KEY,
+        dailyTargetKpi:
+          dailyTargetKpi === '' || dailyTargetKpi == null
+            ? null
+            : Number(dailyTargetKpi),
+        dailySafeKpi:
+          dailySafeKpi === '' || dailySafeKpi == null
+            ? null
+            : Number(dailySafeKpi),
+      }
+      if (existing?.id) {
+        const { data, errors } = await client.models.BusinessKpi.update({
+          id: existing.id,
+          ...payload,
+        })
+        if (errors) throw new Error(errors[0].message)
+        return data
+      }
+      const { data, errors } = await client.models.BusinessKpi.create(payload)
+      if (errors) throw new Error(errors[0].message)
+      return data
+    } catch (error) {
+      console.error('Error saving business KPI:', error)
       throw error
     }
   },

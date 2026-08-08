@@ -23,7 +23,7 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { serviceAPI, costAPI, staffAPI, centerAPI, roomAPI, roomPictureAPI } from '../../services/dataService'
+import { serviceAPI, costAPI, staffAPI, centerAPI, roomAPI, roomPictureAPI, businessKpiAPI } from '../../services/dataService'
 
 const RoomPictureThumb = ({ pictureKey }) => {
   const [url, setUrl] = useState(null)
@@ -54,11 +54,11 @@ const RoomPictureThumb = ({ pictureKey }) => {
 }
 
 /**
- * StaticData - CRUD for Services, Cost Types, Staff, Centers, and Rooms
+ * StaticData - CRUD for Services, Cost Types, Staff, Centers, Rooms, and KPI
  * Card-based layout with modals for management
  */
 const StaticData = () => {
-  const [activeModal, setActiveModal] = useState(null) // 'services' | 'costs' | 'staff' | 'centers' | 'rooms' | null
+  const [activeModal, setActiveModal] = useState(null) // 'services' | 'costs' | 'staff' | 'centers' | 'rooms' | 'kpi' | null
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -68,6 +68,7 @@ const StaticData = () => {
   const [staff, setStaff] = useState([])
   const [centers, setCenters] = useState([])
   const [rooms, setRooms] = useState([])
+  const [kpiSummary, setKpiSummary] = useState(null)
 
   // Room picture upload
   const [roomPictureFile, setRoomPictureFile] = useState(null)
@@ -88,6 +89,13 @@ const StaticData = () => {
       loadData(activeModal)
     }
   }, [activeModal])
+
+  useEffect(() => {
+    businessKpiAPI
+      .get()
+      .then((data) => setKpiSummary(data))
+      .catch(() => setKpiSummary(null))
+  }, [])
 
   const clearRoomPicture = () => {
     setRoomPictureFile(null)
@@ -128,6 +136,16 @@ const StaticData = () => {
           ])
           setRooms(roomsData)
           setCenters(centersForRooms)
+          break
+        case 'kpi':
+          {
+            const kpiData = await businessKpiAPI.get()
+            setKpiSummary(kpiData)
+            setFormData({
+              dailyTargetKpi: kpiData?.dailyTargetKpi ?? '',
+              dailySafeKpi: kpiData?.dailySafeKpi ?? '',
+            })
+          }
           break
       }
     } catch (err) {
@@ -262,10 +280,38 @@ const StaticData = () => {
           await roomAPI.create(roomPayload)
         }
         await loadData('rooms')
+      } else if (activeModal === 'kpi') {
+        const target =
+          formData.dailyTargetKpi === '' || formData.dailyTargetKpi == null
+            ? null
+            : Number(formData.dailyTargetKpi)
+        const safe =
+          formData.dailySafeKpi === '' || formData.dailySafeKpi == null
+            ? null
+            : Number(formData.dailySafeKpi)
+        if (target != null && Number.isNaN(target)) {
+          throw new Error('Daily target KPI must be a number')
+        }
+        if (safe != null && Number.isNaN(safe)) {
+          throw new Error('Daily safe KPI must be a number')
+        }
+        const saved = await businessKpiAPI.save({
+          dailyTargetKpi: target,
+          dailySafeKpi: safe,
+        })
+        setKpiSummary(saved)
+        setFormData({
+          dailyTargetKpi: saved?.dailyTargetKpi ?? '',
+          dailySafeKpi: saved?.dailySafeKpi ?? '',
+        })
       }
       setEditingItem(null)
-      setFormData({})
-      clearRoomPicture()
+      if (activeModal !== 'kpi') {
+        setFormData({})
+        clearRoomPicture()
+      } else {
+        clearRoomPicture()
+      }
     } catch (err) {
       setError(err.message || 'Failed to save')
     } finally {
@@ -379,13 +425,26 @@ const StaticData = () => {
         </svg>
       ),
     },
+    {
+      id: 'kpi',
+      title: 'KPI',
+      subtitle: kpiSummary
+        ? `Target €${Number(kpiSummary.dailyTargetKpi || 0).toFixed(0)} · Safe €${Number(kpiSummary.dailySafeKpi || 0).toFixed(0)}`
+        : 'Daily target & safe local-payment goals',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M3 3v18h18"/>
+          <path d="M7 14l4-4 3 3 5-6"/>
+        </svg>
+      ),
+    },
   ]
 
   return (
     <div>
       <PageHeader 
         title="Local Configuration"
-        subtitle="Manage services, costs, staff, centers, and rooms"
+        subtitle="Manage services, costs, staff, centers, rooms, and KPI"
       />
 
       <Grid cols={3} gap="large">
@@ -992,6 +1051,74 @@ const StaticData = () => {
             )}
           </CardContent>
         </Card>
+      </Modal>
+
+      {/* KPI Modal */}
+      <Modal
+        isOpen={activeModal === 'kpi'}
+        onClose={handleCloseModal}
+        title="KPI"
+        subtitle="Daily local-payment targets used in Admin Reporting"
+        size="default"
+      >
+        {error && (
+          <div style={{ padding: 12, marginBottom: 16, background: 'rgba(239,68,68,0.1)', color: '#dc2626', borderRadius: 8 }}>
+            {error}
+          </div>
+        )}
+        {isLoading ? (
+          <LoadingState text="Loading KPI…" />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle subtitle="Amounts in euros (€)">Daily payment goals</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                label="Daily target KPI (€)"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.dailyTargetKpi ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    dailyTargetKpi: e.target.value === '' ? '' : e.target.value,
+                  })
+                }
+                placeholder="Objective local payment total for the day"
+              />
+              <p style={{ margin: '0 0 16px', fontSize: '0.8125rem', color: 'var(--ui-text-muted)' }}>
+                Target sum of local payments the local should aim for each day.
+              </p>
+              <Input
+                label="Daily safe KPI (€)"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.dailySafeKpi ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    dailySafeKpi: e.target.value === '' ? '' : e.target.value,
+                  })
+                }
+                placeholder="Minimum to cover daily costs"
+              />
+              <p style={{ margin: '0 0 16px', fontSize: '0.8125rem', color: 'var(--ui-text-muted)' }}>
+                Minimum local-payment total needed to cover costs (safe floor).
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <Button variant="secondary" onClick={handleCloseModal}>
+                  Close
+                </Button>
+                <Button onClick={handleSave} loading={isSaving}>
+                  Save KPI
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </Modal>
 
       {/* Delete Confirmation Dialog */}

@@ -11,7 +11,7 @@ import {
   Icons,
   LoadingState,
 } from '../../components/admin/ui'
-import { bookingAPI, getDateFromToday, getTodayDate, toLocalDateKey } from '../../services/dataService'
+import { bookingAPI, getDateFromToday, getTodayDate, toLocalDateKey, getBookingLocalPayment } from '../../services/dataService'
 import { useAuth, ROLES } from '../../context/AuthContext'
 import MiniAdminDashboard from './MiniAdminDashboard'
 import UserDashboard from './UserDashboard'
@@ -264,7 +264,7 @@ const AdminDashboard = () => {
     const totalBookings = bookings.length
     const pendingBookings = bookings.filter(b => b.status === 'Pending').length
     const completedBookings = bookings.filter(b => b.status === 'Done').length
-    const totalRevenue = bookings.reduce((sum, b) => sum + (b.priceAgreement || 0), 0)
+    const totalRevenue = bookings.reduce((sum, b) => sum + getBookingLocalPayment(b), 0)
 
     return [
       {
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
         title: t.reports.revenue,
         value: `€${totalRevenue.toFixed(0)}`,
         icon: <Icons.DollarSign />,
-        subtitle: t.reports.totalEarnings
+        subtitle: t.reports.localPaymentsEarnings
       },
     ]
   }, [bookings, selectedPeriod, periodSubtitle])

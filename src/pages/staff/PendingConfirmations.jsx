@@ -16,12 +16,16 @@ import {
   EmptyState,
   LoadingState,
   Icons,
+  Modal,
+  Input,
 } from '../../components/admin/ui'
 import {
   bookingAPI,
   notConfirmedReservationAPI,
   notConfirmedCostAPI,
   formatDisplayDate,
+  getBookingLocalPayment,
+  getBookingTotalPayment,
 } from '../../services/dataService'
 import {
   isAwaitingServiceConfirm,
@@ -47,6 +51,9 @@ const PendingConfirmations = () => {
   const [awaitingService, setAwaitingService] = useState([])
   const [awaitingPayment, setAwaitingPayment] = useState([])
   const [error, setError] = useState(null)
+  const [confirmItem, setConfirmItem] = useState(null)
+  const [confirmForm, setConfirmForm] = useState({ totalPayment: '', localPayment: '' })
+  const [confirmError, setConfirmError] = useState(null)
 
   const loadAll = useCallback(async () => {
     setIsLoading(true)
@@ -82,6 +89,48 @@ const PendingConfirmations = () => {
       await loadAll()
     } catch (err) {
       alert(err.message || t.pending.actionFailed)
+    } finally {
+      setActionId(null)
+    }
+  }
+
+  const openConfirmModal = (item) => {
+    setConfirmItem(item)
+    setConfirmForm({ totalPayment: '', localPayment: '' })
+    setConfirmError(null)
+  }
+
+  const closeConfirmModal = () => {
+    setConfirmItem(null)
+    setConfirmForm({ totalPayment: '', localPayment: '' })
+    setConfirmError(null)
+  }
+
+  const handleConfirmReservation = async () => {
+    if (
+      confirmForm.localPayment === '' ||
+      confirmForm.localPayment == null ||
+      Number.isNaN(Number(confirmForm.localPayment))
+    ) {
+      setConfirmError(t.reservations.localPaymentRequiredError)
+      return
+    }
+    const id = confirmItem.id
+    setActionId(id)
+    setConfirmError(null)
+    try {
+      await notConfirmedReservationAPI.confirm(confirmItem, {
+        totalPayment:
+          confirmForm.totalPayment === '' || confirmForm.totalPayment == null
+            ? null
+            : Number(confirmForm.totalPayment),
+        localPayment: Number(confirmForm.localPayment),
+        priceAgreement: Number(confirmForm.localPayment),
+      })
+      closeConfirmModal()
+      await loadAll()
+    } catch (err) {
+      setConfirmError(err.message || t.pending.actionFailed)
     } finally {
       setActionId(null)
     }
@@ -161,14 +210,7 @@ const PendingConfirmations = () => {
                       <Button
                         variant="success"
                         size="small"
-                        loading={actionId === item.id}
-                        onClick={() =>
-                          runAction(item.id, () =>
-                            notConfirmedReservationAPI.confirm(item, {
-                              priceAgreement: 0,
-                            })
-                          )
-                        }
+                        onClick={() => openConfirmModal(item)}
                       >
                         {t.pending.confirmReservation}
                       </Button>
@@ -259,19 +301,24 @@ const PendingConfirmations = () => {
                   <TableHead>{t.pending.staff}</TableHead>
                   <TableHead>{t.common.room}</TableHead>
                   <TableHead>{t.common.client}</TableHead>
-                  <TableHead>{t.pending.amount}</TableHead>
+                  <TableHead>{t.reservations.totalPayment}</TableHead>
+                  <TableHead>{t.reservations.localPayment}</TableHead>
                   <TableHead>{t.common.status}</TableHead>
                   <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {awaitingPayment.map((item) => (
+                {awaitingPayment.map((item) => {
+                  const totalPay = getBookingTotalPayment(item)
+                  const localPay = getBookingLocalPayment(item)
+                  return (
                   <TableRow key={item.id}>
                     <TableCell>{formatDisplayDate(item.date)}</TableCell>
                     <TableCell>{item.therapistName || '-'}</TableCell>
                     <TableCell>{item.roomName || '-'}</TableCell>
                     <TableCell>{item.clientName}</TableCell>
-                    <TableCell>€{(item.priceAgreement || 0).toFixed(2)}</TableCell>
+                    <TableCell>{totalPay != null ? `€${Number(totalPay).toFixed(2)}` : '—'}</TableCell>
+                    <TableCell>€{Number(localPay).toFixed(2)}</TableCell>
                     <TableCell><Badge variant="info">{t.pending.paymentPending}</Badge></TableCell>
                     <TableCell style={{ textAlign: 'right' }}>
                       <Button
@@ -286,7 +333,8 @@ const PendingConfirmations = () => {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  )
+                })}
               </TableBody>
             </Table>
           )}
@@ -345,6 +393,71 @@ const PendingConfirmations = () => {
           )}
         </CardContent>
       </Card>
+
+      <Modal
+        isOpen={!!confirmItem}
+        onClose={closeConfirmModal}
+        title={t.pending.confirmReservation}
+        subtitle={
+          confirmItem
+            ? `${confirmItem.clientName} · ${formatDisplayDate(confirmItem.date)}`
+            : ''
+        }
+      >
+        {confirmError && (
+          <div
+            style={{
+              padding: 12,
+              marginBottom: 16,
+              background: 'rgba(239,68,68,0.1)',
+              color: '#dc2626',
+              borderRadius: 8,
+            }}
+          >
+            {confirmError}
+          </div>
+        )}
+        <Input
+          label={t.reservations.totalPaymentOptional}
+          type="number"
+          min="0"
+          step="0.01"
+          value={confirmForm.totalPayment}
+          onChange={(e) =>
+            setConfirmForm({
+              ...confirmForm,
+              totalPayment: e.target.value === '' ? '' : e.target.value,
+            })
+          }
+          placeholder={t.reservations.totalPaymentHint}
+        />
+        <Input
+          label={t.reservations.localPaymentRequired}
+          type="number"
+          min="0"
+          step="0.01"
+          value={confirmForm.localPayment}
+          onChange={(e) =>
+            setConfirmForm({
+              ...confirmForm,
+              localPayment: e.target.value === '' ? '' : e.target.value,
+            })
+          }
+          placeholder={t.reservations.localPaymentHint}
+        />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+          <Button variant="secondary" onClick={closeConfirmModal}>
+            {t.common.cancel}
+          </Button>
+          <Button
+            variant="success"
+            loading={actionId === confirmItem?.id}
+            onClick={handleConfirmReservation}
+          >
+            {t.pending.confirmReservation}
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }

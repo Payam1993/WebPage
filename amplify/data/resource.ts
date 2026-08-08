@@ -11,6 +11,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * - DailyService: daily service records with full details
  * - DailyCost: daily cost records
  * - Booking: client reservations/bookings (staff portal)
+ * - BusinessKpi: daily target / safe KPI for local payments
  * - NotConfirmedReservation: public booking requests awaiting confirmation
  * 
  * Access: 
@@ -112,6 +113,21 @@ const schema = a.schema({
       allow.publicApiKey().to(["read"]), // Public booking form
     ]),
 
+  // Business KPI — daily local-payment targets (Local Configuration)
+  BusinessKpi: a
+    .model({
+      // Singleton key, typically "default"
+      key: a.string().required(),
+      // Target total local payments for a day
+      dailyTargetKpi: a.float(),
+      // Minimum local payments needed to cover costs
+      dailySafeKpi: a.float(),
+    })
+    .authorization((allow) => [
+      allow.group("Admin_Confession"),
+      allow.authenticated().to(["read"]),
+    ]),
+
   // ============================================
   // Daily Data Models (Admin only)
   // ============================================
@@ -182,7 +198,12 @@ const schema = a.schema({
       reservedTime: a.time().required(),
       durationMinutes: a.integer().required(),
       // Financial
+      // Legacy single amount (kept for compatibility; prefer totalPayment / localPayment)
       priceAgreement: a.float().required(),
+      // What the client pays (optional for staff Users)
+      totalPayment: a.float(),
+      // What stays with the local business (required in staff UI)
+      localPayment: a.float(),
       // Status: Done | Pending | Canceled
       status: a.enum(["Done", "Pending", "Canceled"]),
       // Reason when status is Canceled

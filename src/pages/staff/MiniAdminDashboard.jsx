@@ -24,6 +24,8 @@ import {
   roomAPI,
   getTodayDate,
   formatDisplayDate,
+  getBookingLocalPayment,
+  getBookingTotalPayment,
 } from '../../services/dataService'
 import {
   getBookingEndTime,
@@ -353,7 +355,19 @@ const MiniAdminDashboard = () => {
                     <TableCell>{formatDisplayDate(item.date)}</TableCell>
                     <TableCell>{item.therapistName || '-'}</TableCell>
                     <TableCell>{item.roomName || '-'}</TableCell>
-                    <TableCell>€{(item.priceAgreement || 0).toFixed(2)}</TableCell>
+                    <TableCell>
+                      {(() => {
+                        const totalPay = getBookingTotalPayment(item)
+                        const localPay = getBookingLocalPayment(item)
+                        return (
+                          <span>
+                            {totalPay != null ? `€${Number(totalPay).toFixed(2)}` : '—'}
+                            <span style={{ color: 'var(--ui-text-muted)' }}> / </span>
+                            €{Number(localPay).toFixed(2)}
+                          </span>
+                        )
+                      })()}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="info">{t.miniAdmin.paymentPending}</Badge>
                     </TableCell>

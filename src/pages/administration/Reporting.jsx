@@ -1,10 +1,10 @@
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   Button,
-  Badge,
   StatCard,
   Table,
   TableHeader,
@@ -17,212 +17,329 @@ import {
   Input,
   Icons,
   EmptyState,
+  LoadingState,
 } from '../../components/admin/ui'
+import {
+  bookingAPI,
+  dailyCostAPI,
+  businessKpiAPI,
+  getBookingLocalPayment,
+  getBookingTotalPayment,
+  getTodayDate,
+  getDateFromToday,
+  formatDisplayDate,
+} from '../../services/dataService'
+
+const formatEuro = (n) =>
+  `€${Number(n || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 /**
- * Reporting - Admin reporting page with date range controls and summary data
+ * Reporting — live admin analytics from costs + local payments
  */
 const Reporting = () => {
+  const [fromDate, setFromDate] = useState(getDateFromToday(-30))
+  const [toDate, setToDate] = useState(getTodayDate())
+  const [applied, setApplied] = useState({
+    fromDate: getDateFromToday(-30),
+    toDate: getTodayDate(),
+  })
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [bookings, setBookings] = useState([])
+  const [costs, setCosts] = useState([])
+  const [kpi, setKpi] = useState(null)
+
+  const loadReport = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const [bookingsData, costsData, kpiData] = await Promise.all([
+        bookingAPI.list(applied.fromDate, applied.toDate),
+        dailyCostAPI.list(applied.fromDate, applied.toDate),
+        businessKpiAPI.get().catch(() => null),
+      ])
+      setBookings(bookingsData || [])
+      setCosts(costsData || [])
+      setKpi(kpiData)
+    } catch (err) {
+      console.error(err)
+      setError(err.message || 'Error al cargar el informe')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [applied.fromDate, applied.toDate])
+
+  useEffect(() => {
+    loadReport()
+  }, [loadReport])
+
+  const handleGenerate = () => {
+    setApplied({ fromDate, toDate })
+  }
+
+  const summary = useMemo(() => {
+    const activeBookings = (bookings || []).filter((b) => b.status !== 'Canceled')
+    const ingresosLocal = activeBookings.reduce((sum, b) => sum + getBookingLocalPayment(b), 0)
+    const ingresosTotal = activeBookings.reduce((sum, b) => {
+      const total = getBookingTotalPayment(b)
+      return sum + (total != null ? Number(total) : 0)
+    }, 0)
+    const totalCosts = (costs || []).reduce((sum, c) => sum + (Number(c.price) || 0), 0)
+    const net = ingresosLocal - totalCosts
+    return {
+      ingresosLocal,
+      ingresosTotal,
+      totalCosts,
+      net,
+      bookingCount: activeBookings.length,
+      costCount: (costs || []).length,
+    }
+  }, [bookings, costs])
+
+  const costsByCategory = useMemo(() => {
+    const map = new Map()
+    for (const c of costs || []) {
+      const key = c.costName || 'Sin categoría'
+      const prev = map.get(key) || { name: key, count: 0, total: 0 }
+      prev.count += 1
+      prev.total += Number(c.price) || 0
+      map.set(key, prev)
+    }
+    const rows = [...map.values()].sort((a, b) => b.total - a.total)
+    const grand = rows.reduce((s, r) => s + r.total, 0) || 1
+    return rows.map((r) => ({
+      ...r,
+      pct: (r.total / grand) * 100,
+    }))
+  }, [costs])
+
+  const localByDay = useMemo(() => {
+    const map = new Map()
+    for (const b of bookings || []) {
+      if (b.status === 'Canceled') continue
+      const day = b.date
+      const prev = map.get(day) || { date: day, count: 0, local: 0, total: 0 }
+      prev.count += 1
+      prev.local += getBookingLocalPayment(b)
+      const tot = getBookingTotalPayment(b)
+      if (tot != null) prev.total += Number(tot)
+      map.set(day, prev)
+    }
+    return [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
+  }, [bookings])
+
+  const dailyTarget = kpi?.dailyTargetKpi != null ? Number(kpi.dailyTargetKpi) : null
+  const dailySafe = kpi?.dailySafeKpi != null ? Number(kpi.dailySafeKpi) : null
+
   return (
     <div>
-      <PageHeader 
-        title="Reporting"
-        subtitle="View comprehensive reports and analytics"
+      <PageHeader
+        title="Informes"
+        subtitle="Ingresos por pagos locales y costes confirmados"
         actions={
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <Input
               type="date"
-              defaultValue="2026-01-01"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
               containerClassName="ui-mb-0"
               style={{ width: '150px' }}
             />
-            <span style={{ color: 'var(--ui-text-muted)' }}>to</span>
+            <span style={{ color: 'var(--ui-text-muted)' }}>a</span>
             <Input
               type="date"
-              defaultValue="2026-01-31"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
               containerClassName="ui-mb-0"
               style={{ width: '150px' }}
             />
-            <Button>Generate Report</Button>
+            <Button onClick={handleGenerate} loading={isLoading}>
+              Generar informe
+            </Button>
           </div>
         }
       />
 
-      {/* Summary Cards */}
-      <Grid cols={5} gap="default" style={{ marginBottom: '24px' }}>
-        <StatCard
-          title="Total Revenue"
-          value="€48,750"
-          icon={<Icons.DollarSign />}
-          trend="+12%"
-          trendDirection="up"
-        />
-        <StatCard
-          title="Staff Benefit"
-          value="€19,500"
-          icon={<Icons.Users />}
-          subtitle="40% of revenue"
-        />
-        <StatCard
-          title="Local Benefit"
-          value="€29,250"
-          icon={<Icons.TrendingUp />}
-          subtitle="60% of revenue"
-        />
-        <StatCard
-          title="Total Costs"
-          value="€4,250"
-          icon={<Icons.FileText />}
-          trend="-5%"
-          trendDirection="down"
-        />
-        <StatCard
-          title="Net Profit"
-          value="€44,500"
-          icon={<Icons.Star />}
-          trend="+15%"
-          trendDirection="up"
-        />
-      </Grid>
-
-      {/* Breakdown Tables */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
-        {/* By Staff */}
-        <Card padding={false}>
-          <CardHeader>
-            <CardTitle subtitle="Revenue breakdown by staff member">
-              By Staff
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Staff Member</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Services</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Revenue</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Benefit</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><span style={{ fontWeight: 500 }}>Luciana</span></TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>78</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>€26,520</TableCell>
-                  <TableCell style={{ textAlign: 'right', color: 'var(--ui-success)' }}>€10,608</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><span style={{ fontWeight: 500 }}>Sadey</span></TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>65</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>€22,230</TableCell>
-                  <TableCell style={{ textAlign: 'right', color: 'var(--ui-success)' }}>€8,892</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* By Service */}
-        <Card padding={false}>
-          <CardHeader>
-            <CardTitle subtitle="Revenue breakdown by service type">
-              By Service
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Count</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Revenue</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><span style={{ fontWeight: 500 }}>Deep Tissue Massage</span></TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>45</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>€15,300</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><span style={{ fontWeight: 500 }}>Swedish Massage</span></TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>38</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>€11,400</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><span style={{ fontWeight: 500 }}>Hot Stone Therapy</span></TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>32</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>€12,800</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><span style={{ fontWeight: 500 }}>Couples Massage</span></TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>28</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>€9,250</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* By Cost Type */}
-      <Card padding={false}>
-        <CardHeader
-          actions={
-            <Button variant="ghost" size="small">
-              Export CSV
-            </Button>
-          }
+      {error && (
+        <div
+          style={{
+            padding: 12,
+            marginBottom: 16,
+            background: 'rgba(239,68,68,0.1)',
+            color: '#dc2626',
+            borderRadius: 8,
+          }}
         >
-          <CardTitle subtitle="Expense breakdown by category">
-            By Cost Type
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead style={{ textAlign: 'right' }}>Count</TableHead>
-                <TableHead style={{ textAlign: 'right' }}>Total Amount</TableHead>
-                <TableHead style={{ textAlign: 'right' }}>% of Costs</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell><Badge variant="info">Supplies</Badge></TableCell>
-                <TableCell style={{ textAlign: 'right' }}>24</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>€1,450</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>34.1%</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell><Badge variant="warning">Utilities</Badge></TableCell>
-                <TableCell style={{ textAlign: 'right' }}>4</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>€890</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>20.9%</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell><Badge variant="success">Staff</Badge></TableCell>
-                <TableCell style={{ textAlign: 'right' }}>8</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>€720</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>16.9%</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell><Badge variant="danger">Maintenance</Badge></TableCell>
-                <TableCell style={{ textAlign: 'right' }}>6</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>€650</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>15.3%</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell><Badge variant="neutral">Marketing</Badge></TableCell>
-                <TableCell style={{ textAlign: 'right' }}>12</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>€540</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>12.7%</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+          {error}
+        </div>
+      )}
+
+      {isLoading ? (
+        <LoadingState text="Cargando informe…" />
+      ) : (
+        <>
+          <Grid cols={4} gap="default" style={{ marginBottom: 24 }}>
+            <StatCard
+              title="Ingresos locales"
+              value={formatEuro(summary.ingresosLocal)}
+              icon={<Icons.TrendingUp />}
+              subtitle={`${summary.bookingCount} reservas · pagos locales`}
+            />
+            <StatCard
+              title="Pago total clientes"
+              value={formatEuro(summary.ingresosTotal)}
+              icon={<Icons.DollarSign />}
+              subtitle="Suma de pagos totales (si se informaron)"
+            />
+            <StatCard
+              title="Costes"
+              value={formatEuro(summary.totalCosts)}
+              icon={<Icons.FileText />}
+              subtitle={`${summary.costCount} costes confirmados`}
+            />
+            <StatCard
+              title="Resultado neto"
+              value={formatEuro(summary.net)}
+              icon={<Icons.Star />}
+              subtitle="Ingresos locales − costes"
+            />
+          </Grid>
+
+          <Grid cols={2} gap="default" style={{ marginBottom: 24 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle subtitle="Definidos en Configuración local">KPI diarios</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)', marginBottom: 4 }}>
+                      Daily target KPI
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+                      {dailyTarget != null ? formatEuro(dailyTarget) : '—'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)', marginTop: 4 }}>
+                      Objetivo de pago local del día
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)', marginBottom: 4 }}>
+                      Daily safe KPI
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+                      {dailySafe != null ? formatEuro(dailySafe) : '—'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)', marginTop: 4 }}>
+                      Mínimo para cubrir costes
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle subtitle={`${formatDisplayDate(applied.fromDate)} → ${formatDisplayDate(applied.toDate)}`}>
+                  Periodo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p style={{ margin: 0, color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>
+                  Los costes incluyen los confirmados por Admin / Mini Admin. Los ingresos locales
+                  suman el <strong>pago local</strong> de cada reserva (no cancelada).
+                </p>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+            <Card padding={false}>
+              <CardHeader>
+                <CardTitle subtitle="Pagos locales por día">Por día</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {localByDay.length === 0 ? (
+                  <EmptyState title="Sin reservas" description="No hay pagos locales en este periodo" />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead style={{ textAlign: 'right' }}>Reservas</TableHead>
+                        <TableHead style={{ textAlign: 'right' }}>Pago local</TableHead>
+                        <TableHead style={{ textAlign: 'right' }}>vs KPI</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {localByDay.map((row) => {
+                        const vsSafe =
+                          dailySafe != null
+                            ? row.local >= dailySafe
+                              ? 'Seguro'
+                              : 'Bajo safe'
+                            : '—'
+                        const vsTarget =
+                          dailyTarget != null
+                            ? row.local >= dailyTarget
+                              ? ' · Objetivo OK'
+                              : ' · Bajo target'
+                            : ''
+                        return (
+                          <TableRow key={row.date}>
+                            <TableCell>{formatDisplayDate(row.date)}</TableCell>
+                            <TableCell style={{ textAlign: 'right' }}>{row.count}</TableCell>
+                            <TableCell style={{ textAlign: 'right', fontWeight: 500 }}>
+                              {formatEuro(row.local)}
+                            </TableCell>
+                            <TableCell style={{ textAlign: 'right', fontSize: '0.8125rem' }}>
+                              {vsSafe}
+                              {vsTarget}
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card padding={false}>
+              <CardHeader>
+                <CardTitle subtitle="Costes confirmados por categoría">Por tipo de coste</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {costsByCategory.length === 0 ? (
+                  <EmptyState title="Sin costes" description="No hay costes confirmados en este periodo" />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Categoría</TableHead>
+                        <TableHead style={{ textAlign: 'right' }}>Cantidad</TableHead>
+                        <TableHead style={{ textAlign: 'right' }}>Total</TableHead>
+                        <TableHead style={{ textAlign: 'right' }}>% costes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {costsByCategory.map((row) => (
+                        <TableRow key={row.name}>
+                          <TableCell>
+                            <span style={{ fontWeight: 500 }}>{row.name}</span>
+                          </TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>{row.count}</TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>{formatEuro(row.total)}</TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>{row.pct.toFixed(1)}%</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -22,7 +22,7 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/admin/ui'
-import { bookingAPI, staffAPI, serviceAPI, centerAPI, roomAPI, getTodayDate, getDateFromToday, formatDisplayDate, notConfirmedReservationAPI } from '../../services/dataService'
+import { bookingAPI, staffAPI, serviceAPI, centerAPI, roomAPI, getTodayDate, getDateFromToday, formatDisplayDate, notConfirmedReservationAPI, getBookingLocalPayment, getBookingTotalPayment } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 import AvailabilityCalendar from '../../components/AvailabilityCalendar'
 import '../../components/AvailabilityCalendar.css'
@@ -197,7 +197,16 @@ const Reservations = () => {
     setLegalAccepted(false)
     if (item) {
       setEditingItem(item)
-      setFormData({ ...item })
+      setFormData({
+        ...item,
+        totalPayment: item.totalPayment ?? '',
+        localPayment:
+          item.localPayment != null && item.localPayment !== ''
+            ? item.localPayment
+            : item.priceAgreement != null && Number(item.priceAgreement) !== 0
+              ? item.priceAgreement
+              : '',
+      })
       setLegalAccepted(true)
     } else {
       setEditingItem(null)
@@ -206,7 +215,8 @@ const Reservations = () => {
         date: getTodayDate(),
         status: 'Pending',
         durationMinutes: 60,
-        priceAgreement: 0,
+        totalPayment: '',
+        localPayment: '',
         clientPhone: '',
         ...(defaultCenter
           ? { centerId: defaultCenter.id, centerName: defaultCenter.centerName }
@@ -271,7 +281,7 @@ const Reservations = () => {
       roomId,
       roomName: room?.roomName || '',
       reservedTime: '',
-      ...(roomPrice != null ? { priceAgreement: roomPrice } : {}),
+      ...(roomPrice != null ? { localPayment: roomPrice, totalPayment: formData.totalPayment ?? '' } : {}),
       ...(room?.centerId && !formData.centerId
         ? {
             centerId: room.centerId,
@@ -303,9 +313,8 @@ const Reservations = () => {
     setConfirmFormData({
       therapistId: defaultTherapistId,
       therapistName: defaultTherapistName,
-      priceAgreement: item.serviceName
-        ? servicesList.find((s) => s.id === item.serviceId)?.fixedPrice || 0
-        : 0,
+      totalPayment: '',
+      localPayment: '',
     })
   }
 
@@ -328,11 +337,26 @@ const Reservations = () => {
     try {
       const bookingDate = confirmModal.item.date
       
+      if (
+        confirmFormData.localPayment === '' ||
+        confirmFormData.localPayment == null ||
+        Number.isNaN(Number(confirmFormData.localPayment))
+      ) {
+        setError(t.reservations.localPaymentRequiredError)
+        setIsConfirming(false)
+        return
+      }
+
       // Confirm the reservation (creates Booking, deletes NotConfirmedReservation)
       await notConfirmedReservationAPI.confirm(confirmModal.item, {
         therapistId: confirmFormData.therapistId,
         therapistName: confirmFormData.therapistName,
-        priceAgreement: confirmFormData.priceAgreement || 0,
+        totalPayment:
+          confirmFormData.totalPayment === '' || confirmFormData.totalPayment == null
+            ? null
+            : Number(confirmFormData.totalPayment),
+        localPayment: Number(confirmFormData.localPayment),
+        priceAgreement: Number(confirmFormData.localPayment),
       })
       
       // Remove from not confirmed list immediately (optimistic update)
@@ -378,15 +402,23 @@ const Reservations = () => {
       if (isIndividualView && !legalAccepted) {
         throw new Error('You must accept the local massage license declaration')
       }
-      if (formData.priceAgreement == null || formData.priceAgreement === '') {
-        throw new Error('Price Agreement is required')
+      if (
+        formData.localPayment === '' ||
+        formData.localPayment == null ||
+        Number.isNaN(Number(formData.localPayment))
+      ) {
+        throw new Error(t.reservations.localPaymentRequiredError)
       }
       if (!formData.status) throw new Error('Status is required')
 
       const payload = {
         ...formData,
         clientPhone: formData.clientPhone?.trim() || null,
-        priceAgreement: Number(formData.priceAgreement) || 0,
+        totalPayment:
+          formData.totalPayment === '' || formData.totalPayment == null
+            ? null
+            : Number(formData.totalPayment),
+        localPayment: Number(formData.localPayment),
         ...(isIndividualView && staffProfile
           ? {
               therapistId: staffProfile.id,
@@ -735,13 +767,17 @@ const Reservations = () => {
                     <TableHead>{t.common.center}</TableHead>
                     <TableHead>{t.common.room}</TableHead>
                     <TableHead>{t.common.duration}</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>{t.common.price}</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>{t.reservations.totalPayment}</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>{t.reservations.localPayment}</TableHead>
                     <TableHead>{t.common.status}</TableHead>
                     <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredBookings.map((booking) => (
+                  {filteredBookings.map((booking) => {
+                    const totalPay = getBookingTotalPayment(booking)
+                    const localPay = getBookingLocalPayment(booking)
+                    return (
                     <TableRow key={booking.id}>
                       <TableCell>
                         <Badge variant={booking.date === getTodayDate() ? 'info' : 'neutral'} size="small">
@@ -773,7 +809,10 @@ const Reservations = () => {
                       <TableCell style={{ fontSize: '0.875rem' }}>{booking.roomName || '-'}</TableCell>
                       <TableCell>{booking.durationMinutes} {t.common.min}</TableCell>
                       <TableCell style={{ textAlign: 'right', fontWeight: 500 }}>
-                        €{booking.priceAgreement?.toFixed(2)}
+                        {totalPay != null ? `€${Number(totalPay).toFixed(2)}` : '—'}
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'right', fontWeight: 500 }}>
+                        €{Number(localPay).toFixed(2)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusVariant(booking.status)}>
@@ -791,7 +830,7 @@ const Reservations = () => {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )})}
                 </TableBody>
               </Table>
             </div>
@@ -873,21 +912,32 @@ const Reservations = () => {
                 readOnly
                 disabled
               />
-              {roomsList.find((r) => r.id === formData.roomId)?.roomPrice == null && (
-                <Input
-                  label={`${t.reservations.priceAgreement} *`}
-                  type="number"
-                  step="0.01"
-                  placeholder={t.reservations.customRoomPrice}
-                  value={formData.priceAgreement ?? ''}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      priceAgreement: e.target.value === '' ? 0 : parseFloat(e.target.value),
-                    })
-                  }
-                />
-              )}
+              <Input
+                label={isIndividualView ? t.reservations.totalPaymentOptional : t.reservations.totalPaymentOptional}
+                type="number"
+                step="0.01"
+                placeholder=""
+                value={formData.totalPayment ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    totalPayment: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  })
+                }
+              />
+              <Input
+                label={t.reservations.localPaymentRequired}
+                type="number"
+                step="0.01"
+                placeholder=""
+                value={formData.localPayment ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    localPayment: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  })
+                }
+              />
             </Grid>
 
             <div style={{ marginTop: '20px' }}>
@@ -1002,12 +1052,30 @@ const Reservations = () => {
                 })}
               />
               <Input
-                label={`${t.reservations.priceAgreement} *`}
+                label={t.reservations.totalPaymentOptional}
                 type="number"
                 step="0.01"
-                placeholder="0.00"
-                value={formData.priceAgreement ?? ''}
-                onChange={(e) => setFormData({ ...formData, priceAgreement: e.target.value ? parseFloat(e.target.value) : 0 })}
+                placeholder=""
+                value={formData.totalPayment ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    totalPayment: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  })
+                }
+              />
+              <Input
+                label={t.reservations.localPaymentRequired}
+                type="number"
+                step="0.01"
+                placeholder=""
+                value={formData.localPayment ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    localPayment: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  })
+                }
               />
               <Select
                 label={`${t.common.status} *`}
@@ -1215,15 +1283,30 @@ const Reservations = () => {
                 />
               )}
               <Input
-                label={`${t.reservations.priceAgreement} *`}
+                label={t.reservations.totalPaymentOptional}
                 type="number"
                 step="0.01"
-                placeholder="0.00"
-                value={confirmFormData.priceAgreement || ''}
-                onChange={(e) => setConfirmFormData({ 
-                  ...confirmFormData, 
-                  priceAgreement: e.target.value ? parseFloat(e.target.value) : null 
-                })}
+                placeholder=""
+                value={confirmFormData.totalPayment ?? ''}
+                onChange={(e) =>
+                  setConfirmFormData({
+                    ...confirmFormData,
+                    totalPayment: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  })
+                }
+              />
+              <Input
+                label={t.reservations.localPaymentRequired}
+                type="number"
+                step="0.01"
+                placeholder=""
+                value={confirmFormData.localPayment ?? ''}
+                onChange={(e) =>
+                  setConfirmFormData({
+                    ...confirmFormData,
+                    localPayment: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  })
+                }
               />
             </Grid>
 
