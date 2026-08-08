@@ -85,7 +85,7 @@ const DailyData = () => {
   const loadStaticData = async () => {
     try {
       const [servicesData, costsData, staffData] = await Promise.all([
-        serviceAPI.list(),
+        serviceAPI.list({ distinct: true }),
         costAPI.list(),
         staffAPI.list(),
       ])
@@ -301,7 +301,7 @@ const DailyData = () => {
   // Generate service options for dropdown
   const serviceOptions = staticServices.map(s => ({
     value: s.id,
-    label: s.serviceName + (s.fixedPrice ? ` - €${s.fixedPrice.toFixed(2)}` : ''),
+    label: s.serviceName,
   }))
 
   // Generate staff options for dropdown

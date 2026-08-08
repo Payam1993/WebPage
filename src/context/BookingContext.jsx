@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from './LanguageContext'
 import { publicAPI } from '../services/dataService'
@@ -89,7 +89,7 @@ export const BookingProvider = ({ children }) => {
     setIsLoadingServices(true)
     setServicesError(null)
     try {
-      const data = await publicAPI.getServices()
+      const data = await publicAPI.getServices({ distinct: true })
       setServices(data)
     } catch (err) {
       console.error('Error loading services:', err)
@@ -139,24 +139,48 @@ export const BookingProvider = ({ children }) => {
     setPreselectedService(null)
   }
 
+  const roomsForCenter = rooms.filter((r) => !formData.centerId || r.centerId === formData.centerId)
+
+  const servicesForSelect = useMemo(() => {
+    if (!formData.centerId) return services
+    const forCenter = services.filter(
+      (s) => !s.centerId || s.centerId === formData.centerId
+    )
+    return forCenter.length ? forCenter : services
+  }, [services, formData.centerId])
+
   const handleServiceSelect = (serviceId) => {
     const service = services.find(s => s.id === serviceId)
     setFormData({
       ...formData,
       serviceId,
       serviceName: service?.serviceName || '',
-      durationMinutes: service?.minutes || 60,
+      durationMinutes: service?.minutes || formData.durationMinutes || 60,
+      ...(service?.centerId
+        ? {
+            centerId: service.centerId,
+            centerName: service.centerName || '',
+            roomId: formData.centerId === service.centerId ? formData.roomId : '',
+            roomName: formData.centerId === service.centerId ? formData.roomName : '',
+          }
+        : {}),
     })
   }
 
   const handleCenterSelect = (centerId) => {
     const center = centers.find((c) => c.id === centerId)
+    const currentService = services.find((s) => s.id === formData.serviceId)
+    const serviceStillValid =
+      !currentService?.centerId || currentService.centerId === centerId
     setFormData({
       ...formData,
       centerId,
       centerName: center?.centerName || '',
       roomId: '',
       roomName: '',
+      ...(serviceStillValid
+        ? {}
+        : { serviceId: '', serviceName: '' }),
     })
   }
 
@@ -204,8 +228,6 @@ export const BookingProvider = ({ children }) => {
       setIsSubmitting(false)
     }
   }
-
-  const roomsForCenter = rooms.filter((r) => r.centerId === formData.centerId)
 
   // Duration options
   const durationOptions = [
@@ -330,7 +352,7 @@ export const BookingProvider = ({ children }) => {
                           required
                         >
                           <option value="">{bookingFormText.servicePlaceholder || 'Select a service'}</option>
-                          {services.map((service) => (
+                          {servicesForSelect.map((service) => (
                             <option key={service.id} value={service.id}>
                               {service.serviceName}
                             </option>

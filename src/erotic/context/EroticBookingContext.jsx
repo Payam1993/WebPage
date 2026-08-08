@@ -94,7 +94,7 @@ export const EroticBookingProvider = ({ children }) => {
     setIsLoadingServices(true)
     setServicesError(null)
     try {
-      const data = await publicAPI.getServices()
+      const data = await publicAPI.getServices({ distinct: true })
       setServices(data)
     } catch (err) {
       console.error('Error loading services:', err)

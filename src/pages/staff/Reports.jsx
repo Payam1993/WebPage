@@ -15,6 +15,14 @@ import { bookingAPI, getDateFromToday, getTodayDate, toLocalDateKey } from '../.
 import { useAuth, ROLES } from '../../context/AuthContext'
 import MiniAdminDashboard from './MiniAdminDashboard'
 import UserDashboard from './UserDashboard'
+import { staffT as t } from '../../i18n/staffEs'
+
+const PERIOD_LABELS = {
+  today: () => t.reports.today,
+  week: () => t.reports.week,
+  month: () => t.reports.month,
+  year: () => t.reports.year,
+}
 
 /**
  * Simple Line Chart Component for Reservations
@@ -23,7 +31,7 @@ const ReservationsLineChart = ({ data, isLoading }) => {
   if (isLoading) {
     return (
       <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <LoadingState text="Loading chart data..." />
+        <LoadingState text={t.reports.loadingChart} />
       </div>
     )
   }
@@ -31,7 +39,7 @@ const ReservationsLineChart = ({ data, isLoading }) => {
   if (!data || data.length === 0) {
     return (
       <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ui-text-muted)' }}>
-        No reservation data available
+        {t.reports.noReservationData}
       </div>
     )
   }
@@ -120,7 +128,7 @@ const ReservationsLineChart = ({ data, isLoading }) => {
             >
               {p.label}
             </text>
-            <title>{`${p.fullDate}: ${p.count} reservations`}</title>
+            <title>{`${p.fullDate}: ${p.count} ${t.reports.reservationsCount}`}</title>
           </g>
         ))}
 
@@ -132,7 +140,7 @@ const ReservationsLineChart = ({ data, isLoading }) => {
           fill="var(--ui-text-muted)"
           transform={`rotate(-90, 15, ${chartHeight / 2})`}
         >
-          Reservations
+          {t.reports.reservations}
         </text>
       </svg>
     </div>
@@ -220,11 +228,11 @@ const AdminDashboard = () => {
         const date = new Date()
         date.setMonth(date.getMonth() - i)
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-        const monthLabel = date.toLocaleDateString('en-US', { month: 'short' })
+        const monthLabel = date.toLocaleDateString('es-ES', { month: 'short' })
         result.push({
           date: monthKey,
           label: monthLabel,
-          fullDate: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          fullDate: date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }),
           count: monthCounts[monthKey] || 0
         })
       }
@@ -236,16 +244,21 @@ const AdminDashboard = () => {
       const date = new Date()
       date.setDate(date.getDate() - i)
       const dateStr = toLocalDateKey(date)
-      const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })
+      const dayLabel = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' })
       result.push({
         date: dateStr,
         label: days <= 7 ? dayLabel : date.getDate().toString(),
-        fullDate: date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+        fullDate: date.toLocaleDateString('es-ES', { weekday: 'long', month: 'short', day: 'numeric' }),
         count: countsByDate[dateStr] || 0
       })
     }
     return result
   }, [bookings, selectedPeriod])
+
+  const periodSubtitle =
+    selectedPeriod === 'today'
+      ? t.reports.today
+      : `${t.reports.lastPeriod} ${PERIOD_LABELS[selectedPeriod]().toLowerCase()}`
 
   const stats = useMemo(() => {
     const totalBookings = bookings.length
@@ -255,37 +268,42 @@ const AdminDashboard = () => {
 
     return [
       {
-        title: 'Total Bookings',
+        title: t.reports.totalBookings,
         value: totalBookings.toString(),
         icon: <Icons.Calendar />,
-        subtitle: `${selectedPeriod === 'today' ? 'Today' : `Last ${selectedPeriod}`}`
+        subtitle: periodSubtitle
       },
       {
-        title: 'Pending',
+        title: t.reports.pending,
         value: pendingBookings.toString(),
         icon: <Icons.Clock />,
-        subtitle: 'Awaiting completion'
+        subtitle: t.reports.awaitingCompletion
       },
       {
-        title: 'Completed',
+        title: t.reports.completed,
         value: completedBookings.toString(),
         icon: <Icons.Check />,
-        subtitle: 'Successfully done'
+        subtitle: t.reports.successfullyDone
       },
       {
-        title: 'Revenue',
+        title: t.reports.revenue,
         value: `€${totalRevenue.toFixed(0)}`,
         icon: <Icons.DollarSign />,
-        subtitle: 'Total earnings'
+        subtitle: t.reports.totalEarnings
       },
     ]
-  }, [bookings, selectedPeriod])
+  }, [bookings, selectedPeriod, periodSubtitle])
+
+  const overviewSubtitle =
+    selectedPeriod === 'today'
+      ? t.reports.overviewToday
+      : `${t.reports.overviewLast} ${PERIOD_LABELS[selectedPeriod]().toLowerCase()}`
 
   return (
     <div>
       <PageHeader
-        title="Dashboard"
-        subtitle="Overview of your business performance and recent activity"
+        title={t.reports.title}
+        subtitle={t.reports.subtitle}
         actions={
           <div style={{ display: 'flex', gap: '8px' }}>
             {['today', 'week', 'month', 'year'].map((period) => (
@@ -295,7 +313,7 @@ const AdminDashboard = () => {
                 size="small"
                 onClick={() => setSelectedPeriod(period)}
               >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
+                {PERIOD_LABELS[period]()}
               </Button>
             ))}
           </div>
@@ -318,8 +336,8 @@ const AdminDashboard = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle subtitle={`Number of reservations ${selectedPeriod === 'today' ? 'today' : `over the last ${selectedPeriod}`}`}>
-            Reservations Overview
+          <CardTitle subtitle={overviewSubtitle}>
+            {t.reports.reservationsOverview}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -330,20 +348,20 @@ const AdminDashboard = () => {
       <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Breakdown</CardTitle>
+            <CardTitle>{t.reports.revenueBreakdown}</CardTitle>
           </CardHeader>
           <CardContent>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>Staff Benefit (40%)</span>
+                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>{t.reports.staffBenefit}</span>
                 <span style={{ fontWeight: 500 }}>€4,980</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>Local Benefit (60%)</span>
+                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>{t.reports.localBenefit}</span>
                 <span style={{ fontWeight: 500 }}>€7,470</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--ui-border-light)' }}>
-                <span style={{ fontWeight: 500 }}>Total Revenue</span>
+                <span style={{ fontWeight: 500 }}>{t.reports.totalRevenue}</span>
                 <span style={{ fontWeight: 600, color: 'var(--ui-success)' }}>€12,450</span>
               </div>
             </div>
@@ -352,7 +370,7 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Services</CardTitle>
+            <CardTitle>{t.reports.topServices}</CardTitle>
           </CardHeader>
           <CardContent>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -379,20 +397,20 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Net Profit</CardTitle>
+            <CardTitle>{t.reports.netProfit}</CardTitle>
           </CardHeader>
           <CardContent>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>Revenue</span>
+                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>{t.reports.revenue}</span>
                 <span style={{ fontWeight: 500, color: 'var(--ui-success)' }}>+€12,450</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>Costs</span>
+                <span style={{ color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>{t.reports.costs}</span>
                 <span style={{ fontWeight: 500, color: 'var(--ui-danger)' }}>-€1,104.50</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--ui-border-light)' }}>
-                <span style={{ fontWeight: 500 }}>Net Profit</span>
+                <span style={{ fontWeight: 500 }}>{t.reports.netProfit}</span>
                 <span style={{ fontWeight: 600, fontSize: '1.25rem', color: 'var(--ui-success)' }}>€11,345.50</span>
               </div>
             </div>
@@ -410,7 +428,7 @@ const Reports = () => {
   const { role, isLoading: authLoading } = useAuth()
 
   if (authLoading) {
-    return <LoadingState text="Loading dashboard..." />
+    return <LoadingState text={t.reports.loading} />
   }
 
   if (role === ROLES.MINI_ADMIN) {

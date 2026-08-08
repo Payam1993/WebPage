@@ -433,12 +433,26 @@ export const eroticTranslations = {
 }
 
 export const EroticLanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en')
+  const [language, setLanguage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('confession_erotic_lang')
+      if (saved && eroticTranslations[saved]) return saved
+    } catch {
+      // ignore
+    }
+    return 'es'
+  })
 
-  const t = eroticTranslations[language]
+  const t = eroticTranslations[language] || eroticTranslations.es
 
   const changeLanguage = (lang) => {
+    if (!eroticTranslations[lang]) return
     setLanguage(lang)
+    try {
+      localStorage.setItem('confession_erotic_lang', lang)
+    } catch {
+      // ignore
+    }
   }
 
   return (

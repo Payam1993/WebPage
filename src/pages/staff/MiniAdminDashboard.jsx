@@ -31,6 +31,7 @@ import {
   isPaymentPending,
   isTodayBooking,
 } from '../../utils/bookingStatus'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * Mini Admin dashboard — all-staff overview, room cards, daily plan, confirm flow
@@ -55,7 +56,7 @@ const MiniAdminDashboard = () => {
       setRooms(roomList || [])
     } catch (err) {
       console.error(err)
-      setError(err.message || 'Failed to load dashboard')
+      setError(err.message || t.miniAdmin.failedLoad)
     } finally {
       setIsLoading(false)
     }
@@ -73,7 +74,7 @@ const MiniAdminDashboard = () => {
       await fn()
       await loadData()
     } catch (err) {
-      alert(err.message || 'Action failed')
+      alert(err.message || t.miniAdmin.actionFailed)
     } finally {
       setActionId(null)
     }
@@ -110,7 +111,7 @@ const MiniAdminDashboard = () => {
         id: b.id,
         start: b.reservedTime?.substring(0, 5) || '-',
         finish: getBookingEndTime(b),
-        staff: b.therapistName || 'Unassigned',
+        staff: b.therapistName || t.common.unassigned,
         room: b.roomName || '-',
         client: b.clientName,
         status: b.status,
@@ -128,17 +129,17 @@ const MiniAdminDashboard = () => {
   )
 
   if (isLoading) {
-    return <LoadingState text="Loading mini admin dashboard..." />
+    return <LoadingState text={t.miniAdmin.loading} />
   }
 
   return (
     <div>
       <PageHeader
-        title="Mini Admin Dashboard"
-        subtitle="Staff payments, reservations overview, room activity, and daily planning"
+        title={t.miniAdmin.title}
+        subtitle={t.miniAdmin.subtitle}
         actions={
           <Button variant="secondary" size="small" onClick={loadData}>
-            Refresh
+            {t.common.refresh}
           </Button>
         }
       />
@@ -151,35 +152,35 @@ const MiniAdminDashboard = () => {
 
       <Grid cols={3} gap="default" style={{ marginBottom: 24 }}>
         <StatCard
-          title="Staff pending payments"
+          title={t.miniAdmin.staffPendingPayments}
           value={String(stats.paymentPending)}
           icon={<Icons.DollarSign />}
-          subtitle="Awaiting payment approval"
+          subtitle={t.miniAdmin.awaitingPaymentApproval}
         />
         <StatCard
-          title="Total reservations"
+          title={t.miniAdmin.totalReservations}
           value={String(stats.total)}
           icon={<Icons.Calendar />}
-          subtitle="All staff"
+          subtitle={t.miniAdmin.allStaff}
         />
         <StatCard
-          title="Pending reservations"
+          title={t.miniAdmin.pendingReservations}
           value={String(stats.pending)}
           icon={<Icons.Clock />}
-          subtitle="All staff — not yet done"
+          subtitle={t.miniAdmin.allStaffNotDone}
         />
       </Grid>
 
       {/* Room cards — names live from Room table */}
       <Card style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle="Counts follow Room records — rename a room and the card label updates">
-            Reservations by room
+          <CardTitle subtitle={t.miniAdmin.reservationsByRoomSubtitle}>
+            {t.miniAdmin.reservationsByRoom}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {roomCards.length === 0 ? (
-            <EmptyState title="No rooms yet" description="Create rooms in Local Configuration" />
+            <EmptyState title={t.miniAdmin.noRooms} description={t.miniAdmin.noRoomsDesc} />
           ) : (
             <div
               style={{
@@ -209,7 +210,7 @@ const MiniAdminDashboard = () => {
                     {room.count}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
-                    reservations
+                    {t.miniAdmin.reservations}
                   </div>
                 </div>
               ))}
@@ -221,23 +222,26 @@ const MiniAdminDashboard = () => {
       {/* Daily planning */}
       <Card padding={false} style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle={`Today · ${formatDisplayDate(today)}`}>
-            Daily planning
+          <CardTitle subtitle={`${t.miniAdmin.today} · ${formatDisplayDate(today)}`}>
+            {t.miniAdmin.dailyPlanning}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {dailyPlan.length === 0 ? (
-            <EmptyState title="No reservations today" description="Today’s schedule will appear here" />
+            <EmptyState
+              title={t.miniAdmin.noReservationsToday}
+              description={t.miniAdmin.noReservationsTodayDesc}
+            />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Hour start</TableHead>
-                  <TableHead>Hour finish</TableHead>
-                  <TableHead>Staff name</TableHead>
-                  <TableHead>Room reserved</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{t.miniAdmin.hourStart}</TableHead>
+                  <TableHead>{t.miniAdmin.hourFinish}</TableHead>
+                  <TableHead>{t.miniAdmin.staffName}</TableHead>
+                  <TableHead>{t.miniAdmin.roomReserved}</TableHead>
+                  <TableHead>{t.common.client}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -250,7 +254,7 @@ const MiniAdminDashboard = () => {
                     <TableCell>{row.client}</TableCell>
                     <TableCell>
                       <Badge variant={row.status === 'Done' ? 'success' : 'warning'}>
-                        {row.status}
+                        {t.statusLabel[row.status] || row.status}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -264,23 +268,26 @@ const MiniAdminDashboard = () => {
       {/* Past slots → confirm service */}
       <Card padding={false} style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle="End time passed — confirm the service was realized">
-            Reserved rooms · pending service confirm
+          <CardTitle subtitle={t.miniAdmin.pendingServiceConfirmSubtitle}>
+            {t.miniAdmin.pendingServiceConfirmTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {awaitingService.length === 0 ? (
-            <EmptyState title="Nothing to confirm" description="Finished slots awaiting confirmation appear here" />
+            <EmptyState
+              title={t.miniAdmin.nothingToConfirm}
+              description={t.miniAdmin.nothingToConfirmDesc}
+            />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Hours</TableHead>
-                  <TableHead>Staff</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.miniAdmin.hours}</TableHead>
+                  <TableHead>{t.miniAdmin.staff}</TableHead>
+                  <TableHead>{t.common.room}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -293,7 +300,7 @@ const MiniAdminDashboard = () => {
                     <TableCell>{item.therapistName || '-'}</TableCell>
                     <TableCell>{item.roomName || '-'}</TableCell>
                     <TableCell>
-                      <Badge variant="warning">Pending to confirm</Badge>
+                      <Badge variant="warning">{t.miniAdmin.pendingToConfirm}</Badge>
                     </TableCell>
                     <TableCell style={{ textAlign: 'right' }}>
                       <Button
@@ -304,7 +311,7 @@ const MiniAdminDashboard = () => {
                           runAction(item.id, () => bookingAPI.confirmServiceDone(item))
                         }
                       >
-                        Confirm service done
+                        {t.miniAdmin.confirmServiceDone}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -318,23 +325,26 @@ const MiniAdminDashboard = () => {
       {/* After service confirm → approve payment */}
       <Card padding={false}>
         <CardHeader>
-          <CardTitle subtitle="Service confirmed — approve staff payment">
-            Payment approved queue
+          <CardTitle subtitle={t.miniAdmin.paymentApprovedSubtitle}>
+            {t.miniAdmin.paymentApprovedQueue}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {awaitingPayment.length === 0 ? (
-            <EmptyState title="No payments waiting" description="After service confirm, payments appear here" />
+            <EmptyState
+              title={t.miniAdmin.noPaymentsWaiting}
+              description={t.miniAdmin.noPaymentsWaitingDesc}
+            />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Staff</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.miniAdmin.staff}</TableHead>
+                  <TableHead>{t.common.room}</TableHead>
+                  <TableHead>{t.miniAdmin.amount}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -345,7 +355,7 @@ const MiniAdminDashboard = () => {
                     <TableCell>{item.roomName || '-'}</TableCell>
                     <TableCell>€{(item.priceAgreement || 0).toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant="info">Payment pending</Badge>
+                      <Badge variant="info">{t.miniAdmin.paymentPending}</Badge>
                     </TableCell>
                     <TableCell style={{ textAlign: 'right' }}>
                       <Button
@@ -356,7 +366,7 @@ const MiniAdminDashboard = () => {
                           runAction(item.id, () => bookingAPI.approvePayment(item))
                         }
                       >
-                        Approve payment
+                        {t.miniAdmin.approvePayment}
                       </Button>
                     </TableCell>
                   </TableRow>

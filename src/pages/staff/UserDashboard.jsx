@@ -23,6 +23,7 @@ import { bookingAPI, formatDisplayDate, getTodayDate, getDateFromToday } from '.
 import { isPaymentPending } from '../../utils/bookingStatus'
 import { minutesToTime, timeToMinutes } from '../../utils/availability'
 import { useAuth } from '../../context/AuthContext'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * User (staff) individual dashboard — own stats, To Do (booked services), promotions
@@ -83,15 +84,15 @@ const UserDashboard = () => {
   }
 
   if (authLoading || isLoading) {
-    return <LoadingState text="Loading your dashboard..." />
+    return <LoadingState text={t.dashboard.loading} />
   }
 
   if (!staffProfile?.id) {
     return (
       <EmptyState
         icon={<Icons.Users />}
-        title="Staff profile not linked"
-        description="Your Cognito email is not linked to a Staff record. Ask an admin to add your email on the Staff page."
+        title={t.dashboard.profileNotLinked}
+        description={t.dashboard.profileNotLinkedDesc}
       />
     )
   }
@@ -99,60 +100,60 @@ const UserDashboard = () => {
   return (
     <div>
       <PageHeader
-        title="My Dashboard"
-        subtitle={`Personal overview for ${staffProfile.staffName || 'your account'}`}
+        title={t.dashboard.myDashboard}
+        subtitle={`${t.dashboard.subtitle} ${staffProfile.staffName || t.dashboard.yourAccount}`}
       />
 
       <Grid cols={4} gap="default" style={{ marginBottom: 24 }}>
         <StatCard
-          title="Total reservations"
+          title={t.dashboard.totalReservations}
           value={String(stats.total)}
           icon={<Icons.Calendar />}
-          subtitle="Your bookings"
+          subtitle={t.dashboard.yourBookings}
         />
         <StatCard
-          title="Pending reservations"
+          title={t.dashboard.pendingReservations}
           value={String(stats.pending)}
           icon={<Icons.Clock />}
-          subtitle="Not yet completed"
+          subtitle={t.dashboard.notYetCompleted}
         />
         <StatCard
-          title="Completed services"
+          title={t.dashboard.completedServices}
           value={String(stats.completed)}
           icon={<Icons.Check />}
-          subtitle="Marked done"
+          subtitle={t.dashboard.markedDone}
         />
         <StatCard
-          title="Payment pending"
+          title={t.dashboard.paymentPending}
           value={String(stats.paymentPending)}
           icon={<Icons.DollarSign />}
-          subtitle="Awaiting approval"
+          subtitle={t.dashboard.awaitingApproval}
         />
       </Grid>
 
       <Card padding={false} style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle="Services booked for you (pending)">
-            To Do
+          <CardTitle subtitle={t.dashboard.todoSubtitle}>
+            {t.todo.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {todoBookings.length === 0 ? (
             <EmptyState
-              title="No booked services yet"
-              description="Pending services assigned to you will appear here"
+              title={t.dashboard.noBookedServices}
+              description={t.dashboard.noBookedServicesDesc}
             />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Start</TableHead>
-                  <TableHead>Finish</TableHead>
-                  <TableHead>Room</TableHead>
+                  <TableHead>{t.common.client}</TableHead>
+                  <TableHead>{t.common.service}</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.common.duration}</TableHead>
+                  <TableHead>{t.todo.start}</TableHead>
+                  <TableHead>{t.todo.finish}</TableHead>
+                  <TableHead>{t.common.room}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -163,7 +164,7 @@ const UserDashboard = () => {
                       <TableCell>{b.clientName}</TableCell>
                       <TableCell>{b.serviceName || '-'}</TableCell>
                       <TableCell>{formatDisplayDate(b.date)}</TableCell>
-                      <TableCell>{b.durationMinutes || 60} min</TableCell>
+                      <TableCell>{b.durationMinutes || 60} {t.common.min}</TableCell>
                       <TableCell>{start}</TableCell>
                       <TableCell>{getEndTime(start, b.durationMinutes)}</TableCell>
                       <TableCell>{b.roomName || '-'}</TableCell>
@@ -176,7 +177,7 @@ const UserDashboard = () => {
           <div style={{ marginTop: 16 }}>
             <Link to="/staff/calendar" style={{ textDecoration: 'none' }}>
               <Button variant="secondary" size="small">
-                Open calendar & cancel
+                {t.dashboard.openCalendar}
               </Button>
             </Link>
           </div>
@@ -185,8 +186,8 @@ const UserDashboard = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle subtitle="Offers linked to your account">
-            Promotions
+          <CardTitle subtitle={t.dashboard.promotionsSubtitle}>
+            {t.dashboard.promotions}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -200,7 +201,7 @@ const UserDashboard = () => {
               border: '1px dashed var(--ui-border)',
             }}
           >
-            No Promotion is associated to you
+            {t.dashboard.noPromotion}
           </div>
         </CardContent>
       </Card>

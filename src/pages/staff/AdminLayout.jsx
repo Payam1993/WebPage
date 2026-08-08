@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { signOut, getCurrentUser } from 'aws-amplify/auth'
-import { useAuth, ROLES } from '../../context/AuthContext'
+import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
+import { staffT as t } from '../../i18n/staffEs'
 import './AdminLayout.css'
 
 const iconDashboard = (
@@ -71,7 +73,8 @@ const iconTodo = (
 const AdminLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAdmin, isMiniAdmin, isUser, role } = useAuth()
+  const { isAdmin, isMiniAdmin, isUser } = useAuth()
+  const { changeLanguage } = useLanguage()
   const [user, setUser] = useState(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -80,6 +83,11 @@ const AdminLayout = () => {
   useEffect(() => {
     fetchUserInfo()
   }, [])
+
+  // Staff portal is always Spanish
+  useEffect(() => {
+    changeLanguage('es')
+  }, [changeLanguage])
 
   useEffect(() => {
     setMobileMenuOpen(false)
@@ -108,48 +116,48 @@ const AdminLayout = () => {
   const getPageTitle = () => {
     const path = location.pathname
     if (path.includes('/reports')) {
-      if (isAdmin) return 'Dashboard'
-      if (isMiniAdmin) return 'Mini Admin Dashboard'
-      return 'My Dashboard'
+      if (isAdmin) return t.titles.dashboard
+      if (isMiniAdmin) return t.titles.miniAdminDashboard
+      return t.titles.myDashboard
     }
-    if (path.includes('/costs')) return 'Costs Management'
-    if (path.includes('/reservations')) return isUser ? 'My Reservations' : 'Reservations'
-    if (path.includes('/calendar')) return isUser ? 'My Calendar' : 'Calendar'
-    if (path.includes('/to-do')) return 'To Do'
+    if (path.includes('/costs')) return t.titles.costs
+    if (path.includes('/reservations')) return isUser ? t.titles.myReservations : t.titles.reservations
+    if (path.includes('/calendar')) return isUser ? t.titles.myCalendar : t.titles.calendar
+    if (path.includes('/to-do')) return t.titles.toDo
     if (path.includes('/pending-confirmations') || path.includes('/assigned-task')) {
-      return 'Pending Confirmations'
+      return t.titles.pendingConfirmations
     }
-    if (path.includes('/staff-management')) return 'Staff'
-    if (path.includes('/create-link')) return 'Create Link'
-    if (path.includes('/profile')) return 'Profile Settings'
-    return 'Dashboard'
+    if (path.includes('/staff-management')) return t.titles.staff
+    if (path.includes('/create-link')) return t.titles.createLink
+    if (path.includes('/profile')) return t.titles.profile
+    return t.titles.dashboard
   }
 
   const adminNavItems = [
-    { path: '/staff/reports', label: 'Dashboard', icon: iconDashboard },
-    { path: '/staff/costs', label: 'Costs', icon: iconCosts },
-    { path: '/staff/reservations', label: 'Reservations', icon: iconReservations },
-    { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
-    { path: '/staff/to-do', label: 'To Do', icon: iconTodo },
-    { path: '/staff/create-link', label: 'Create Link', icon: iconLink },
-    { path: '/staff/pending-confirmations', label: 'Pending Confirmations', icon: iconPending },
-    { path: '/staff/staff-management', label: 'Staff', icon: iconStaff },
+    { path: '/staff/reports', label: t.nav.dashboard, icon: iconDashboard },
+    { path: '/staff/costs', label: t.nav.costs, icon: iconCosts },
+    { path: '/staff/reservations', label: t.nav.reservations, icon: iconReservations },
+    { path: '/staff/calendar', label: t.nav.calendar, icon: iconCalendar },
+    { path: '/staff/to-do', label: t.nav.toDo, icon: iconTodo },
+    { path: '/staff/create-link', label: t.nav.createLink, icon: iconLink },
+    { path: '/staff/pending-confirmations', label: t.nav.pendingConfirmations, icon: iconPending },
+    { path: '/staff/staff-management', label: t.nav.staff, icon: iconStaff },
   ]
 
   const miniAdminNavItems = [
-    { path: '/staff/reports', label: 'Dashboard', icon: iconDashboard },
-    { path: '/staff/costs', label: 'Costs', icon: iconCosts },
-    { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
-    { path: '/staff/to-do', label: 'To Do', icon: iconTodo },
-    { path: '/staff/pending-confirmations', label: 'Pending Confirmations', icon: iconPending },
+    { path: '/staff/reports', label: t.nav.dashboard, icon: iconDashboard },
+    { path: '/staff/costs', label: t.nav.costs, icon: iconCosts },
+    { path: '/staff/calendar', label: t.nav.calendar, icon: iconCalendar },
+    { path: '/staff/to-do', label: t.nav.toDo, icon: iconTodo },
+    { path: '/staff/pending-confirmations', label: t.nav.pendingConfirmations, icon: iconPending },
   ]
 
   const userNavItems = [
-    { path: '/staff/reports', label: 'Dashboard', icon: iconDashboard },
-    { path: '/staff/reservations', label: 'Reservations', icon: iconReservations },
-    { path: '/staff/calendar', label: 'Calendar', icon: iconCalendar },
-    { path: '/staff/to-do', label: 'To Do', icon: iconTodo },
-    { path: '/staff/create-link', label: 'Create Link', icon: iconLink },
+    { path: '/staff/reports', label: t.nav.dashboard, icon: iconDashboard },
+    { path: '/staff/reservations', label: t.nav.reservations, icon: iconReservations },
+    { path: '/staff/calendar', label: t.nav.calendar, icon: iconCalendar },
+    { path: '/staff/to-do', label: t.nav.toDo, icon: iconTodo },
+    { path: '/staff/create-link', label: t.nav.createLink, icon: iconLink },
   ]
 
   const navItems = isAdmin
@@ -159,18 +167,18 @@ const AdminLayout = () => {
       : userNavItems
 
   const menuTitle = isAdmin
-    ? 'Admin Menu'
+    ? t.menuAdmin
     : isMiniAdmin
-      ? 'Mini Admin Menu'
-      : 'My Menu'
+      ? t.menuMiniAdmin
+      : t.menuUser
 
-  const roleLabel = isAdmin ? 'Admin' : isMiniAdmin ? 'Mini Admin' : 'User'
+  const roleLabel = isAdmin ? t.roleAdmin : isMiniAdmin ? t.roleMiniAdmin : t.roleUser
 
   const bottomNavItems = [
     ...(isAdmin
       ? [{
           path: '/administration',
-          label: 'Administration',
+          label: t.administration,
           icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -183,7 +191,7 @@ const AdminLayout = () => {
       : []),
     {
       path: '/staff/profile',
-      label: 'Settings',
+      label: t.settings,
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="12" cy="12" r="3"/>
@@ -195,7 +203,7 @@ const AdminLayout = () => {
 
   const userInitial = user?.signInDetails?.loginId?.charAt(0)?.toUpperCase() ||
                       user?.username?.charAt(0)?.toUpperCase() || 'S'
-  const userEmail = user?.signInDetails?.loginId || user?.username || 'Staff Member'
+  const userEmail = user?.signInDetails?.loginId || user?.username || 'Personal'
 
   return (
     <div className={`admin-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -214,14 +222,14 @@ const AdminLayout = () => {
               </svg>
             </div>
             <div className="logo-text">
-              <span className="logo-main">Confession</span>
-              <span className="logo-sub">Staff Portal</span>
+              <span className="logo-main">{t.brand}</span>
+              <span className="logo-sub">{t.portal}</span>
             </div>
           </div>
           <button
             className="sidebar-toggle-btn"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={sidebarCollapsed ? t.expandSidebar : t.collapseSidebar}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               {sidebarCollapsed ? (
@@ -262,7 +270,7 @@ const AdminLayout = () => {
                 >
                   <span className="nav-icon">{item.icon}</span>
                   <span className="nav-label">{item.label}</span>
-                  {item.isAdmin && <span className="nav-badge">Admin</span>}
+                  {item.isAdmin && <span className="nav-badge">{t.roleAdmin}</span>}
                 </NavLink>
               </li>
             ))}
@@ -278,7 +286,7 @@ const AdminLayout = () => {
                 <line x1="21" y1="12" x2="9" y2="12"/>
               </svg>
             )}
-            <span className="nav-label">{isSigningOut ? 'Signing out...' : 'Log out'}</span>
+            <span className="nav-label">{isSigningOut ? t.signingOut : t.logOut}</span>
           </button>
         </div>
       </aside>
@@ -289,7 +297,7 @@ const AdminLayout = () => {
             <button
               className="mobile-menu-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
+              aria-label={mobileMenuOpen ? t.closeMenu : t.openMenu}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="3" y1="12" x2="21" y2="12"/>

@@ -24,24 +24,74 @@ const getClient = () => {
 // ============================================
 // Services CRUD (Static Data)
 // ============================================
+
+/** Normalize service names for uniqueness / distinct checks */
+export const normalizeServiceName = (name) =>
+  (name || '').trim().replace(/\s+/g, ' ').toLowerCase()
+
+/** Keep first occurrence of each service name (case-insensitive) */
+export const dedupeServicesByName = (services = []) => {
+  const seen = new Set()
+  const result = []
+  for (const service of services) {
+    const key = normalizeServiceName(service?.serviceName)
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    result.push(service)
+  }
+  return result
+}
+
 export const serviceAPI = {
-  async list() {
+  /**
+   * @param {{ centerId?: string, distinct?: boolean }} [options]
+   */
+  async list(options = {}) {
     try {
       const client = getClient()
       const { data, errors } = await client.models.Service.list()
       if (errors) throw new Error(errors[0].message)
-      return data || []
+      let items = data || []
+      if (options.centerId) {
+        items = items.filter((s) => s.centerId === options.centerId)
+      }
+      if (options.distinct) {
+        items = dedupeServicesByName(items)
+      }
+      items.sort((a, b) =>
+        (a.serviceName || '').localeCompare(b.serviceName || '', undefined, { sensitivity: 'base' })
+      )
+      return items
     } catch (error) {
       console.error('Error listing services:', error)
       throw error
     }
   },
 
+  async assertUniqueName(serviceName, excludeId = null) {
+    const key = normalizeServiceName(serviceName)
+    if (!key) throw new Error('Service Name is required')
+    const existing = await this.list()
+    const conflict = existing.find(
+      (s) => s.id !== excludeId && normalizeServiceName(s.serviceName) === key
+    )
+    if (conflict) {
+      throw new Error(`A service named "${serviceName.trim()}" already exists. Service names must be unique.`)
+    }
+  },
+
   async create(serviceData) {
     try {
+      const serviceName = serviceData.serviceName?.trim()
+      if (!serviceName) throw new Error('Service Name is required')
+      if (!serviceData.centerId) throw new Error('Center is required')
+      await this.assertUniqueName(serviceName)
+
       const client = getClient()
       const { data, errors } = await client.models.Service.create({
-        serviceName: serviceData.serviceName,
+        serviceName,
+        centerId: serviceData.centerId || null,
+        centerName: serviceData.centerName || null,
         minutes: serviceData.minutes || null,
         fixedPrice: serviceData.fixedPrice || null,
       })
@@ -55,12 +105,19 @@ export const serviceAPI = {
 
   async update(id, serviceData) {
     try {
+      const serviceName = serviceData.serviceName?.trim()
+      if (!serviceName) throw new Error('Service Name is required')
+      if (!serviceData.centerId) throw new Error('Center is required')
+      await this.assertUniqueName(serviceName, id)
+
       const client = getClient()
       const { data, errors } = await client.models.Service.update({
         id,
-        serviceName: serviceData.serviceName,
-        minutes: serviceData.minutes || null,
-        fixedPrice: serviceData.fixedPrice || null,
+        serviceName,
+        centerId: serviceData.centerId || null,
+        centerName: serviceData.centerName || null,
+        minutes: serviceData.minutes ?? null,
+        fixedPrice: serviceData.fixedPrice ?? null,
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -1021,12 +1078,27 @@ export const publicAPI = {
   /**
    * Get available services (guest access)
    */
-  async getServices() {
+  /**
+   * Get available services (guest access)
+   * @param {{ centerId?: string, distinct?: boolean }} [options]
+   */
+  async getServices(options = {}) {
     try {
       const client = generateClient({ authMode: 'apiKey' })
       const { data, errors } = await client.models.Service.list()
       if (errors) throw new Error(errors[0].message)
-      return data || []
+      let items = data || []
+      if (options.centerId) {
+        items = items.filter((s) => s.centerId === options.centerId)
+      }
+      // Default to distinct names so public dropdowns never show duplicates
+      if (options.distinct !== false) {
+        items = dedupeServicesByName(items)
+      }
+      items.sort((a, b) =>
+        (a.serviceName || '').localeCompare(b.serviceName || '', undefined, { sensitivity: 'base' })
+      )
+      return items
     } catch (error) {
       console.error('Error fetching services:', error)
       throw error

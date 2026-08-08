@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 const LanguageContext = createContext()
 
@@ -236,7 +236,20 @@ export const translations = {
       todayBookings: "Today's Bookings",
       pendingRequests: "Pending Requests",
       viewSchedule: "View Schedule",
-      manageBookings: "Manage Bookings"
+      manageBookings: "Manage Bookings",
+      temporaryPasswordNotice: "This account requires a new password. Please set one to continue.",
+      confirmSignUp: "Please confirm your account first.",
+      selectMfaNotice: "Select how you want to receive your verification code.",
+      mfaNotice: "Multi-factor authentication is required. Enter the verification code from your authenticator app.",
+      setNewPassword: "Set new password",
+      newPassword: "New password",
+      passwordsMismatch: "Passwords do not match.",
+      continue: "Continue",
+      verify: "Verify",
+      mfaCode: "Verification code",
+      totpSetupTitle: "Set up authenticator app",
+      totpSetupHint: "Scan the QR code with your authenticator app, then enter the code.",
+      userNotConfirmed: "Account not confirmed. Please contact admin.",
     },
     // Footer
     footer: {
@@ -469,23 +482,36 @@ export const translations = {
     staffLogin: {
       title: "Portal del Personal",
       subtitle: "Inicia sesión para acceder al panel de personal",
-      email: "Correo Electrónico",
+      email: "Correo electrónico",
       emailPlaceholder: "tu@correo.com",
       password: "Contraseña",
-      confirmPassword: "Confirmar Contraseña",
+      confirmPassword: "Confirmar contraseña",
       rememberMe: "Recordarme",
       forgotPassword: "¿Olvidaste tu contraseña?",
-      signIn: "Iniciar Sesión",
-      signOut: "Cerrar Sesión",
+      signIn: "Iniciar sesión",
+      signOut: "Cerrar sesión",
       invalidCredentials: "Credenciales inválidas. Inténtalo de nuevo.",
       needHelp: "¿Necesitas ayuda?",
       contactAdmin: "Contacta al administrador",
-      backToHome: "Volver al Inicio",
-      welcomeBack: "Bienvenido de Nuevo",
-      todayBookings: "Reservas de Hoy",
-      pendingRequests: "Solicitudes Pendientes",
-      viewSchedule: "Ver Horario",
-      manageBookings: "Gestionar Reservas"
+      backToHome: "Volver al inicio",
+      welcomeBack: "Bienvenido de nuevo",
+      todayBookings: "Reservas de hoy",
+      pendingRequests: "Solicitudes pendientes",
+      viewSchedule: "Ver horario",
+      manageBookings: "Gestionar reservas",
+      temporaryPasswordNotice: "Esta cuenta requiere una nueva contraseña. Establécela para continuar.",
+      confirmSignUp: "Confirma tu cuenta primero.",
+      selectMfaNotice: "Elige cómo quieres recibir el código de verificación.",
+      mfaNotice: "Se requiere autenticación en dos pasos. Introduce el código de tu aplicación autenticadora.",
+      setNewPassword: "Establecer nueva contraseña",
+      newPassword: "Nueva contraseña",
+      passwordsMismatch: "Las contraseñas no coinciden.",
+      continue: "Continuar",
+      verify: "Verificar",
+      mfaCode: "Código de verificación",
+      totpSetupTitle: "Configurar aplicación autenticadora",
+      totpSetupHint: "Escanea el código QR con tu app autenticadora e introduce el código.",
+      userNotConfirmed: "Cuenta no confirmada. Contacta al administrador.",
     },
     // Footer
     footer: {
@@ -753,13 +779,36 @@ export const translations = {
 }
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en')
+  const [language, setLanguage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('confession_lang')
+      if (saved && translations[saved]) return saved
+    } catch {
+      // ignore
+    }
+    return 'es'
+  })
 
-  const t = translations[language]
+  const t = translations[language] || translations.es
 
   const changeLanguage = (lang) => {
+    if (!translations[lang]) return
     setLanguage(lang)
+    try {
+      localStorage.setItem('confession_lang', lang)
+      document.documentElement.lang = lang
+    } catch {
+      // ignore
+    }
   }
+
+  useEffect(() => {
+    try {
+      document.documentElement.lang = language
+    } catch {
+      // ignore
+    }
+  }, [language])
 
   return (
     <LanguageContext.Provider value={{ language, changeLanguage, t }}>

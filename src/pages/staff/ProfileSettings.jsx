@@ -11,9 +11,9 @@ import {
   Input,
   LoadingState,
   EmptyState,
-  Icons,
   Grid,
 } from '../../components/admin/ui'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * ProfileSettings - User profile and account settings
@@ -49,23 +49,23 @@ const ProfileSettings = () => {
     return (
       <div>
         <PageHeader 
-          title="Profile Settings"
-          subtitle="Manage your account settings and preferences"
+          title={t.profile.title}
+          subtitle={t.profile.subtitleLong}
         />
         <Card>
-          <LoadingState text="Loading profile..." />
+          <LoadingState text={t.profile.loading} />
         </Card>
       </div>
     )
   }
 
-  const email = userAttributes?.email || user?.signInDetails?.loginId || user?.username || 'Not available'
+  const email = userAttributes?.email || user?.signInDetails?.loginId || user?.username || t.common.notAvailable
 
   return (
     <div>
       <PageHeader 
-        title="Profile Settings"
-        subtitle="Manage your account settings and preferences"
+        title={t.profile.title}
+        subtitle={t.profile.subtitleLong}
       />
 
       {/* Profile Card */}
@@ -96,7 +96,7 @@ const ProfileSettings = () => {
             <p style={{ margin: 0, color: 'var(--ui-text-muted)', fontSize: '0.875rem' }}>
               {email}
             </p>
-            <Badge variant="info" style={{ marginTop: '8px' }}>Staff Member</Badge>
+            <Badge variant="info" style={{ marginTop: '8px' }}>{t.profile.staffMember}</Badge>
           </div>
         </div>
       </Card>
@@ -105,24 +105,24 @@ const ProfileSettings = () => {
         {/* Account Information */}
         <Card>
           <CardHeader>
-            <CardTitle subtitle="Your account details">
-              Account Information
+            <CardTitle subtitle={t.profile.accountDetails}>
+              {t.profile.accountInfo}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Input
-                label="Email Address"
+                label={t.profile.emailAddress}
                 type="email"
                 value={email}
                 disabled
-                hint="Contact your administrator to change your email address"
+                hint={t.profile.emailHint}
               />
 
               <Input
-                label="User ID"
+                label={t.profile.userId}
                 type="text"
-                value={user?.userId || 'Not available'}
+                value={user?.userId || t.common.notAvailable}
                 disabled
                 style={{ fontFamily: 'var(--ui-font-mono)', fontSize: '0.8125rem' }}
               />
@@ -130,10 +130,10 @@ const ProfileSettings = () => {
               {userAttributes?.email_verified !== undefined && (
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '6px' }}>
-                    Email Status
+                    {t.profile.emailStatus}
                   </label>
                   <Badge variant={userAttributes.email_verified === 'true' ? 'success' : 'warning'}>
-                    {userAttributes.email_verified === 'true' ? 'Verified' : 'Not Verified'}
+                    {userAttributes.email_verified === 'true' ? t.profile.verified : t.profile.notVerified}
                   </Badge>
                 </div>
               )}
@@ -144,8 +144,8 @@ const ProfileSettings = () => {
         {/* Security Settings */}
         <Card>
           <CardHeader>
-            <CardTitle subtitle="Manage your security settings">
-              Security
+            <CardTitle subtitle={t.profile.securitySubtitle}>
+              {t.profile.security}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -159,13 +159,13 @@ const ProfileSettings = () => {
                 borderRadius: 'var(--ui-radius)'
               }}>
                 <div>
-                  <h4 style={{ margin: 0, marginBottom: '4px', fontSize: '0.875rem', fontWeight: 500 }}>Password</h4>
+                  <h4 style={{ margin: 0, marginBottom: '4px', fontSize: '0.875rem', fontWeight: 500 }}>{t.profile.password}</h4>
                   <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--ui-text-muted)' }}>
-                    Change your password
+                    {t.profile.changePassword}
                   </p>
                 </div>
                 <Button variant="secondary" size="small" disabled>
-                  Change
+                  {t.profile.change}
                 </Button>
               </div>
 
@@ -178,12 +178,12 @@ const ProfileSettings = () => {
                 borderRadius: 'var(--ui-radius)'
               }}>
                 <div>
-                  <h4 style={{ margin: 0, marginBottom: '4px', fontSize: '0.875rem', fontWeight: 500 }}>Two-Factor Authentication</h4>
+                  <h4 style={{ margin: 0, marginBottom: '4px', fontSize: '0.875rem', fontWeight: 500 }}>{t.profile.twoFactor}</h4>
                   <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--ui-text-muted)' }}>
-                    Extra layer of security
+                    {t.profile.twoFactorDesc}
                   </p>
                 </div>
-                <Badge variant="success">Enabled</Badge>
+                <Badge variant="success">{t.profile.enabled}</Badge>
               </div>
             </div>
           </CardContent>
@@ -193,7 +193,7 @@ const ProfileSettings = () => {
       {/* Preferences (Placeholder) */}
       <Card style={{ marginTop: '24px' }}>
         <CardHeader>
-          <CardTitle>Preferences</CardTitle>
+          <CardTitle>{t.profile.preferences}</CardTitle>
         </CardHeader>
         <CardContent>
           <EmptyState
@@ -203,8 +203,8 @@ const ProfileSettings = () => {
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
             }
-            title="Coming Soon"
-            description="Language, notifications, and display settings will be available here."
+            title={t.profile.comingSoon}
+            description={t.profile.comingSoonDesc}
           />
         </CardContent>
       </Card>

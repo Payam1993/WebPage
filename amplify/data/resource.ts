@@ -4,7 +4,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * Confession Barcelona - Data Schema
  * 
  * Defines DynamoDB tables for:
- * - Service: massage services with name, duration, price (static data)
+ * - Service: massage service names per center (static data)
  * - Cost: expense types with name and optional fixed price (static data)
  * - Staff: staff members with name (static data)
  * - StaffApplication: public Work With Us applications awaiting admin review
@@ -23,10 +23,14 @@ const schema = a.schema({
   // Static Data Models (Admin only)
   // ============================================
   
-  // Service model - massage services
+  // Service model - massage services (name + center; no duration/price here)
   Service: a
     .model({
       serviceName: a.string().required(),
+      // Center this service is offered at
+      centerId: a.string(),
+      centerName: a.string(),
+      // Legacy optional fields (no longer edited in Local Configuration)
       minutes: a.integer(),
       fixedPrice: a.float(),
     })

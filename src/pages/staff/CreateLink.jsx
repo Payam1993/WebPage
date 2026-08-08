@@ -20,6 +20,7 @@ import {
 } from '../../components/admin/ui'
 import { staffBookingLinkAPI, centerAPI, roomAPI } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * Create Link — staff generate shareable booking URLs for customers
@@ -60,7 +61,7 @@ const CreateLink = () => {
         setForm((prev) => ({ ...prev, centerId: prev.centerId || centersData[0].id }))
       }
     } catch (err) {
-      setError(err.message || 'Failed to load links')
+      setError(err.message || t.createLink.failedLoad)
     } finally {
       setIsLoading(false)
     }
@@ -76,7 +77,7 @@ const CreateLink = () => {
   }))
 
   const roomOptions = [
-    { value: '', label: 'Any room' },
+    { value: '', label: t.createLink.anyRoomShort },
     ...rooms
       .filter((r) => !form.centerId || r.centerId === form.centerId)
       .map((r) => ({
@@ -89,11 +90,11 @@ const CreateLink = () => {
 
   const handleCreate = async () => {
     if (!staffProfile?.id) {
-      setError('Your Cognito email must be linked to a Staff profile to create links')
+      setError(t.createLink.profileRequiredCreate)
       return
     }
     if (!form.centerId) {
-      setError('Select a center')
+      setError(t.createLink.selectCenterError)
       return
     }
     setIsCreating(true)
@@ -112,7 +113,7 @@ const CreateLink = () => {
       })
       await load()
     } catch (err) {
-      setError(err.message || 'Failed to create link')
+      setError(err.message || t.createLink.failedCreate)
     } finally {
       setIsCreating(false)
     }
@@ -125,7 +126,7 @@ const CreateLink = () => {
       setCopiedId(link.id)
       setTimeout(() => setCopiedId(null), 2000)
     } catch {
-      window.prompt('Copy this link:', url)
+      window.prompt(t.createLink.copyPrompt, url)
     }
   }
 
@@ -134,15 +135,20 @@ const CreateLink = () => {
       await staffBookingLinkAPI.deactivate(link.id)
       await load()
     } catch (err) {
-      setError(err.message || 'Failed to deactivate')
+      setError(err.message || t.createLink.failedDeactivate)
     }
+  }
+
+  const displayRoomName = (roomName) => {
+    if (!roomName || roomName === 'Any room') return t.createLink.anyRoomShort
+    return roomName
   }
 
   if (!isUser && !isAdmin) {
     return (
       <EmptyState
-        title="Access denied"
-        description="Create Link is available for staff Users and Admins."
+        title={t.common.accessDenied}
+        description={t.createLink.accessDeniedDesc}
       />
     )
   }
@@ -151,8 +157,8 @@ const CreateLink = () => {
     return (
       <EmptyState
         icon={<Icons.Users />}
-        title="Staff profile required"
-        description="Ask an admin to add your email on the Staff page before creating booking links."
+        title={t.todo.profileRequired}
+        description={t.createLink.profileRequiredDesc}
       />
     )
   }
@@ -160,8 +166,8 @@ const CreateLink = () => {
   return (
     <div>
       <PageHeader
-        title="Create Link"
-        subtitle="Generate a booking link for your customers based on your availability and room choice"
+        title={t.createLink.title}
+        subtitle={t.createLink.subtitleLong}
       />
 
       {error && (
@@ -180,31 +186,32 @@ const CreateLink = () => {
 
       <Card style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle={`Therapist: ${staffName}`}>New booking link</CardTitle>
+          <CardTitle subtitle={`${t.createLink.therapistLabel}: ${staffName}`}>
+            {t.createLink.newBookingLink}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             <Select
-              label="Center *"
+              label={t.createLink.centerRequired}
               options={centerOptions}
-              placeholder="Select center"
+              placeholder={t.createLink.selectCenter}
               value={form.centerId}
               onChange={(e) => setForm({ ...form, centerId: e.target.value, roomId: '' })}
             />
             <Select
-              label="Room"
+              label={t.common.room}
               options={roomOptions}
               value={form.roomId}
               onChange={(e) => setForm({ ...form, roomId: e.target.value })}
             />
           </div>
           <p style={{ margin: '12px 0 0', fontSize: '0.8125rem', color: 'var(--ui-text-muted)' }}>
-            Choose <strong>Any room</strong> if the room does not matter — customers will book any free room at the center,
-            still blocked when you (the therapist) are already booked.
+            {t.createLink.hintAnyRoom}
           </p>
           <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
             <Button onClick={handleCreate} loading={isCreating} icon={<Icons.Plus />}>
-              Create link
+              {t.createLink.title}
             </Button>
           </div>
         </CardContent>
@@ -212,22 +219,24 @@ const CreateLink = () => {
 
       <Card padding={false}>
         <CardHeader>
-          <CardTitle subtitle={`${links.length} link(s)`}>Your links</CardTitle>
+          <CardTitle subtitle={`${links.length} ${t.createLink.linksCount}`}>
+            {t.createLink.yourLinks}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <LoadingState text="Loading links..." />
+            <LoadingState text={t.createLink.loading} />
           ) : links.length === 0 ? (
-            <EmptyState title="No links yet" description="Create a link to share with customers" />
+            <EmptyState title={t.createLink.noLinks} description={t.createLink.noLinksDesc} />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Center</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead>Link</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead>{t.common.center}</TableHead>
+                  <TableHead>{t.common.room}</TableHead>
+                  <TableHead>{t.common.link}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -235,22 +244,22 @@ const CreateLink = () => {
                   <TableRow key={link.id}>
                     <TableCell>
                       <Badge variant={link.active ? 'success' : 'neutral'}>
-                        {link.active ? 'Active' : 'Off'}
+                        {link.active ? t.createLink.active : t.createLink.inactive}
                       </Badge>
                     </TableCell>
                     <TableCell>{link.centerName || '-'}</TableCell>
-                    <TableCell>{link.roomName || 'Any room'}</TableCell>
+                    <TableCell>{displayRoomName(link.roomName)}</TableCell>
                     <TableCell style={{ fontSize: '0.75rem', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {buildPublicUrl(link.token)}
                     </TableCell>
                     <TableCell style={{ textAlign: 'right' }}>
                       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                         <Button variant="secondary" size="small" onClick={() => handleCopy(link)}>
-                          {copiedId === link.id ? 'Copied' : 'Copy'}
+                          {copiedId === link.id ? t.createLink.copied : t.createLink.copy}
                         </Button>
                         {link.active && (
                           <Button variant="ghost" size="small" onClick={() => handleDeactivate(link)}>
-                            Deactivate
+                            {t.createLink.deactivate}
                           </Button>
                         )}
                       </div>

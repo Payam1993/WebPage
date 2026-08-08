@@ -11,6 +11,7 @@ import { bookingAPI, centerAPI, roomAPI } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 import { toLocalDateKey } from '../../utils/dates'
 import { timeToMinutes, minutesToTime } from '../../utils/availability'
+import { staffT as t } from '../../i18n/staffEs'
 
 const HOUR_START = 9
 const HOUR_END = 22 // exclusive end for grid labels through 21:00
@@ -36,7 +37,7 @@ const Calendar = () => {
     () => Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i),
     []
   )
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const daysOfWeek = t.calendar.daysShort
 
   useEffect(() => {
     loadCentersAndRooms()
@@ -62,7 +63,7 @@ const Calendar = () => {
     title: booking.clientName,
     time: booking.reservedTime?.substring(0, 5) || '00:00',
     duration: Number(booking.durationMinutes) || 60,
-    therapist: booking.therapistName || 'Unassigned',
+    therapist: booking.therapistName || t.common.unassigned,
     therapistId: booking.therapistId,
     service: booking.serviceName || null,
     center: booking.centerName || null,
@@ -97,7 +98,7 @@ const Calendar = () => {
   }
 
   const centerOptions = [
-    { value: '', label: 'All Centers' },
+    { value: '', label: t.calendar.allCenters },
     ...centers.map((c) => ({
       value: c.id,
       label: `${c.centerName}${c.referenceNumber ? ` (${c.referenceNumber})` : ''}`,
@@ -105,7 +106,7 @@ const Calendar = () => {
   ]
 
   const roomOptions = [
-    { value: '', label: 'All Rooms' },
+    { value: '', label: t.calendar.allRooms },
     ...rooms
       .filter((r) => !filterCenterId || r.centerId === filterCenterId)
       .map((r) => ({
@@ -113,6 +114,12 @@ const Calendar = () => {
         label: `${r.roomName}${r.referenceNumber ? ` (${r.referenceNumber})` : ''}`,
       })),
   ]
+
+  const viewModeLabels = {
+    day: t.calendar.day,
+    week: t.calendar.week,
+    month: t.calendar.month,
+  }
 
   const handleCenterFilterChange = (centerId) => {
     setFilterCenterId(centerId)
@@ -249,15 +256,15 @@ const Calendar = () => {
   return (
     <div>
       <PageHeader
-        title={isIndividualView ? 'My Calendar' : 'Calendar'}
+        title={isIndividualView ? t.calendar.myTitle : t.calendar.title}
         subtitle={
           isIndividualView
-            ? 'Your pending appointments — blocks show full duration'
-            : 'Pending appointments — blocks show full duration'
+            ? t.calendar.mySubtitle
+            : t.calendar.subtitle
         }
         actions={
           <Button variant="secondary" onClick={loadEvents}>
-            <Icons.Search /> Refresh
+            <Icons.Search /> {t.common.refresh}
           </Button>
         }
       />
@@ -270,16 +277,16 @@ const Calendar = () => {
             </Button>
             <h2 style={{ margin: 0, minWidth: 200, textAlign: 'center', fontSize: '1rem', fontWeight: 600 }}>
               {viewMode === 'month'
-                ? currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                ? currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
                 : viewMode === 'week'
-                  ? `Week of ${getWeekDays()[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                  : currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  ? `${t.calendar.weekOf} ${getWeekDays()[0].toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}`
+                  : currentDate.toLocaleDateString('es-ES', { weekday: 'long', month: 'long', day: 'numeric' })}
             </h2>
             <Button variant="secondary" size="small" onClick={() => navigateDate(1)}>
               ›
             </Button>
             <Button variant="ghost" size="small" onClick={() => setCurrentDate(new Date())}>
-              Today
+              {t.common.today}
             </Button>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -290,13 +297,13 @@ const Calendar = () => {
                 size="small"
                 onClick={() => setViewMode(mode)}
               >
-                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                {viewModeLabels[mode]}
               </Button>
             ))}
             {(isAdmin || isMiniAdmin) && (
               <>
                 <Select
-                  label="Center"
+                  label={t.common.center}
                   options={centerOptions}
                   value={filterCenterId}
                   onChange={(e) => handleCenterFilterChange(e.target.value)}
@@ -304,7 +311,7 @@ const Calendar = () => {
                   style={{ minWidth: 160 }}
                 />
                 <Select
-                  label="Room"
+                  label={t.common.room}
                   options={roomOptions}
                   value={filterRoomId}
                   onChange={(e) => setFilterRoomId(e.target.value)}
@@ -320,7 +327,7 @@ const Calendar = () => {
       <Card padding={false}>
         {isLoading ? (
           <div style={{ padding: 48 }}>
-            <LoadingState text="Loading calendar..." />
+            <LoadingState text={t.calendar.loading} />
           </div>
         ) : viewMode === 'month' ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--ui-border)' }}>
@@ -390,7 +397,7 @@ const Calendar = () => {
                   ))}
                   {dayEvents.length > 2 && (
                     <div style={{ fontSize: '0.6875rem', color: 'var(--ui-primary)', textAlign: 'center' }}>
-                      +{dayEvents.length - 2} more
+                      +{dayEvents.length - 2} {t.calendar.more}
                     </div>
                   )}
                 </div>
@@ -516,7 +523,7 @@ const Calendar = () => {
               ))}
               {getEventsForDate(currentDate).length === 0 && (
                 <div style={{ padding: 48, textAlign: 'center', color: 'var(--ui-text-muted)' }}>
-                  No pending appointments for this day
+                  {t.calendar.noAppointments}
                 </div>
               )}
               {getEventsForDate(currentDate).map((event) => renderSpanningEvent(event, HOUR_HEIGHT_DAY))}

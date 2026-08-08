@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { signIn, confirmSignIn, setUpTOTP } from 'aws-amplify/auth'
@@ -14,8 +14,13 @@ import './StaffLogin.css'
  * On success, redirects to /staff/reports (default admin page).
  */
 const StaffLogin = ({ setCursorVariant }) => {
-  const { t } = useLanguage()
+  const { t, changeLanguage } = useLanguage()
   const navigate = useNavigate()
+
+  // Staff portal login is always Spanish
+  useEffect(() => {
+    changeLanguage('es')
+  }, [changeLanguage])
   
   // Login form state
   const [email, setEmail] = useState('')

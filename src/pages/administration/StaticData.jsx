@@ -100,8 +100,14 @@ const StaticData = () => {
     try {
       switch (type) {
         case 'services':
-          const servicesData = await serviceAPI.list()
-          setServices(servicesData)
+          {
+            const [servicesData, centersForServices] = await Promise.all([
+              serviceAPI.list(),
+              centerAPI.list(),
+            ])
+            setServices(servicesData)
+            setCenters(centersForServices)
+          }
           break
         case 'costs':
           const costsData = await costAPI.list()
@@ -178,10 +184,19 @@ const StaticData = () => {
         if (!formData.serviceName?.trim()) {
           throw new Error('Service Name is required')
         }
+        if (!formData.centerId) {
+          throw new Error('Center is required')
+        }
+        const center = centers.find((c) => c.id === formData.centerId)
+        const payload = {
+          serviceName: formData.serviceName.trim(),
+          centerId: formData.centerId,
+          centerName: center?.centerName || formData.centerName || null,
+        }
         if (editingItem) {
-          await serviceAPI.update(editingItem.id, formData)
+          await serviceAPI.update(editingItem.id, payload)
         } else {
-          await serviceAPI.create(formData)
+          await serviceAPI.create(payload)
         }
         await loadData('services')
       } else if (activeModal === 'costs') {
@@ -299,7 +314,7 @@ const StaticData = () => {
     {
       id: 'services',
       title: 'Services',
-      subtitle: 'Manage massage services and pricing',
+      subtitle: 'Manage service names per center',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="12" cy="12" r="10"/>
@@ -390,7 +405,7 @@ const StaticData = () => {
         isOpen={activeModal === 'services'}
         onClose={handleCloseModal}
         title="Services"
-        subtitle="Manage massage services and pricing"
+        subtitle="Service names must be unique · assign each to a center"
         size="large"
       >
         {/* Add/Edit Form */}
@@ -413,27 +428,27 @@ const StaticData = () => {
                 {error}
               </div>
             )}
-            <Grid cols={3} gap="default">
+            <Grid cols={2} gap="default">
               <Input
                 label="Service Name *"
                 placeholder="e.g., Deep Tissue Massage"
                 value={formData.serviceName || ''}
                 onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
               />
-              <Input
-                label="Minutes"
-                type="number"
-                placeholder="e.g., 60"
-                value={formData.minutes || ''}
-                onChange={(e) => setFormData({ ...formData, minutes: e.target.value ? parseInt(e.target.value) : null })}
-              />
-              <Input
-                label="Fixed Price (€)"
-                type="number"
-                step="0.01"
-                placeholder="e.g., 85.00"
-                value={formData.fixedPrice || ''}
-                onChange={(e) => setFormData({ ...formData, fixedPrice: e.target.value ? parseFloat(e.target.value) : null })}
+              <Select
+                label="Center *"
+                options={centerOptions}
+                placeholder={centers.length ? 'Select center' : 'Register a center first'}
+                value={formData.centerId || ''}
+                onChange={(e) => {
+                  const center = centers.find((c) => c.id === e.target.value)
+                  setFormData({
+                    ...formData,
+                    centerId: e.target.value,
+                    centerName: center?.centerName || '',
+                  })
+                }}
+                disabled={!centers.length}
               />
             </Grid>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
@@ -442,7 +457,7 @@ const StaticData = () => {
                   Cancel
                 </Button>
               )}
-              <Button onClick={handleSave} loading={isSaving}>
+              <Button onClick={handleSave} loading={isSaving} disabled={!centers.length}>
                 {editingItem ? 'Update Service' : 'Add Service'}
               </Button>
             </div>
@@ -470,8 +485,7 @@ const StaticData = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Service Name</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Price</TableHead>
+                    <TableHead>Center</TableHead>
                     <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -479,8 +493,7 @@ const StaticData = () => {
                   {services.map((service) => (
                     <TableRow key={service.id}>
                       <TableCell><span style={{ fontWeight: 500 }}>{service.serviceName}</span></TableCell>
-                      <TableCell>{service.minutes ? `${service.minutes} min` : '-'}</TableCell>
-                      <TableCell>{service.fixedPrice ? `€${service.fixedPrice.toFixed(2)}` : '-'}</TableCell>
+                      <TableCell>{service.centerName || '-'}</TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
                           <Button variant="ghost" size="small" onClick={() => handleEdit(service)}>

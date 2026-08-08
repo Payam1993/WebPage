@@ -27,6 +27,7 @@ import { useAuth } from '../../context/AuthContext'
 import AvailabilityCalendar from '../../components/AvailabilityCalendar'
 import '../../components/AvailabilityCalendar.css'
 import { toBusyIntervals, getSlotConflictReasons } from '../../utils/availability'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * Reservations - Manage client bookings and reservations
@@ -118,7 +119,7 @@ const Reservations = () => {
     try {
       const [staffData, servicesData, centersData, roomsData] = await Promise.all([
         staffAPI.list(),
-        serviceAPI.list(),
+        serviceAPI.list({ distinct: true }),
         centerAPI.list(),
         roomAPI.list(),
       ])
@@ -523,7 +524,7 @@ const Reservations = () => {
   }))
 
   const centerFilterOptions = [
-    { value: '', label: 'All Centers' },
+    { value: '', label: t.common.allCenters },
     ...centersList.map((c) => ({
       value: c.id,
       label: `${c.centerName}${c.referenceNumber ? ` (${c.referenceNumber})` : ''}`,
@@ -531,7 +532,7 @@ const Reservations = () => {
   ]
 
   const roomFilterOptions = [
-    { value: '', label: 'All Rooms' },
+    { value: '', label: t.common.allRooms },
     ...roomsList
       .filter((r) => !filterCenterId || r.centerId === filterCenterId)
       .map((r) => ({
@@ -551,7 +552,7 @@ const Reservations = () => {
       const priceLabel =
         r.roomPrice != null && r.roomPrice !== ''
           ? ` · €${Number(r.roomPrice).toFixed(2)}`
-          : ' · custom price'
+          : ` · ${t.reservations.customPrice}`
       return {
         value: r.id,
         label: `${r.roomName}${r.referenceNumber ? ` (${r.referenceNumber})` : ''}${priceLabel}`,
@@ -560,33 +561,38 @@ const Reservations = () => {
 
   // Duration options
   const durationOptions = [
-    { value: 30, label: '30 minutes' },
-    { value: 45, label: '45 minutes' },
-    { value: 60, label: '60 minutes' },
-    { value: 75, label: '75 minutes' },
-    { value: 90, label: '90 minutes' },
-    { value: 120, label: '120 minutes' },
+    { value: 30, label: `30 ${t.reservations.minutesOption}` },
+    { value: 45, label: `45 ${t.reservations.minutesOption}` },
+    { value: 60, label: `60 ${t.reservations.minutesOption}` },
+    { value: 75, label: `75 ${t.reservations.minutesOption}` },
+    { value: 90, label: `90 ${t.reservations.minutesOption}` },
+    { value: 120, label: `120 ${t.reservations.minutesOption}` },
   ]
 
-  // Status options
+  // Status options — values stay API enums; labels are display-only
   const statusOptions = [
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Done', label: 'Done' },
-    { value: 'Canceled', label: 'Canceled' },
+    { value: 'Pending', label: t.statusLabel.Pending },
+    { value: 'Done', label: t.statusLabel.Done },
+    { value: 'Canceled', label: t.statusLabel.Canceled },
   ]
+
+  const statusFilterLabel = (status) => {
+    if (status === 'all') return t.status.all
+    return t.statusLabel[status] || status
+  }
 
   return (
     <div>
       <PageHeader 
-        title={isIndividualView ? 'My Reservations' : 'Reservations'}
+        title={isIndividualView ? t.reservations.myTitle : t.reservations.title}
         subtitle={
           isIndividualView
-            ? 'Manage and view your assigned client bookings'
-            : 'Manage and view all client bookings'
+            ? t.reservations.subtitleUser
+            : t.reservations.subtitleAdmin
         }
         actions={
           <Button icon={<Icons.Plus />} onClick={() => handleOpenModal()}>
-            New Booking
+            {t.reservations.newBooking}
           </Button>
         }
       />
@@ -596,7 +602,7 @@ const Reservations = () => {
         <CardContent>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
             <Input
-              label="From Date"
+              label={t.reservations.fromDate}
               type="date"
               value={dateFilter.fromDate}
               onChange={(e) => setDateFilter({ ...dateFilter, fromDate: e.target.value })}
@@ -604,7 +610,7 @@ const Reservations = () => {
               style={{ width: '160px' }}
             />
             <Input
-              label="To Date"
+              label={t.reservations.toDate}
               type="date"
               value={dateFilter.toDate}
               onChange={(e) => setDateFilter({ ...dateFilter, toDate: e.target.value })}
@@ -612,7 +618,7 @@ const Reservations = () => {
               style={{ width: '160px' }}
             />
             <Select
-              label="Center"
+              label={t.common.center}
               options={centerFilterOptions}
               value={filterCenterId}
               onChange={(e) => handleCenterFilterChange(e.target.value)}
@@ -620,7 +626,7 @@ const Reservations = () => {
               style={{ width: '180px' }}
             />
             <Select
-              label="Room"
+              label={t.common.room}
               options={roomFilterOptions}
               value={filterRoomId}
               onChange={(e) => setFilterRoomId(e.target.value)}
@@ -628,10 +634,10 @@ const Reservations = () => {
               style={{ width: '180px' }}
             />
             <Button onClick={handleApplyFilter} size="small">
-              <Icons.Search /> Search
+              <Icons.Search /> {t.common.search}
             </Button>
             <Button variant="secondary" onClick={handleResetFilter} size="small">
-              This Week
+              {t.reservations.thisWeek}
             </Button>
             <Button 
               variant="secondary" 
@@ -641,11 +647,11 @@ const Reservations = () => {
               }} 
               size="small"
             >
-              Show All
+              {t.reservations.showAll}
             </Button>
             <div style={{ marginLeft: 'auto', fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
-              Showing: {!appliedFilter.fromDate && !appliedFilter.toDate
-                ? 'All bookings'
+              {t.reservations.showing} {!appliedFilter.fromDate && !appliedFilter.toDate
+                ? t.reservations.allBookings
                 : appliedFilter.fromDate === appliedFilter.toDate 
                   ? formatDate(appliedFilter.fromDate)
                   : `${formatDate(appliedFilter.fromDate)} - ${formatDate(appliedFilter.toDate)}`
@@ -667,7 +673,7 @@ const Reservations = () => {
                 size="small"
                 onClick={() => setFilterStatus(status)}
               >
-                {status === 'all' ? 'All' : status} ({count})
+                {statusFilterLabel(status)} ({count})
               </Button>
             ))}
           </div>
@@ -676,7 +682,7 @@ const Reservations = () => {
           <div style={{ flex: 1, minWidth: '200px' }}>
             <Input
               type="text"
-              placeholder="Search by client name, phone, or therapist..."
+              placeholder={t.reservations.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               containerClassName="ui-mb-0"
@@ -689,8 +695,8 @@ const Reservations = () => {
       <Card padding={false}>
         <CardHeader style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--ui-border-light)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <CardTitle subtitle={`${filteredBookings.length} bookings found`}>
-              Booking List
+            <CardTitle subtitle={`${filteredBookings.length} ${t.reservations.bookingsFound}`}>
+              {t.reservations.bookingList}
             </CardTitle>
             <Button 
               variant="secondary" 
@@ -698,21 +704,21 @@ const Reservations = () => {
               onClick={loadBookings}
               loading={isLoading}
             >
-              <Icons.Refresh /> Refresh
+              <Icons.Refresh /> {t.common.refresh}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <LoadingState text="Loading bookings..." />
+            <LoadingState text={t.reservations.loadingBookings} />
           ) : filteredBookings.length === 0 ? (
             <EmptyState
               icon={<Icons.Calendar />}
-              title="No reservations found"
-              description="No bookings match your current filters"
+              title={t.reservations.noReservationsFound}
+              description={t.reservations.noBookingsMatch}
               action={
                 <Button icon={<Icons.Plus />} onClick={() => handleOpenModal()}>
-                  New Booking
+                  {t.reservations.newBooking}
                 </Button>
               }
             />
@@ -721,17 +727,17 @@ const Reservations = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Therapist</TableHead>
-                    <TableHead>Center</TableHead>
-                    <TableHead>Room</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>Price</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                    <TableHead>{t.common.date}</TableHead>
+                    <TableHead>{t.common.time}</TableHead>
+                    <TableHead>{t.common.client}</TableHead>
+                    <TableHead>{t.common.service}</TableHead>
+                    <TableHead>{t.common.therapist}</TableHead>
+                    <TableHead>{t.common.center}</TableHead>
+                    <TableHead>{t.common.room}</TableHead>
+                    <TableHead>{t.common.duration}</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>{t.common.price}</TableHead>
+                    <TableHead>{t.common.status}</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -753,7 +759,7 @@ const Reservations = () => {
                         <div>
                           <div style={{ fontWeight: 500 }}>{booking.clientName}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
-                            {booking.clientPhone || 'No phone'}
+                            {booking.clientPhone || t.common.noPhone}
                           </div>
                         </div>
                       </TableCell>
@@ -765,21 +771,21 @@ const Reservations = () => {
                       <TableCell>{booking.therapistName || '-'}</TableCell>
                       <TableCell style={{ fontSize: '0.875rem' }}>{booking.centerName || '-'}</TableCell>
                       <TableCell style={{ fontSize: '0.875rem' }}>{booking.roomName || '-'}</TableCell>
-                      <TableCell>{booking.durationMinutes} min</TableCell>
+                      <TableCell>{booking.durationMinutes} {t.common.min}</TableCell>
                       <TableCell style={{ textAlign: 'right', fontWeight: 500 }}>
                         €{booking.priceAgreement?.toFixed(2)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusVariant(booking.status)}>
-                          {booking.status}
+                          {t.statusLabel[booking.status] || booking.status}
                         </Badge>
                       </TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
-                          <Button variant="icon" size="small" onClick={() => handleOpenModal(booking)} title="Edit booking">
+                          <Button variant="icon" size="small" onClick={() => handleOpenModal(booking)} title={t.reservations.editBookingTitle}>
                             <Icons.Edit />
                           </Button>
-                          <Button variant="icon" size="small" className="ui-btn-icon-danger" onClick={() => handleDeleteClick(booking)} title="Delete booking">
+                          <Button variant="icon" size="small" className="ui-btn-icon-danger" onClick={() => handleDeleteClick(booking)} title={t.reservations.deleteBookingTitle}>
                             <Icons.Trash />
                           </Button>
                         </div>
@@ -797,13 +803,13 @@ const Reservations = () => {
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
-        title={editingItem ? 'Edit Booking' : 'New Booking'}
+        title={editingItem ? t.reservations.editBooking : t.reservations.newBooking}
         subtitle={
           isIndividualView
-            ? 'Book with room availability from the general calendar'
+            ? t.reservations.bookWithRoomAvailability
             : editingItem
-              ? 'Update booking details'
-              : 'Create a new client reservation'
+              ? t.reservations.updateDetails
+              : t.reservations.createNewClient
         }
         size="large"
       >
@@ -824,19 +830,19 @@ const Reservations = () => {
           <>
             <Grid cols={2} gap="default">
               <Input
-                label="Client Name *"
-                placeholder="Enter client name"
+                label={`${t.reservations.clientName} *`}
+                placeholder={t.reservations.enterClientName}
                 value={formData.clientName || ''}
                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
               />
               <Input
-                label="Client Phone"
-                placeholder="Optional"
+                label={t.reservations.clientPhone}
+                placeholder={t.common.optional}
                 value={formData.clientPhone || ''}
                 onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
               />
               <Select
-                label="Duration *"
+                label={`${t.common.duration} *`}
                 options={durationOptions}
                 value={formData.durationMinutes || ''}
                 onChange={(e) => setFormData({
@@ -847,32 +853,32 @@ const Reservations = () => {
               />
               {centersList.length > 1 && (
                 <Select
-                  label="Center"
+                  label={t.common.center}
                   options={centerFormOptions}
-                  placeholder="Select center"
+                  placeholder={t.reservations.selectCenter}
                   value={formData.centerId || ''}
                   onChange={(e) => handleCenterSelect(e.target.value)}
                 />
               )}
               <Select
-                label="Room *"
+                label={`${t.common.room} *`}
                 options={roomFormOptions}
-                placeholder="Select room"
+                placeholder={t.reservations.selectRoom}
                 value={formData.roomId || ''}
                 onChange={(e) => handleRoomSelect(e.target.value)}
               />
               <Input
-                label="Therapist / Staff"
+                label={t.reservations.therapistStaff}
                 value={formData.therapistName || staffDisplayName}
                 readOnly
                 disabled
               />
               {roomsList.find((r) => r.id === formData.roomId)?.roomPrice == null && (
                 <Input
-                  label="Price Agreement (€) *"
+                  label={`${t.reservations.priceAgreement} *`}
                   type="number"
                   step="0.01"
-                  placeholder="Custom room price"
+                  placeholder={t.reservations.customRoomPrice}
                   value={formData.priceAgreement ?? ''}
                   onChange={(e) =>
                     setFormData({
@@ -886,11 +892,11 @@ const Reservations = () => {
 
             <div style={{ marginTop: '20px' }}>
               <div style={{ fontWeight: 600, marginBottom: '8px', fontSize: '0.9375rem' }}>
-                Select date & time *
+                {t.reservations.selectDateTime}
               </div>
               <p style={{ margin: '0 0 12px', fontSize: '0.8125rem', color: 'var(--ui-text-muted)' }}>
-                Connected to the general calendar — free slots depend on room availability
-                {formData.roomName ? ` for ${formData.roomName}` : '. Select a room first for accurate slots.'}
+                {t.reservations.calendarHint}
+                {formData.roomName ? ` ${t.reservations.forRoom} ${formData.roomName}` : t.reservations.selectRoomFirst}
               </p>
               <div className="availability-calendar--admin">
                 <AvailabilityCalendar
@@ -936,11 +942,9 @@ const Reservations = () => {
                 style={{ marginTop: 3, flexShrink: 0 }}
               />
               <span>
-                <strong>Legal license confirmation *</strong>
+                <strong>{t.reservations.legalTitle}</strong>
                 <br />
-                I accept the local license compliance: this booking is for massage services only
-                and is not erotic in nature. / Acepto el cumplimiento legal de la licencia del local:
-                se trata de masajes y nada erótico.
+                {t.reservations.legalBody}
               </span>
             </label>
           </>
@@ -948,47 +952,47 @@ const Reservations = () => {
           <>
             <Grid cols={2} gap="default">
               <Input
-                label="Client Name *"
-                placeholder="Enter client name"
+                label={`${t.reservations.clientName} *`}
+                placeholder={t.reservations.enterClientName}
                 value={formData.clientName || ''}
                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
               />
               <Input
-                label="Client Phone"
-                placeholder="Optional"
+                label={t.reservations.clientPhone}
+                placeholder={t.common.optional}
                 value={formData.clientPhone || ''}
                 onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
               />
               <Select
-                label="Service"
+                label={t.common.service}
                 options={serviceOptions}
-                placeholder="Select service (optional)"
+                placeholder={t.reservations.selectServiceOptional}
                 value={formData.serviceId || ''}
                 onChange={(e) => handleServiceSelect(e.target.value)}
               />
               <Select
-                label="Therapist"
+                label={t.common.therapist}
                 options={staffOptions}
-                placeholder="Select therapist (optional)"
+                placeholder={t.reservations.selectTherapistOptional}
                 value={formData.therapistId || ''}
                 onChange={(e) => handleTherapistSelect(e.target.value)}
               />
               <Select
-                label="Center"
+                label={t.common.center}
                 options={centerFormOptions}
-                placeholder="Select center"
+                placeholder={t.reservations.selectCenter}
                 value={formData.centerId || ''}
                 onChange={(e) => handleCenterSelect(e.target.value)}
               />
               <Select
-                label="Room (optional)"
+                label={t.reservations.roomOptional}
                 options={roomFormOptions}
-                placeholder="Select room (optional)"
+                placeholder={t.reservations.selectRoomOptional}
                 value={formData.roomId || ''}
                 onChange={(e) => handleRoomSelect(e.target.value)}
               />
               <Select
-                label="Duration *"
+                label={`${t.common.duration} *`}
                 options={durationOptions}
                 value={formData.durationMinutes || ''}
                 onChange={(e) => setFormData({
@@ -998,7 +1002,7 @@ const Reservations = () => {
                 })}
               />
               <Input
-                label="Price Agreement (€) *"
+                label={`${t.reservations.priceAgreement} *`}
                 type="number"
                 step="0.01"
                 placeholder="0.00"
@@ -1006,7 +1010,7 @@ const Reservations = () => {
                 onChange={(e) => setFormData({ ...formData, priceAgreement: e.target.value ? parseFloat(e.target.value) : 0 })}
               />
               <Select
-                label="Status *"
+                label={`${t.common.status} *`}
                 options={statusOptions}
                 value={formData.status || 'Pending'}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
@@ -1032,16 +1036,16 @@ const Reservations = () => {
         )}
 
         <div style={{ display: 'none' }}>
-          <Input label="Date *" type="date" value={formData.date || ''} readOnly />
-          <Input label="Reserved Time *" type="time" value={formData.reservedTime || ''} readOnly />
+          <Input label={`${t.common.date} *`} type="date" value={formData.date || ''} readOnly />
+          <Input label={`${t.common.time} *`} type="time" value={formData.reservedTime || ''} readOnly />
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
           <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button onClick={handleSave} loading={isSaving}>
-            {editingItem ? 'Update Booking' : 'Create Booking'}
+            {editingItem ? t.reservations.updateBooking : t.reservations.createBooking}
           </Button>
         </div>
       </Modal>
@@ -1054,11 +1058,11 @@ const Reservations = () => {
             <CardTitle
               subtitle={
                 isIndividualView
-                  ? `${notConfirmedList.length} booking request(s) from your shareable link (auto-refreshes every 30s)`
-                  : `${notConfirmedList.length} pending requests from public website / booking links (auto-refreshes every 30s)`
+                  ? `${notConfirmedList.length} ${t.reservations.notConfirmedUserSubtitle}`
+                  : `${notConfirmedList.length} ${t.reservations.notConfirmedAdminSubtitle}`
               }
             >
-              Not Confirmed Reservations
+              {t.reservations.notConfirmed}
             </CardTitle>
             <Button 
               variant="secondary" 
@@ -1066,21 +1070,21 @@ const Reservations = () => {
               onClick={loadNotConfirmedReservations}
               loading={isLoadingNotConfirmed}
             >
-              <Icons.Refresh /> Refresh
+              <Icons.Refresh /> {t.common.refresh}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {isLoadingNotConfirmed ? (
-            <LoadingState text="Loading booking requests..." />
+            <LoadingState text={t.reservations.loadingRequests} />
           ) : notConfirmedList.length === 0 ? (
             <EmptyState
               icon={<Icons.Calendar />}
-              title="No pending booking requests"
+              title={t.reservations.noPendingRequests}
               description={
                 isIndividualView
-                  ? 'Requests from your Create Link page will appear here'
-                  : 'Booking requests from the public website and staff links will appear here'
+                  ? t.reservations.noPendingUserDesc
+                  : t.reservations.noPendingAdminDesc
               }
             />
           ) : (
@@ -1088,15 +1092,15 @@ const Reservations = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Therapist</TableHead>
-                    <TableHead>Room</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                    <TableHead>{t.common.date}</TableHead>
+                    <TableHead>{t.common.time}</TableHead>
+                    <TableHead>{t.common.client}</TableHead>
+                    <TableHead>{t.common.service}</TableHead>
+                    <TableHead>{t.common.therapist}</TableHead>
+                    <TableHead>{t.common.room}</TableHead>
+                    <TableHead>{t.common.duration}</TableHead>
+                    <TableHead>{t.common.created}</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1125,9 +1129,9 @@ const Reservations = () => {
                       </TableCell>
                       <TableCell>{reservation.therapistName || '-'}</TableCell>
                       <TableCell>{reservation.roomName || '-'}</TableCell>
-                      <TableCell>{reservation.durationMinutes} min</TableCell>
+                      <TableCell>{reservation.durationMinutes} {t.common.min}</TableCell>
                       <TableCell style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
-                        {reservation.createdAt ? new Date(reservation.createdAt).toLocaleDateString('en-GB') : '-'}
+                        {reservation.createdAt ? new Date(reservation.createdAt).toLocaleDateString('es-ES') : '-'}
                       </TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <Button 
@@ -1135,7 +1139,7 @@ const Reservations = () => {
                           size="small" 
                           onClick={() => handleOpenConfirmModal(reservation)}
                         >
-                          <Icons.Check /> Confirm
+                          <Icons.Check /> {t.common.confirm}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -1152,11 +1156,11 @@ const Reservations = () => {
       <Modal
         isOpen={confirmModal.open}
         onClose={handleCloseConfirmModal}
-        title="Confirm Reservation"
+        title={t.reservations.confirmReservation}
         subtitle={
           isIndividualView
-            ? 'Set price to create the booking'
-            : 'Assign therapist and set price to create booking'
+            ? t.reservations.confirmSubtitleUser
+            : t.reservations.confirmSubtitleAdmin
         }
         size="default"
       >
@@ -1170,31 +1174,31 @@ const Reservations = () => {
             }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.875rem' }}>
                 <div>
-                  <span style={{ color: 'var(--ui-text-muted)' }}>Client:</span>{' '}
+                  <span style={{ color: 'var(--ui-text-muted)' }}>{t.common.client}:</span>{' '}
                   <strong>{confirmModal.item.clientName}</strong>
                 </div>
                 <div>
-                  <span style={{ color: 'var(--ui-text-muted)' }}>Phone:</span>{' '}
+                  <span style={{ color: 'var(--ui-text-muted)' }}>{t.common.phone}:</span>{' '}
                   {confirmModal.item.clientPhone}
                 </div>
                 <div>
-                  <span style={{ color: 'var(--ui-text-muted)' }}>Date:</span>{' '}
+                  <span style={{ color: 'var(--ui-text-muted)' }}>{t.common.date}:</span>{' '}
                   {formatDate(confirmModal.item.date)}
                 </div>
                 <div>
-                  <span style={{ color: 'var(--ui-text-muted)' }}>Time:</span>{' '}
-                  {formatTime(confirmModal.item.reservedTime)} ({confirmModal.item.durationMinutes} min)
+                  <span style={{ color: 'var(--ui-text-muted)' }}>{t.common.time}:</span>{' '}
+                  {formatTime(confirmModal.item.reservedTime)} ({confirmModal.item.durationMinutes} {t.common.min})
                 </div>
                 <div>
-                  <span style={{ color: 'var(--ui-text-muted)' }}>Room:</span>{' '}
+                  <span style={{ color: 'var(--ui-text-muted)' }}>{t.common.room}:</span>{' '}
                   {confirmModal.item.roomName || '-'}
                 </div>
                 <div>
-                  <span style={{ color: 'var(--ui-text-muted)' }}>Therapist:</span>{' '}
+                  <span style={{ color: 'var(--ui-text-muted)' }}>{t.common.therapist}:</span>{' '}
                   {confirmModal.item.therapistName || confirmFormData.therapistName || '-'}
                 </div>
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <span style={{ color: 'var(--ui-text-muted)' }}>Service:</span>{' '}
+                  <span style={{ color: 'var(--ui-text-muted)' }}>{t.common.service}:</span>{' '}
                   <Badge variant="info" size="small">{confirmModal.item.serviceName}</Badge>
                 </div>
               </div>
@@ -1203,15 +1207,15 @@ const Reservations = () => {
             <Grid cols={2} gap="default">
               {!isIndividualView && (
                 <Select
-                  label="Assign Therapist"
+                  label={t.reservations.assignTherapist}
                   options={staffOptions}
-                  placeholder="Select therapist (optional)"
+                  placeholder={t.reservations.selectTherapistOptional}
                   value={confirmFormData.therapistId || ''}
                   onChange={(e) => handleConfirmTherapistSelect(e.target.value)}
                 />
               )}
               <Input
-                label="Price Agreement (€) *"
+                label={`${t.reservations.priceAgreement} *`}
                 type="number"
                 step="0.01"
                 placeholder="0.00"
@@ -1225,10 +1229,10 @@ const Reservations = () => {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
               <Button variant="secondary" onClick={handleCloseConfirmModal}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button onClick={handleConfirmReservation} loading={isConfirming}>
-                <Icons.Check /> Confirm Booking
+                <Icons.Check /> {t.reservations.confirmBooking}
               </Button>
             </div>
           </>
@@ -1240,9 +1244,9 @@ const Reservations = () => {
         isOpen={deleteConfirm.open}
         onClose={() => setDeleteConfirm({ open: false, item: null })}
         onConfirm={handleDeleteConfirm}
-        title="Delete Booking"
-        message={`Are you sure you want to delete the booking for "${deleteConfirm.item?.clientName}"? This action cannot be undone.`}
-        confirmText="Delete"
+        title={t.reservations.deleteBooking}
+        message={`${t.reservations.deleteMessage} "${deleteConfirm.item?.clientName}"? ${t.reservations.deleteCannotUndo}`}
+        confirmText={t.common.delete}
         loading={isDeleting}
       />
     </div>

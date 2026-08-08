@@ -22,6 +22,7 @@ import {
 import { bookingAPI, formatDisplayDate, getTodayDate, getDateFromToday } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
 import { timeToMinutes, minutesToTime } from '../../utils/availability'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * To Do — booked services for the current role
@@ -81,7 +82,7 @@ const Todo = () => {
 
   const handleCancelConfirm = async () => {
     if (!cancelReason.trim()) {
-      setCancelError('Please explain the reason for canceling')
+      setCancelError(t.todo.cancelReasonRequired)
       return
     }
     setIsCanceling(true)
@@ -91,22 +92,22 @@ const Todo = () => {
       setCancelModal({ open: false, item: null })
       await loadTodo()
     } catch (err) {
-      setCancelError(err.message || 'Failed to cancel')
+      setCancelError(err.message || t.todo.cancelFailed)
     } finally {
       setIsCanceling(false)
     }
   }
 
   if (authLoading) {
-    return <LoadingState text="Loading..." />
+    return <LoadingState text={t.common.loading} />
   }
 
   if (isIndividualView && !staffProfile?.id) {
     return (
       <EmptyState
         icon={<Icons.Users />}
-        title="Staff profile required"
-        description="Link your Cognito email to a Staff record to see your booked services."
+        title={t.todo.profileRequired}
+        description={t.todo.profileRequiredDesc}
       />
     )
   }
@@ -114,46 +115,46 @@ const Todo = () => {
   return (
     <div>
       <PageHeader
-        title="To Do"
+        title={t.todo.title}
         subtitle={
           isIndividualView
-            ? 'Services booked for you (pending)'
-            : 'All staff booked services (pending)'
+            ? t.todo.subtitleUser
+            : t.todo.subtitleAdmin
         }
         actions={
           <Button variant="secondary" size="small" onClick={loadTodo}>
-            <Icons.Search /> Refresh
+            <Icons.Search /> {t.common.refresh}
           </Button>
         }
       />
 
       <Card padding={false}>
         <CardHeader>
-          <CardTitle subtitle={`${todoBookings.length} pending service(s)`}>
-            Booked services
+          <CardTitle subtitle={`${todoBookings.length} ${t.todo.pendingCount}`}>
+            {t.todo.bookedServices}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <LoadingState text="Loading to-do list..." />
+            <LoadingState text={t.todo.loading} />
           ) : todoBookings.length === 0 ? (
             <EmptyState
-              title="Nothing to do"
-              description="No pending reservations in the next 60 days"
+              title={t.todo.nothing}
+              description={t.todo.nothingDesc}
             />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Therapist</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Start</TableHead>
-                  <TableHead>Finish</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.therapist}</TableHead>
+                  <TableHead>{t.common.client}</TableHead>
+                  <TableHead>{t.common.service}</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.common.duration}</TableHead>
+                  <TableHead>{t.todo.start}</TableHead>
+                  <TableHead>{t.todo.finish}</TableHead>
+                  <TableHead>{t.common.room}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -166,18 +167,18 @@ const Todo = () => {
                       <TableCell>
                         <div style={{ fontWeight: 500 }}>{b.clientName}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)' }}>
-                          {b.clientPhone || 'No phone'}
+                          {b.clientPhone || t.common.noPhone}
                         </div>
                       </TableCell>
                       <TableCell>{b.serviceName || '-'}</TableCell>
                       <TableCell>{formatDisplayDate(b.date)}</TableCell>
-                      <TableCell>{b.durationMinutes || 60} min</TableCell>
+                      <TableCell>{b.durationMinutes || 60} {t.common.min}</TableCell>
                       <TableCell>{start}</TableCell>
                       <TableCell>{finish}</TableCell>
                       <TableCell>{b.roomName || '-'}</TableCell>
                       <TableCell style={{ textAlign: 'right' }}>
                         <Button variant="danger" size="small" onClick={() => openCancel(b)}>
-                          Cancel service
+                          {t.todo.cancelService}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -192,13 +193,13 @@ const Todo = () => {
       <Modal
         isOpen={cancelModal.open}
         onClose={() => setCancelModal({ open: false, item: null })}
-        title="Cancel service"
-        subtitle="Are you sure you want to cancel this reservation?"
+        title={t.todo.cancelTitle}
+        subtitle={t.todo.cancelSubtitle}
         size="default"
       >
         {cancelModal.item && (
           <div style={{ marginBottom: 16, fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
-            <Badge variant="warning">Pending</Badge>{' '}
+            <Badge variant="warning">{t.status.pending}</Badge>{' '}
             <strong>{cancelModal.item.clientName}</strong> · {formatDisplayDate(cancelModal.item.date)} ·{' '}
             {cancelModal.item.reservedTime?.substring(0, 5)}
             {cancelModal.item.serviceName ? ` · ${cancelModal.item.serviceName}` : ''}
@@ -219,17 +220,17 @@ const Todo = () => {
           </div>
         )}
         <Input
-          label="Reason for cancel *"
-          placeholder="Explain why this service is canceled"
+          label={t.todo.cancelReason}
+          placeholder={t.todo.cancelReasonPlaceholder}
           value={cancelReason}
           onChange={(e) => setCancelReason(e.target.value)}
         />
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
           <Button variant="secondary" onClick={() => setCancelModal({ open: false, item: null })}>
-            No, keep it
+            {t.todo.keepIt}
           </Button>
           <Button variant="danger" loading={isCanceling} onClick={handleCancelConfirm}>
-            Yes, cancel
+            {t.todo.yesCancel}
           </Button>
         </div>
       </Modal>

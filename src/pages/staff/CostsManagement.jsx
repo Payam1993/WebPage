@@ -23,6 +23,7 @@ import {
 } from '../../components/admin/ui'
 import { notConfirmedCostAPI, costAPI, getTodayDate } from '../../services/dataService'
 import { useAuth } from '../../context/AuthContext'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * CostsManagement - Staff can submit costs, Admin can confirm them
@@ -83,7 +84,7 @@ const CostsManagement = () => {
       data.sort((a, b) => b.date.localeCompare(a.date))
       setCosts(data)
     } catch (err) {
-      setError(err.message || 'Failed to load costs')
+      setError(err.message || t.costs.failedLoad)
     } finally {
       setIsLoading(false)
     }
@@ -118,9 +119,9 @@ const CostsManagement = () => {
     setError(null)
     try {
       // Validate required fields
-      if (!formData.costId) throw new Error('Please select a Cost Name')
-      if (!formData.price || formData.price <= 0) throw new Error('Price is required and must be greater than 0')
-      if (!formData.date) throw new Error('Date is required')
+      if (!formData.costId) throw new Error(t.costs.selectCostName)
+      if (!formData.price || formData.price <= 0) throw new Error(t.costs.priceRequiredError)
+      if (!formData.date) throw new Error(t.costs.dateRequiredError)
 
       await notConfirmedCostAPI.create({
         costName: formData.costName,
@@ -132,7 +133,7 @@ const CostsManagement = () => {
       await loadCosts()
       handleCloseModal()
     } catch (err) {
-      setError(err.message || 'Failed to save cost')
+      setError(err.message || t.costs.failedSave)
     } finally {
       setIsSaving(false)
     }
@@ -147,26 +148,26 @@ const CostsManagement = () => {
       // Remove from local state
       setCosts(prev => prev.filter(c => c.id !== cost.id))
     } catch (err) {
-      setError(err.message || 'Failed to confirm cost')
+      setError(err.message || t.costs.failedConfirm)
     } finally {
       setIsConfirming(null)
     }
   }
 
   const handleDelete = async (cost) => {
-    if (!window.confirm(`Are you sure you want to delete "${cost.costName}"?`)) return
+    if (!window.confirm(`${t.costs.deleteConfirm} "${cost.costName}"?`)) return
     
     try {
       await notConfirmedCostAPI.delete(cost.id)
       setCosts(prev => prev.filter(c => c.id !== cost.id))
     } catch (err) {
-      setError(err.message || 'Failed to delete cost')
+      setError(err.message || t.costs.failedDelete)
     }
   }
 
   // Format date for display
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    return new Date(dateStr).toLocaleDateString('es-ES', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
@@ -179,18 +180,18 @@ const CostsManagement = () => {
   return (
     <div>
       <PageHeader 
-        title="Costs Management"
+        title={t.costs.title}
         subtitle={
           canConfirm
-            ? 'Submit and confirm business expenses'
-            : 'Submit business expenses for admin approval'
+            ? t.costs.subtitleConfirm
+            : t.costs.subtitleSubmit
         }
         actions={
           <Button 
             icon={<Icons.Plus />}
             onClick={handleOpenModal}
           >
-            Add New Cost
+            {t.costs.addNew}
           </Button>
         }
       />
@@ -203,7 +204,7 @@ const CostsManagement = () => {
               <Icons.X />
               <span>{error}</span>
               <Button variant="ghost" size="small" onClick={() => setError(null)} style={{ marginLeft: 'auto' }}>
-                Dismiss
+                {t.costs.dismiss}
               </Button>
             </div>
           </CardContent>
@@ -214,8 +215,8 @@ const CostsManagement = () => {
       <Card padding={false}>
         <CardHeader style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--ui-border-light)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <CardTitle subtitle={`${costs.length} pending costs awaiting approval`}>
-              Pending Costs
+            <CardTitle subtitle={`${costs.length} ${t.costs.pendingSubtitle}`}>
+              {t.costs.pendingCosts}
             </CardTitle>
             <Button 
               variant="secondary" 
@@ -223,21 +224,21 @@ const CostsManagement = () => {
               onClick={loadCosts}
               loading={isLoading}
             >
-              <Icons.Refresh /> Refresh
+              <Icons.Refresh /> {t.common.refresh}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <LoadingState text="Loading costs..." />
+            <LoadingState text={t.costs.loading} />
           ) : costs.length === 0 ? (
             <EmptyState
               icon={<Icons.FileText />}
-              title="No pending costs"
-              description="All submitted costs have been processed, or no costs have been submitted yet."
+              title={t.costs.noPending}
+              description={t.costs.noPendingDesc}
               action={
                 <Button onClick={handleOpenModal} icon={<Icons.Plus />}>
-                  Add New Cost
+                  {t.costs.addNew}
                 </Button>
               }
             />
@@ -246,11 +247,11 @@ const CostsManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Cost Name</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>Price</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                    <TableHead>{t.common.date}</TableHead>
+                    <TableHead>{t.costs.costName}</TableHead>
+                    <TableHead>{t.costs.reason}</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>{t.common.price}</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -284,17 +285,17 @@ const CostsManagement = () => {
                               loading={isConfirming === cost.id}
                               disabled={isConfirming !== null}
                             >
-                              <Icons.Check /> Confirm
+                              <Icons.Check /> {t.common.confirm}
                             </Button>
                           ) : (
                             <Button 
                               variant="secondary" 
                               size="small"
                               disabled
-                              title="Only administrators can confirm costs"
+                              title={t.costs.onlyAdminsConfirm}
                               style={{ opacity: 0.5, cursor: 'not-allowed' }}
                             >
-                              <Icons.Check /> Pending Approval
+                              <Icons.Check /> {t.costs.pendingApproval}
                             </Button>
                           )}
                           <Button 
@@ -302,7 +303,7 @@ const CostsManagement = () => {
                             size="small" 
                             className="ui-btn-icon-danger"
                             onClick={() => handleDelete(cost)}
-                            title="Delete cost"
+                            title={t.costs.deleteCost}
                           >
                             <Icons.Trash />
                           </Button>
@@ -328,7 +329,7 @@ const CostsManagement = () => {
             borderRadius: '0 0 16px 16px',
           }}>
             <span style={{ marginRight: '24px', color: 'var(--ui-text-muted)', fontWeight: 500 }}>
-              Total Pending:
+              {t.costs.totalPending}
             </span>
             <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--ui-danger)' }}>
               €{totalCosts.toFixed(2)}
@@ -356,11 +357,9 @@ const CostsManagement = () => {
                 <Icons.Info />
               </div>
               <div>
-                <h4 style={{ margin: '0 0 8px 0', fontWeight: 600 }}>How it works</h4>
+                <h4 style={{ margin: '0 0 8px 0', fontWeight: 600 }}>{t.costs.howItWorks}</h4>
                 <p style={{ margin: 0, color: 'var(--ui-text-muted)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-                  Submit your business expenses using the "Add New Cost" button. 
-                  An administrator will review and confirm your submissions. 
-                  Once confirmed, the cost will be recorded in the daily expense report.
+                  {t.costs.howItWorksDesc}
                 </p>
               </div>
             </div>
@@ -372,15 +371,15 @@ const CostsManagement = () => {
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
-        title="Add New Cost"
-        subtitle="Submit a business expense for approval"
+        title={t.costs.modalTitle}
+        subtitle={t.costs.modalSubtitle}
         size="default"
       >
         <Grid cols={2} gap="default">
           <Select
-            label="Cost Name *"
+            label={t.costs.costNameRequired}
             options={costTypeOptions}
-            placeholder="Select cost type"
+            placeholder={t.costs.selectCostType}
             value={formData.costId}
             onChange={(e) => {
               const selectedCost = costTypes.find(ct => ct.id === e.target.value)
@@ -394,7 +393,7 @@ const CostsManagement = () => {
             }}
           />
           <Input
-            label="Price (€) *"
+            label={t.costs.priceRequired}
             type="number"
             step="0.01"
             min="0.01"
@@ -403,15 +402,15 @@ const CostsManagement = () => {
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
           />
           <Input
-            label="Date *"
+            label={t.costs.dateRequired}
             type="date"
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
           />
           <Input
-            label="Reason (optional)"
+            label={t.costs.reasonOptional}
             type="text"
-            placeholder="Brief description or reason"
+            placeholder={t.costs.reasonPlaceholder}
             value={formData.reason}
             onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
           />
@@ -419,10 +418,10 @@ const CostsManagement = () => {
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
           <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button onClick={handleSubmit} loading={isSaving}>
-            <Icons.Plus /> Submit Cost
+            <Icons.Plus /> {t.costs.submitCost}
           </Button>
         </div>
       </Modal>

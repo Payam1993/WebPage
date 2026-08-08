@@ -55,13 +55,14 @@ const StaffLinkBooking = () => {
         return
       }
       setLink(found)
-      const { generateClient } = await import('aws-amplify/data')
-      const client = generateClient({ authMode: 'apiKey' })
       const [servicesResult, roomsData] = await Promise.all([
-        client.models.Service.list(),
+        publicAPI.getServices({
+          centerId: found.centerId || undefined,
+          distinct: true,
+        }),
         publicAPI.getRooms(found.centerId),
       ])
-      setServices(servicesResult.data || [])
+      setServices(servicesResult || [])
       setRooms(roomsData || [])
       if (found.roomId) {
         setFormData((prev) => ({
@@ -287,7 +288,6 @@ const StaffLinkBooking = () => {
             {services.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.serviceName}
-                {s.minutes ? ` (${s.minutes} min)` : ''}
               </option>
             ))}
           </select>

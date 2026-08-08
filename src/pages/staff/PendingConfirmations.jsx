@@ -29,6 +29,7 @@ import {
   getBookingEndTime,
 } from '../../utils/bookingStatus'
 import { useAuth } from '../../context/AuthContext'
+import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * Pending Confirmations — Mini Admin / Admin
@@ -62,7 +63,7 @@ const PendingConfirmations = () => {
       setAwaitingPayment((bookings || []).filter((b) => isPaymentPending(b)))
     } catch (err) {
       console.error(err)
-      setError(err.message || 'Failed to load pending items')
+      setError(err.message || t.pending.failedLoad)
     } finally {
       setIsLoading(false)
     }
@@ -80,7 +81,7 @@ const PendingConfirmations = () => {
       await fn()
       await loadAll()
     } catch (err) {
-      alert(err.message || 'Action failed')
+      alert(err.message || t.pending.actionFailed)
     } finally {
       setActionId(null)
     }
@@ -90,24 +91,24 @@ const PendingConfirmations = () => {
     return (
       <EmptyState
         icon={<Icons.Users />}
-        title="Access denied"
-        description="Only Mini Admin and Admin can manage pending confirmations."
+        title={t.common.accessDenied}
+        description={t.pending.accessDeniedDesc}
       />
     )
   }
 
   if (isLoading) {
-    return <LoadingState text="Loading pending confirmations..." />
+    return <LoadingState text={t.pending.loading} />
   }
 
   return (
     <div>
       <PageHeader
-        title="Pending Confirmations"
-        subtitle="Confirm reservations, services realized, staff payments, and cost submissions"
+        title={t.pending.title}
+        subtitle={t.pending.subtitle}
         actions={
           <Button variant="secondary" size="small" onClick={loadAll}>
-            Refresh
+            {t.common.refresh}
           </Button>
         }
       />
@@ -121,23 +122,26 @@ const PendingConfirmations = () => {
       {/* Public booking requests */}
       <Card padding={false} style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle={`${pendingReservations.length} awaiting confirmation`}>
-            Reservation requests
+          <CardTitle subtitle={`${pendingReservations.length} ${t.pending.awaitingConfirmation}`}>
+            {t.pending.reservationRequests}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {pendingReservations.length === 0 ? (
-            <EmptyState title="No pending reservation requests" description="Public booking requests will appear here" />
+            <EmptyState
+              title={t.pending.noReservationRequests}
+              description={t.pending.noReservationRequestsDesc}
+            />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Center / Room</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.common.time}</TableHead>
+                  <TableHead>{t.common.client}</TableHead>
+                  <TableHead>{t.common.service}</TableHead>
+                  <TableHead>{t.common.center} / {t.common.room}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -166,7 +170,7 @@ const PendingConfirmations = () => {
                           )
                         }
                       >
-                        Confirm reservation
+                        {t.pending.confirmReservation}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -180,24 +184,27 @@ const PendingConfirmations = () => {
       {/* Service realized */}
       <Card padding={false} style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle={`${awaitingService.length} slots finished — confirm service was realized`}>
-            Service confirmation
+          <CardTitle subtitle={`${awaitingService.length} ${t.pending.slotsFinished}`}>
+            {t.pending.serviceConfirmation}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {awaitingService.length === 0 ? (
-            <EmptyState title="No services waiting confirmation" description="When a reservation end time passes, it appears here" />
+            <EmptyState
+              title={t.pending.noServicesWaiting}
+              description={t.pending.noServicesWaitingDesc}
+            />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Hours</TableHead>
-                  <TableHead>Staff</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.pending.hours}</TableHead>
+                  <TableHead>{t.pending.staff}</TableHead>
+                  <TableHead>{t.common.room}</TableHead>
+                  <TableHead>{t.common.client}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -210,7 +217,7 @@ const PendingConfirmations = () => {
                     <TableCell>{item.therapistName || '-'}</TableCell>
                     <TableCell>{item.roomName || '-'}</TableCell>
                     <TableCell>{item.clientName}</TableCell>
-                    <TableCell><Badge variant="warning">Pending service confirm</Badge></TableCell>
+                    <TableCell><Badge variant="warning">{t.pending.pendingServiceConfirm}</Badge></TableCell>
                     <TableCell style={{ textAlign: 'right' }}>
                       <Button
                         variant="success"
@@ -220,7 +227,7 @@ const PendingConfirmations = () => {
                           runAction(item.id, () => bookingAPI.confirmServiceDone(item))
                         }
                       >
-                        Confirm service done
+                        {t.pending.confirmServiceDone}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -234,24 +241,27 @@ const PendingConfirmations = () => {
       {/* Payment approval */}
       <Card padding={false} style={{ marginBottom: 24 }}>
         <CardHeader>
-          <CardTitle subtitle={`${awaitingPayment.length} staff payments to approve`}>
-            Payment approval
+          <CardTitle subtitle={`${awaitingPayment.length} ${t.pending.staffPaymentsToApprove}`}>
+            {t.pending.paymentApproval}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {awaitingPayment.length === 0 ? (
-            <EmptyState title="No payments pending" description="After service is confirmed done, payments appear here for approval" />
+            <EmptyState
+              title={t.pending.noPaymentsPending}
+              description={t.pending.noPaymentsPendingDesc}
+            />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Staff</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.pending.staff}</TableHead>
+                  <TableHead>{t.common.room}</TableHead>
+                  <TableHead>{t.common.client}</TableHead>
+                  <TableHead>{t.pending.amount}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -262,7 +272,7 @@ const PendingConfirmations = () => {
                     <TableCell>{item.roomName || '-'}</TableCell>
                     <TableCell>{item.clientName}</TableCell>
                     <TableCell>€{(item.priceAgreement || 0).toFixed(2)}</TableCell>
-                    <TableCell><Badge variant="info">Payment pending</Badge></TableCell>
+                    <TableCell><Badge variant="info">{t.pending.paymentPending}</Badge></TableCell>
                     <TableCell style={{ textAlign: 'right' }}>
                       <Button
                         variant="success"
@@ -272,7 +282,7 @@ const PendingConfirmations = () => {
                           runAction(item.id, () => bookingAPI.approvePayment(item))
                         }
                       >
-                        Approve payment
+                        {t.pending.approvePayment}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -286,23 +296,26 @@ const PendingConfirmations = () => {
       {/* Cost submissions */}
       <Card padding={false}>
         <CardHeader>
-          <CardTitle subtitle={`${pendingCosts.length} cost submissions`}>
-            Cost confirmations
+          <CardTitle subtitle={`${pendingCosts.length} ${t.pending.costSubmissions}`}>
+            {t.pending.costConfirmations}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {pendingCosts.length === 0 ? (
-            <EmptyState title="No pending costs" description="Staff cost submissions appear here" />
+            <EmptyState
+              title={t.pending.noPendingCosts}
+              description={t.pending.noPendingCostsDesc}
+            />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Cost</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Submitted by</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.costs.costName}</TableHead>
+                  <TableHead>{t.common.price}</TableHead>
+                  <TableHead>{t.costs.reason}</TableHead>
+                  <TableHead>{t.pending.submittedBy}</TableHead>
+                  <TableHead style={{ textAlign: 'right' }}>{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -322,7 +335,7 @@ const PendingConfirmations = () => {
                           runAction(item.id, () => notConfirmedCostAPI.confirm(item))
                         }
                       >
-                        Confirm cost
+                        {t.pending.confirmCost}
                       </Button>
                     </TableCell>
                   </TableRow>
