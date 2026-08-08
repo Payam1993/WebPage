@@ -208,8 +208,10 @@ const schema = a.schema({
       status: a.enum(["Done", "Pending", "Canceled"]),
       // Reason when status is Canceled
       cancelReason: a.string(),
-      // Payment after service is confirmed done
+      // Payment approval by Mini Admin / Admin (set pending when booking is confirmed)
       paymentStatus: a.enum(["None", "PaymentPending", "PaymentApproved"]),
+      // How the booking was created: Staff | StaffLink | PublicWeb
+      bookingSource: a.enum(["Staff", "StaffLink", "PublicWeb"]),
     })
     .authorization((allow) => [
       allow.authenticated(), // All authenticated staff can CRUD bookings
@@ -243,6 +245,8 @@ const schema = a.schema({
       durationMinutes: a.integer().required(),
       // Status for tracking
       status: a.enum(["NotConfirmed", "Confirmed"]),
+      // StaffLink → owning staff confirms; PublicWeb → Mini Admin / Admin confirms
+      bookingSource: a.enum(["Staff", "StaffLink", "PublicWeb"]),
     })
     .authorization((allow) => [
       allow.publicApiKey().to(["create", "read"]), // Public create + read for availability

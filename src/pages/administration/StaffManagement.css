@@ -76,10 +76,11 @@
 @media (max-width: 640px) {
   .staff-tabs {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .staff-tab {
-    flex: 1;
+    flex: 1 1 calc(50% - 0.5rem);
     justify-content: center;
   }
 }

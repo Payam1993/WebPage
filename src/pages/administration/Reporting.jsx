@@ -137,23 +137,21 @@ const Reporting = () => {
         title="Informes"
         subtitle="Ingresos por pagos locales y costes confirmados"
         actions={
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="portal-filter-bar" style={{ alignItems: 'center' }}>
             <Input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              containerClassName="ui-mb-0"
-              style={{ width: '150px' }}
+              containerClassName="ui-mb-0 portal-filter-field"
             />
             <span style={{ color: 'var(--ui-text-muted)' }}>a</span>
             <Input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              containerClassName="ui-mb-0"
-              style={{ width: '150px' }}
+              containerClassName="ui-mb-0 portal-filter-field"
             />
-            <Button onClick={handleGenerate} loading={isLoading}>
+            <Button onClick={handleGenerate} loading={isLoading} className="portal-actions-full">
               Generar informe
             </Button>
           </div>
@@ -211,7 +209,7 @@ const Reporting = () => {
                 <CardTitle subtitle="Definidos en Configuración local">KPI diarios</CardTitle>
               </CardHeader>
               <CardContent>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <Grid cols={2} gap="default">
                   <div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--ui-text-muted)', marginBottom: 4 }}>
                       Daily target KPI
@@ -234,7 +232,7 @@ const Reporting = () => {
                       Mínimo para cubrir costes
                     </div>
                   </div>
-                </div>
+                </Grid>
               </CardContent>
             </Card>
             <Card>
@@ -252,7 +250,7 @@ const Reporting = () => {
             </Card>
           </Grid>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+          <Grid cols={2} gap="default" style={{ marginBottom: 24 }}>
             <Card padding={false}>
               <CardHeader>
                 <CardTitle subtitle="Pagos locales por día">Por día</CardTitle>
@@ -337,7 +335,7 @@ const Reporting = () => {
                 )}
               </CardContent>
             </Card>
-          </div>
+          </Grid>
         </>
       )}
     </div>

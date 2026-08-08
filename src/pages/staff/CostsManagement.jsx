@@ -214,7 +214,7 @@ const CostsManagement = () => {
       {/* Costs Table */}
       <Card padding={false}>
         <CardHeader style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--ui-border-light)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div className="portal-card-header-row">
             <CardTitle subtitle={`${costs.length} ${t.costs.pendingSubtitle}`}>
               {t.costs.pendingCosts}
             </CardTitle>

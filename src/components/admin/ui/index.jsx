@@ -91,9 +91,10 @@ export const Select = ({
   placeholder,
   className = '', 
   containerClassName = '',
+  style,
   ...props 
 }) => (
-  <div className={`ui-form-group ${error ? 'has-error' : ''} ${containerClassName}`}>
+  <div className={`ui-form-group ${error ? 'has-error' : ''} ${containerClassName}`} style={style}>
     {label && <label className="ui-label">{label}</label>}
     <select className={`ui-select ${className}`} {...props}>
       {placeholder && <option value="">{placeholder}</option>}

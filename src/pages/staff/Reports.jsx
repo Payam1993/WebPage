@@ -305,7 +305,7 @@ const AdminDashboard = () => {
         title={t.reports.title}
         subtitle={t.reports.subtitle}
         actions={
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="portal-chip-row">
             {['today', 'week', 'month', 'year'].map((period) => (
               <Button
                 key={period}
@@ -345,7 +345,7 @@ const AdminDashboard = () => {
         </CardContent>
       </Card>
 
-      <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+      <Grid cols={3} gap="default" style={{ marginTop: '24px' }}>
         <Card>
           <CardHeader>
             <CardTitle>{t.reports.revenueBreakdown}</CardTitle>
@@ -416,7 +416,7 @@ const AdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </Grid>
     </div>
   )
 }

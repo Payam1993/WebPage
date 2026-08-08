@@ -25,7 +25,11 @@ const Calendar = () => {
   const { isUser, isAdmin, isMiniAdmin, staffProfile, isLoading: authLoading } = useAuth()
   const isIndividualView = isUser
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [viewMode, setViewMode] = useState('week')
+  const [viewMode, setViewMode] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches
+      ? 'day'
+      : 'week'
+  )
   const [events, setEvents] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [centers, setCenters] = useState([])
@@ -270,12 +274,12 @@ const Calendar = () => {
       />
 
       <Card style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="portal-toolbar" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', width: '100%' }}>
             <Button variant="secondary" size="small" onClick={() => navigateDate(-1)}>
               ‹
             </Button>
-            <h2 style={{ margin: 0, minWidth: 200, textAlign: 'center', fontSize: '1rem', fontWeight: 600 }}>
+            <h2 className="calendar-toolbar-title">
               {viewMode === 'month'
                 ? currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
                 : viewMode === 'week'
@@ -289,7 +293,7 @@ const Calendar = () => {
               {t.common.today}
             </Button>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div className="portal-chip-row" style={{ alignItems: 'flex-end' }}>
             {['day', 'week', 'month'].map((mode) => (
               <Button
                 key={mode}
@@ -307,16 +311,14 @@ const Calendar = () => {
                   options={centerOptions}
                   value={filterCenterId}
                   onChange={(e) => handleCenterFilterChange(e.target.value)}
-                  containerClassName="ui-mb-0"
-                  style={{ minWidth: 160 }}
+                  containerClassName="ui-mb-0 portal-filter-field"
                 />
                 <Select
                   label={t.common.room}
                   options={roomOptions}
                   value={filterRoomId}
                   onChange={(e) => setFilterRoomId(e.target.value)}
-                  containerClassName="ui-mb-0"
-                  style={{ minWidth: 160 }}
+                  containerClassName="ui-mb-0 portal-filter-field"
                 />
               </>
             )}
@@ -330,7 +332,8 @@ const Calendar = () => {
             <LoadingState text={t.calendar.loading} />
           </div>
         ) : viewMode === 'month' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--ui-border)' }}>
+          <div className="calendar-month-scroll">
+          <div className="calendar-month-grid">
             {daysOfWeek.map((day) => (
               <div
                 key={day}
@@ -404,8 +407,9 @@ const Calendar = () => {
               )
             })}
           </div>
+          </div>
         ) : viewMode === 'week' ? (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="calendar-month-scroll">
             <div style={{ minWidth: 900 }}>
               <div
                 style={{
@@ -489,7 +493,8 @@ const Calendar = () => {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex' }}>
+          <div className="calendar-day-scroll">
+          <div style={{ display: 'flex', minWidth: 320 }}>
             <div style={{ width: 64, flexShrink: 0, borderRight: '1px solid var(--ui-border)' }}>
               {hours.map((hour) => (
                 <div
@@ -507,7 +512,7 @@ const Calendar = () => {
                 </div>
               ))}
             </div>
-            <div style={{ flex: 1, position: 'relative', height: dayGridHeight }}>
+            <div style={{ flex: 1, position: 'relative', height: dayGridHeight, minWidth: 0 }}>
               {hours.map((hour) => (
                 <div
                   key={hour}
@@ -528,6 +533,7 @@ const Calendar = () => {
               )}
               {getEventsForDate(currentDate).map((event) => renderSpanningEvent(event, HOUR_HEIGHT_DAY))}
             </div>
+          </div>
           </div>
         )}
       </Card>

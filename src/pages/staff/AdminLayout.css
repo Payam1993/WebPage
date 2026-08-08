@@ -324,6 +324,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
   transition: margin-left var(--admin-transition);
 }
 
@@ -440,12 +441,25 @@
 .admin-content {
   flex: 1;
   padding: 24px;
-  overflow-x: hidden;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .content-container {
   max-width: 1400px;
   margin: 0 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+body.admin-mobile-menu-open {
+  overflow: hidden;
+}
+
+/* Allow intentional horizontal scroll inside portal tables/calendars */
+body:has(.admin-layout) {
+  overflow-x: auto;
 }
 
 /* Mobile Overlay */
@@ -497,15 +511,24 @@
 
 @media (max-width: 640px) {
   .admin-content {
-    padding: 16px;
+    padding: 12px;
   }
 
   .admin-header {
-    padding: 0 16px;
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .header-title {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: min(52vw, 220px);
   }
 
   .admin-sidebar {
-    width: 280px;
+    width: min(320px, 88vw);
   }
 
   .header-user .user-info {
@@ -514,5 +537,9 @@
 
   .header-user {
     padding: 4px;
+  }
+
+  .header-right {
+    gap: 8px;
   }
 }

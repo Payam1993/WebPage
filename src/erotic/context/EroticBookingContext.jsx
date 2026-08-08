@@ -201,6 +201,7 @@ export const EroticBookingProvider = ({ children }) => {
         date: formData.date,
         reservedTime: formData.reservedTime,
         durationMinutes: formData.durationMinutes,
+        bookingSource: 'PublicWeb',
       })
       
       setSubmitSuccess(true)

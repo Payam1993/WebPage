@@ -27,6 +27,7 @@ import { useAuth } from '../../context/AuthContext'
 import AvailabilityCalendar from '../../components/AvailabilityCalendar'
 import '../../components/AvailabilityCalendar.css'
 import { toBusyIntervals, getSlotConflictReasons } from '../../utils/availability'
+import { isStaffLinkRequest, isPublicWebRequest } from '../../utils/bookingStatus'
 import { staffT as t } from '../../i18n/staffEs'
 
 /**
@@ -139,7 +140,13 @@ const Reservations = () => {
         isIndividualView && staffProfile?.id
           ? { therapistId: staffProfile.id }
           : {}
-      const data = await notConfirmedReservationAPI.list(null, null, options)
+      let data = await notConfirmedReservationAPI.list(null, null, options)
+      // Staff (Users): only their staff-link requests. Admin: public web only.
+      if (isIndividualView) {
+        data = (data || []).filter((r) => isStaffLinkRequest(r))
+      } else {
+        data = (data || []).filter((r) => isPublicWebRequest(r))
+      }
       // Sort by date ascending (oldest first)
       data.sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date)
@@ -348,6 +355,13 @@ const Reservations = () => {
       }
 
       // Confirm the reservation (creates Booking, deletes NotConfirmedReservation)
+      const source = isIndividualView ? 'StaffLink' : 'PublicWeb'
+      if (isIndividualView && !isStaffLinkRequest(confirmModal.item)) {
+        throw new Error(t.reservations.onlyStaffLinkForUser)
+      }
+      if (!isIndividualView && !isPublicWebRequest(confirmModal.item)) {
+        throw new Error(t.reservations.staffLinkConfirmByOwner)
+      }
       await notConfirmedReservationAPI.confirm(confirmModal.item, {
         therapistId: confirmFormData.therapistId,
         therapistName: confirmFormData.therapistName,
@@ -357,6 +371,7 @@ const Reservations = () => {
             : Number(confirmFormData.totalPayment),
         localPayment: Number(confirmFormData.localPayment),
         priceAgreement: Number(confirmFormData.localPayment),
+        bookingSource: source,
       })
       
       // Remove from not confirmed list immediately (optimistic update)
@@ -423,6 +438,13 @@ const Reservations = () => {
           ? {
               therapistId: staffProfile.id,
               therapistName: staffDisplayName,
+            }
+          : {}),
+        ...(!editingItem
+          ? {
+              bookingSource: 'Staff',
+              paymentStatus: 'PaymentPending',
+              status: formData.status || 'Pending',
             }
           : {}),
       }
@@ -632,38 +654,34 @@ const Reservations = () => {
       {/* Date Filter */}
       <Card style={{ marginBottom: '16px' }}>
         <CardContent>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap' }}>
+          <div className="portal-filter-bar">
             <Input
               label={t.reservations.fromDate}
               type="date"
               value={dateFilter.fromDate}
               onChange={(e) => setDateFilter({ ...dateFilter, fromDate: e.target.value })}
-              containerClassName="ui-mb-0"
-              style={{ width: '160px' }}
+              containerClassName="ui-mb-0 portal-filter-field"
             />
             <Input
               label={t.reservations.toDate}
               type="date"
               value={dateFilter.toDate}
               onChange={(e) => setDateFilter({ ...dateFilter, toDate: e.target.value })}
-              containerClassName="ui-mb-0"
-              style={{ width: '160px' }}
+              containerClassName="ui-mb-0 portal-filter-field"
             />
             <Select
               label={t.common.center}
               options={centerFilterOptions}
               value={filterCenterId}
               onChange={(e) => handleCenterFilterChange(e.target.value)}
-              containerClassName="ui-mb-0"
-              style={{ width: '180px' }}
+              containerClassName="ui-mb-0 portal-filter-field"
             />
             <Select
               label={t.common.room}
               options={roomFilterOptions}
               value={filterRoomId}
               onChange={(e) => setFilterRoomId(e.target.value)}
-              containerClassName="ui-mb-0"
-              style={{ width: '180px' }}
+              containerClassName="ui-mb-0 portal-filter-field"
             />
             <Button onClick={handleApplyFilter} size="small">
               <Icons.Search /> {t.common.search}
@@ -681,7 +699,7 @@ const Reservations = () => {
             >
               {t.reservations.showAll}
             </Button>
-            <div style={{ marginLeft: 'auto', fontSize: '0.875rem', color: 'var(--ui-text-muted)' }}>
+            <div className="portal-filter-meta">
               {t.reservations.showing} {!appliedFilter.fromDate && !appliedFilter.toDate
                 ? t.reservations.allBookings
                 : appliedFilter.fromDate === appliedFilter.toDate 
@@ -697,7 +715,7 @@ const Reservations = () => {
       <Card style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Status Filters */}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="portal-chip-row">
             {Object.entries(statusCounts).map(([status, count]) => (
               <Button
                 key={status}
@@ -711,7 +729,7 @@ const Reservations = () => {
           </div>
           
           {/* Search */}
-          <div style={{ flex: 1, minWidth: '200px' }}>
+          <div style={{ flex: 1, minWidth: 'min(100%, 200px)' }}>
             <Input
               type="text"
               placeholder={t.reservations.searchPlaceholder}
@@ -726,7 +744,7 @@ const Reservations = () => {
       {/* Bookings List */}
       <Card padding={false}>
         <CardHeader style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--ui-border-light)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div className="portal-card-header-row">
             <CardTitle subtitle={`${filteredBookings.length} ${t.reservations.bookingsFound}`}>
               {t.reservations.bookingList}
             </CardTitle>

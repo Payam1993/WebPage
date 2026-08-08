@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { signOut, getCurrentUser } from 'aws-amplify/auth'
+import '../staff/AdminLayout.css'
 import './AdministrationLayout.css'
 
 /**
@@ -27,6 +28,11 @@ const AdministrationLayout = () => {
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    document.body.classList.toggle('admin-mobile-menu-open', mobileMenuOpen)
+    return () => document.body.classList.remove('admin-mobile-menu-open')
+  }, [mobileMenuOpen])
 
   const fetchUserInfo = async () => {
     try {

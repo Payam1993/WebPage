@@ -816,7 +816,8 @@ export const bookingAPI = {
         localPayment: payments.localPayment,
         status: bookingData.status || 'Pending',
         cancelReason: bookingData.cancelReason || null,
-        paymentStatus: bookingData.paymentStatus || 'None',
+        paymentStatus: bookingData.paymentStatus || 'PaymentPending',
+        bookingSource: bookingData.bookingSource || 'Staff',
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -854,6 +855,7 @@ export const bookingAPI = {
         status: bookingData.status,
         cancelReason: bookingData.cancelReason || null,
         paymentStatus: bookingData.paymentStatus || 'None',
+        ...(bookingData.bookingSource ? { bookingSource: bookingData.bookingSource } : {}),
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -881,17 +883,17 @@ export const bookingAPI = {
     return this.update(booking.id, {
       ...booking,
       status: 'Done',
-      paymentStatus: 'PaymentPending',
+      paymentStatus:
+        booking.paymentStatus === 'PaymentApproved' ? 'PaymentApproved' : 'PaymentPending',
     })
   },
 
   /**
-   * Mini-admin: approve staff payment after service is done
+   * Mini-admin / Admin: approve payment for a confirmed reservation
    */
   async approvePayment(booking) {
     return this.update(booking.id, {
       ...booking,
-      status: 'Done',
       paymentStatus: 'PaymentApproved',
     })
   },
@@ -965,6 +967,7 @@ export const notConfirmedReservationAPI = {
         reservedTime,
         durationMinutes: Number(reservationData.durationMinutes) || 60,
         status: 'NotConfirmed',
+        bookingSource: reservationData.bookingSource || null,
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -987,10 +990,15 @@ export const notConfirmedReservationAPI = {
         centerName: reservationData.centerName || null,
         roomId: reservationData.roomId || null,
         roomName: reservationData.roomName || null,
+        therapistId: reservationData.therapistId || null,
+        therapistName: reservationData.therapistName || null,
         date: reservationData.date,
         reservedTime: reservationData.reservedTime,
         durationMinutes: reservationData.durationMinutes,
         status: reservationData.status || 'NotConfirmed',
+        ...(reservationData.bookingSource
+          ? { bookingSource: reservationData.bookingSource }
+          : {}),
       })
       if (errors) throw new Error(errors[0].message)
       return data
@@ -1017,7 +1025,11 @@ export const notConfirmedReservationAPI = {
    */
   async confirm(notConfirmedReservation, additionalData = {}) {
     try {
-      // Create the confirmed booking
+      const source =
+        additionalData.bookingSource ||
+        notConfirmedReservation.bookingSource ||
+        (notConfirmedReservation.therapistId ? 'StaffLink' : 'PublicWeb')
+      // Create the confirmed booking — payment enters Mini Admin / Admin queue
       const bookingData = {
         clientName: notConfirmedReservation.clientName,
         clientPhone: notConfirmedReservation.clientPhone,
@@ -1036,6 +1048,8 @@ export const notConfirmedReservationAPI = {
         totalPayment: additionalData.totalPayment ?? null,
         localPayment: additionalData.localPayment ?? additionalData.priceAgreement ?? null,
         status: 'Pending',
+        paymentStatus: 'PaymentPending',
+        bookingSource: source,
       }
       
       const newBooking = await bookingAPI.create(bookingData)
@@ -1080,6 +1094,7 @@ export const publicAPI = {
         reservedTime,
         durationMinutes: Number(reservationData.durationMinutes) || 60,
         status: 'NotConfirmed',
+        bookingSource: reservationData.bookingSource || 'PublicWeb',
       })
       if (errors) throw new Error(errors[0].message)
       return data

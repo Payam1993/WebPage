@@ -31,16 +31,17 @@ import {
   isAwaitingServiceConfirm,
   isPaymentPending,
   getBookingEndTime,
+  isPublicWebRequest,
 } from '../../utils/bookingStatus'
 import { useAuth } from '../../context/AuthContext'
 import { staffT as t } from '../../i18n/staffEs'
 
 /**
  * Pending Confirmations — Mini Admin / Admin
- * - Public reservation requests
+ * - Public website reservation requests (not staff-link — those go to the owning User)
  * - Staff cost submissions
  * - Past bookings awaiting service confirmation
- * - Done services awaiting payment approval
+ * - Payments awaiting approval (all confirmed reservations)
  */
 const PendingConfirmations = () => {
   const { isAdmin, isMiniAdmin } = useAuth()
@@ -64,7 +65,7 @@ const PendingConfirmations = () => {
         notConfirmedCostAPI.list(),
         bookingAPI.list(),
       ])
-      setPendingReservations(reservations || [])
+      setPendingReservations((reservations || []).filter((r) => isPublicWebRequest(r)))
       setPendingCosts(costs || [])
       setAwaitingService((bookings || []).filter((b) => isAwaitingServiceConfirm(b)))
       setAwaitingPayment((bookings || []).filter((b) => isPaymentPending(b)))
@@ -115,6 +116,10 @@ const PendingConfirmations = () => {
       setConfirmError(t.reservations.localPaymentRequiredError)
       return
     }
+    if (!isPublicWebRequest(confirmItem)) {
+      setConfirmError(t.pending.staffLinkMustConfirmByUser)
+      return
+    }
     const id = confirmItem.id
     setActionId(id)
     setConfirmError(null)
@@ -126,6 +131,7 @@ const PendingConfirmations = () => {
             : Number(confirmForm.totalPayment),
         localPayment: Number(confirmForm.localPayment),
         priceAgreement: Number(confirmForm.localPayment),
+        bookingSource: 'PublicWeb',
       })
       closeConfirmModal()
       await loadAll()

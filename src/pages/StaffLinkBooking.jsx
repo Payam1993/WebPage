@@ -191,6 +191,7 @@ const StaffLinkBooking = () => {
         date: formData.date,
         reservedTime: formData.reservedTime,
         durationMinutes: formData.durationMinutes,
+        bookingSource: 'StaffLink',
       })
       setSuccess(true)
     } catch (err) {

@@ -1,6 +1,36 @@
 import { timeToMinutes, minutesToTime } from './availability'
 import { parseLocalDateKey, toLocalDateKey } from './dates'
 
+/** Booking / request origin */
+export const BOOKING_SOURCE = {
+  STAFF: 'Staff',
+  STAFF_LINK: 'StaffLink',
+  PUBLIC_WEB: 'PublicWeb',
+}
+
+/**
+ * Resolve source for new or legacy records.
+ * Legacy heuristic: therapist on a request ≈ staff booking link.
+ */
+export const resolveBookingSource = (item) => {
+  const raw = item?.bookingSource
+  if (
+    raw === BOOKING_SOURCE.STAFF ||
+    raw === BOOKING_SOURCE.STAFF_LINK ||
+    raw === BOOKING_SOURCE.PUBLIC_WEB
+  ) {
+    return raw
+  }
+  if (item?.therapistId) return BOOKING_SOURCE.STAFF_LINK
+  return BOOKING_SOURCE.PUBLIC_WEB
+}
+
+export const isStaffLinkRequest = (item) =>
+  resolveBookingSource(item) === BOOKING_SOURCE.STAFF_LINK
+
+export const isPublicWebRequest = (item) =>
+  resolveBookingSource(item) === BOOKING_SOURCE.PUBLIC_WEB
+
 /** End datetime of a booking in local time */
 export const getBookingEndDate = (booking) => {
   const day = parseLocalDateKey(booking.date)
@@ -35,8 +65,11 @@ export const isAwaitingServiceConfirm = (booking, now = new Date()) => {
   return end ? end <= now : false
 }
 
+/** Payment awaiting Mini Admin / Admin approval (after reservation is confirmed) */
 export const isPaymentPending = (booking) =>
-  booking?.status === 'Done' && booking?.paymentStatus === 'PaymentPending'
+  !!booking &&
+  booking.status !== 'Canceled' &&
+  booking.paymentStatus === 'PaymentPending'
 
 export const isPaymentApproved = (booking) =>
   booking?.paymentStatus === 'PaymentApproved'
