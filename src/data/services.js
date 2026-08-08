@@ -59,6 +59,17 @@ export const servicesData = [
       min90: null
     },
     isCorporate: true
+  },
+  {
+    id: 'reserve-room',
+    image: "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=600&q=80",
+    detailImage: "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=1200&q=80",
+    prices: {
+      min30: null,
+      min60: null,
+      min90: null
+    },
+    isReserveRoom: true
   }
 ]
 
@@ -139,6 +150,19 @@ export const serviceTranslations = {
       ],
       features: ["Gift Cards", "Corporate Rates", "Custom Packages"],
       contactUs: "Contact Us for Corporate Pricing"
+    },
+    'reserve-room': {
+      name: "Reserve Room",
+      shortDesc: "If you are a massage therapist with experience and are looking for a room to treat your clients, get in contact with us and we will contact you.",
+      longDesc: "If you are a massage therapist with experience and are looking for a room to treat your clients, get in contact with us and we will contact you.",
+      benefits: [
+        "Professional treatment rooms",
+        "Flexible reservation options",
+        "Central Barcelona location",
+        "Support for independent therapists"
+      ],
+      features: ["For therapists", "Room rental", "Contact us"],
+      contactUs: "Contact Us to Reserve"
     },
     consultMore: "For sessions over 90 min, please contact us",
     duration: "Duration",
@@ -251,6 +275,19 @@ export const serviceTranslations = {
       features: ["Tarjetas Regalo", "Tarifas Corporativas", "Paquetes Personalizados"],
       contactUs: "Contáctenos para Precios Corporativos"
     },
+    'reserve-room': {
+      name: "Reservar Sala",
+      shortDesc: "Si eres masajista, tienes experiencia y buscas una sala para atender a tus clientes, ponte en contacto con nosotros y te contactaremos.",
+      longDesc: "Si eres masajista, tienes experiencia y buscas una sala para atender a tus clientes, ponte en contacto con nosotros y te contactaremos.",
+      benefits: [
+        "Salas profesionales de tratamiento",
+        "Opciones de reserva flexibles",
+        "Ubicación céntrica en Barcelona",
+        "Apoyo para terapeutas independientes"
+      ],
+      features: ["Para terapeutas", "Alquiler de sala", "Contáctanos"],
+      contactUs: "Contáctanos para reservar"
+    },
     consultMore: "Para sesiones de más de 90 min, contáctenos",
     duration: "Duración",
     price: "Precio",
@@ -361,6 +398,19 @@ export const serviceTranslations = {
       ],
       features: ["Targetes Regal", "Tarifes Corporatives", "Paquets Personalitzats"],
       contactUs: "Contacteu-nos per a Preus Corporatius"
+    },
+    'reserve-room': {
+      name: "Reservar Sala",
+      shortDesc: "Si ets massatgista, tens experiència i busques una sala per atendre els teus clients, posa't en contacte amb nosaltres i et contactarem.",
+      longDesc: "Si ets massatgista, tens experiència i busques una sala per atendre els teus clients, posa't en contacte amb nosaltres i et contactarem.",
+      benefits: [
+        "Sales professionals de tractament",
+        "Opcions de reserva flexibles",
+        "Ubicació cèntrica a Barcelona",
+        "Suport per a terapeutes independents"
+      ],
+      features: ["Per a terapeutes", "Lloguer de sala", "Contacteu-nos"],
+      contactUs: "Contacteu-nos per reservar"
     },
     consultMore: "Per a sessions de més de 90 min, contacteu-nos",
     duration: "Durada",

@@ -5,9 +5,11 @@ import { useLanguage } from '../context/LanguageContext'
 import { servicesData, serviceTranslations } from '../data/services'
 import './Services.css'
 
-const CorporateModal = ({ isOpen, onClose, serviceText, setCursorVariant, t }) => {
+const ContactModal = ({ isOpen, onClose, title, subtitle, message, setCursorVariant, t, variant = 'corporate' }) => {
   const phoneNumber = '+34 691 846 476'
   const whatsappLink = 'https://wa.me/34691846476'
+  const isReserve = variant === 'reserveRoom'
+  const copy = isReserve ? t.reserveRoom : t.corporate
 
   if (!isOpen) return null
 
@@ -23,39 +25,43 @@ const CorporateModal = ({ isOpen, onClose, serviceText, setCursorVariant, t }) =
         <button className="modal-close-btn" onClick={onClose}>×</button>
         
         <div className="corporate-b2b-content">
-          {/* Icon */}
           <div className="b2b-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
+            {isReserve ? (
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M3 21h18"/>
+                <path d="M5 21V7l7-4 7 4v14"/>
+                <path d="M9 21v-6h6v6"/>
+                <path d="M9 9h.01"/>
+                <path d="M15 9h.01"/>
+              </svg>
+            ) : (
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            )}
           </div>
 
-          {/* Heading */}
-          <h3 className="b2b-title">{serviceText?.name || 'Corporate Wellness'}</h3>
+          <h3 className="b2b-title">{title}</h3>
           
-          {/* Subtitle */}
           <p className="b2b-subtitle">
-            {t.corporate?.b2bSubtitle || 'Business to Business Partnership'}
+            {subtitle}
           </p>
 
-          {/* Main Message */}
           <div className="b2b-message">
-            <p>
-              {t.corporate?.b2bMessage || 
-                'Interested in elevating your team\'s well-being through our premium corporate wellness programs? We\'d love to discuss how we can create a tailored experience for your organization.'}
-            </p>
             <p className="b2b-highlight">
-              {t.corporate?.b2bCta || 
-                'For B2B collaborations and corporate inquiries, please contact us directly — we\'re here to help you design the perfect wellness solution for your company.'}
+              {message}
             </p>
+            {!isReserve && (
+              <p>
+                {t.corporate?.b2bCta}
+              </p>
+            )}
           </div>
 
-          {/* Contact Options */}
           <div className="b2b-contact-options">
-            {/* WhatsApp Button */}
             <a 
               href={whatsappLink}
               target="_blank"
@@ -67,10 +73,9 @@ const CorporateModal = ({ isOpen, onClose, serviceText, setCursorVariant, t }) =
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
               </svg>
-              <span>{t.corporate?.whatsappBtn || 'Chat on WhatsApp'}</span>
+              <span>{copy?.whatsappBtn || t.corporate?.whatsappBtn || 'WhatsApp'}</span>
             </a>
 
-            {/* Phone Button */}
             <a 
               href={`tel:${phoneNumber.replace(/\s/g, '')}`}
               className="b2b-contact-btn phone"
@@ -84,10 +89,8 @@ const CorporateModal = ({ isOpen, onClose, serviceText, setCursorVariant, t }) =
             </a>
           </div>
 
-          {/* Footer Note */}
           <p className="b2b-footer">
-            {t.corporate?.b2bFooter || 
-              'Our team is available Monday to Saturday, 10:00 - 20:00'}
+            {copy?.footer || copy?.b2bFooter || t.corporate?.b2bFooter}
           </p>
         </div>
       </motion.div>
@@ -95,24 +98,36 @@ const CorporateModal = ({ isOpen, onClose, serviceText, setCursorVariant, t }) =
   )
 }
 
-const ServiceCard = ({ service, serviceText, index, setCursorVariant, onCorporateClick }) => {
+const ServiceCard = ({ service, serviceText, index, setCursorVariant, onContactClick }) => {
   const cardRef = useRef(null)
   const isInView = useInView(cardRef, { once: true, margin: "-100px" })
   const { t } = useLanguage()
 
   const isCorporate = service.isCorporate
+  const isReserveRoom = service.isReserveRoom
+  const isContactCard = isCorporate || isReserveRoom
 
   const handleClick = (e) => {
-    if (isCorporate) {
+    if (isContactCard) {
       e.preventDefault()
-      onCorporateClick()
+      onContactClick(isReserveRoom ? 'reserveRoom' : 'corporate')
     }
   }
+
+  const badgeLabel = isReserveRoom
+    ? (t.reserveRoom?.badge || 'For therapists')
+    : (t.corporate?.agreementBased || 'Agreement Based')
+
+  const ctaLabel = isReserveRoom
+    ? (t.reserveRoom?.contactUs || serviceText?.contactUs || 'Contact Us')
+    : isCorporate
+      ? (t.corporate?.contactUs || 'Contact Us')
+      : (t.services?.bookThis || 'View Details')
 
   return (
     <motion.div
       ref={cardRef}
-      className={`service-card ${isCorporate ? 'corporate-card' : ''}`}
+      className={`service-card ${isContactCard ? 'corporate-card' : ''}`}
       initial={{ opacity: 0, y: 60 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
       transition={{ duration: 0.8, delay: index * 0.1 }}
@@ -120,7 +135,7 @@ const ServiceCard = ({ service, serviceText, index, setCursorVariant, onCorporat
       onMouseLeave={() => setCursorVariant('default')}
     >
       <Link 
-        to={isCorporate ? '#' : `/service/${service.id}`} 
+        to={isContactCard ? '#' : `/service/${service.id}`} 
         className="service-card-link"
         onClick={handleClick}
       >
@@ -128,8 +143,8 @@ const ServiceCard = ({ service, serviceText, index, setCursorVariant, onCorporat
           <img src={service.image} alt={serviceText.name} loading="lazy" />
           <div className="service-overlay">
             <div className="service-prices-preview">
-              {isCorporate ? (
-                <span className="agreement-badge">{t.corporate?.agreementBased || 'Agreement Based'}</span>
+              {isContactCard ? (
+                <span className="agreement-badge">{badgeLabel}</span>
               ) : (
                 <>
                   <span>30' €{service.prices.min30}</span>
@@ -158,7 +173,7 @@ const ServiceCard = ({ service, serviceText, index, setCursorVariant, onCorporat
           </ul>
           
           <span className="service-link">
-            <span>{isCorporate ? (t.corporate?.contactUs || 'Contact Us') : (t.services?.bookThis || 'View Details')}</span>
+            <span>{ctaLabel}</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -174,7 +189,7 @@ const Services = ({ setCursorVariant }) => {
   const sectionRef = useRef(null)
   const isInView = useInView(sectionRef, { once: true, margin: "-200px" })
   const serviceTexts = serviceTranslations[language]
-  const [showCorporateModal, setShowCorporateModal] = useState(false)
+  const [contactModal, setContactModal] = useState(null) // 'corporate' | 'reserveRoom' | null
 
   return (
     <section id="services" className="services section" ref={sectionRef}>
@@ -198,7 +213,7 @@ const Services = ({ setCursorVariant }) => {
               serviceText={serviceTexts[service.id]}
               index={index}
               setCursorVariant={setCursorVariant}
-              onCorporateClick={() => setShowCorporateModal(true)}
+              onContactClick={(type) => setContactModal(type)}
             />
           ))}
         </div>
@@ -222,13 +237,28 @@ const Services = ({ setCursorVariant }) => {
       </div>
 
       <AnimatePresence>
-        {showCorporateModal && (
-          <CorporateModal 
-            isOpen={showCorporateModal}
-            onClose={() => setShowCorporateModal(false)}
-            serviceText={serviceTexts['corporate']}
+        {contactModal === 'corporate' && (
+          <ContactModal 
+            isOpen
+            onClose={() => setContactModal(null)}
+            title={serviceTexts['corporate']?.name}
+            subtitle={t.corporate?.b2bSubtitle}
+            message={t.corporate?.b2bMessage}
             setCursorVariant={setCursorVariant}
             t={t}
+            variant="corporate"
+          />
+        )}
+        {contactModal === 'reserveRoom' && (
+          <ContactModal 
+            isOpen
+            onClose={() => setContactModal(null)}
+            title={serviceTexts['reserve-room']?.name || t.reserveRoom?.subtitle}
+            subtitle={t.reserveRoom?.subtitle}
+            message={t.reserveRoom?.message || serviceTexts['reserve-room']?.shortDesc}
+            setCursorVariant={setCursorVariant}
+            t={t}
+            variant="reserveRoom"
           />
         )}
       </AnimatePresence>

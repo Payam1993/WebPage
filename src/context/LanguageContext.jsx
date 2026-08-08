@@ -59,6 +59,15 @@ export const translations = {
       whatsappBtn: "Chat on WhatsApp",
       b2bFooter: "Our team is available Monday to Saturday, 10:00 - 20:00"
     },
+    // Reserve Room (for therapists)
+    reserveRoom: {
+      badge: "For therapists",
+      contactUs: "Contact Us",
+      subtitle: "Room reservation for massage therapists",
+      message: "If you are a massage therapist with experience and are looking for a room to treat your clients, get in contact with us and we will contact you.",
+      whatsappBtn: "Chat on WhatsApp",
+      footer: "Our team is available Monday to Saturday, 10:00 - 20:00"
+    },
     // About
     about: {
       overline: "Our Story",
@@ -321,6 +330,14 @@ export const translations = {
       whatsappBtn: "Chatea por WhatsApp",
       b2bFooter: "Nuestro equipo está disponible de lunes a sábado, 10:00 - 20:00"
     },
+    reserveRoom: {
+      badge: "Para terapeutas",
+      contactUs: "Contáctanos",
+      subtitle: "Reserva de sala para masajistas",
+      message: "Si eres masajista, tienes experiencia y buscas una sala para atender a tus clientes, ponte en contacto con nosotros y te contactaremos.",
+      whatsappBtn: "Chatea por WhatsApp",
+      footer: "Nuestro equipo está disponible de lunes a sábado, 10:00 - 20:00"
+    },
     // About
     about: {
       overline: "Nuestra Historia",
@@ -582,6 +599,14 @@ export const translations = {
       b2bCta: "Per a col·laboracions B2B i consultes corporatives, si us plau contacta'ns directament — estem aquí per ajudar-te a dissenyar la solució de benestar perfecta per a la teva empresa.",
       whatsappBtn: "Xateja per WhatsApp",
       b2bFooter: "El nostre equip està disponible de dilluns a dissabte, 10:00 - 20:00"
+    },
+    reserveRoom: {
+      badge: "Per a terapeutes",
+      contactUs: "Contacteu-nos",
+      subtitle: "Reserva de sala per a massatgistes",
+      message: "Si ets massatgista, tens experiència i busques una sala per atendre els teus clients, posa't en contacte amb nosaltres i et contactarem.",
+      whatsappBtn: "Xateja per WhatsApp",
+      footer: "El nostre equip està disponible de dilluns a dissabte, 10:00 - 20:00"
     },
     // About
     about: {
