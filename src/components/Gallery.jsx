@@ -1,14 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '../context/LanguageContext'
 import { websiteGalleryImageAPI, websiteImageAPI } from '../services/dataService'
 import './Gallery.css'
 
+/**
+ * Public homepage Gallery.
+ * Always mounts <section id="gallery"> so the navbar anchor works.
+ * Do not gate visibility on useInView — that left opacity at 0 when inView never flipped.
+ */
 const Gallery = () => {
   const { t } = useLanguage()
   const sectionRef = useRef(null)
-  const isInView = useInView(sectionRef, { once: true, margin: '-120px' })
   const [items, setItems] = useState([])
+  const [loadState, setLoadState] = useState({
+    status: 'loading', // loading | ready | error
+    totalRecords: 0,
+    activeRecords: 0,
+    resolvedUrls: 0,
+    error: null,
+  })
   const [lightbox, setLightbox] = useState(null)
 
   useEffect(() => {
@@ -16,17 +27,19 @@ const Gallery = () => {
     ;(async () => {
       try {
         const rows = await websiteGalleryImageAPI.listPublic()
+        const list = rows || []
         console.info('[Gallery] public records', {
-          count: (rows || []).length,
-          items: (rows || []).map((r) => ({
+          count: list.length,
+          items: list.map((r) => ({
             id: r.id,
             active: r.active,
             sortOrder: r.sortOrder,
             imageKey: r.imageKey,
           })),
         })
+
         const withUrls = await Promise.all(
-          (rows || []).map(async (row) => {
+          list.map(async (row) => {
             const url = await websiteImageAPI.getUrl(row.imageKey)
             if (!url) {
               console.error('[Gallery] getUrl returned null', {
@@ -49,7 +62,9 @@ const Gallery = () => {
             return { ...row, url }
           })
         )
+
         if (cancelled) return
+
         const ready = withUrls.filter((r) => r.url)
         if (withUrls.length > 0 && ready.length === 0) {
           console.error(
@@ -57,10 +72,27 @@ const Gallery = () => {
             withUrls.map((r) => r.imageKey)
           )
         }
+
         setItems(ready)
+        setLoadState({
+          status: 'ready',
+          totalRecords: list.length,
+          activeRecords: list.length,
+          resolvedUrls: ready.length,
+          error: null,
+        })
       } catch (err) {
         console.error('Gallery load failed:', err)
-        if (!cancelled) setItems([])
+        if (!cancelled) {
+          setItems([])
+          setLoadState({
+            status: 'error',
+            totalRecords: 0,
+            activeRecords: 0,
+            resolvedUrls: 0,
+            error: err?.message || 'Gallery load failed',
+          })
+        }
       }
     })()
     return () => {
@@ -77,52 +109,70 @@ const Gallery = () => {
     return () => window.removeEventListener('keydown', onKey)
   }, [lightbox])
 
-  if (items.length === 0) {
-    return null
-  }
+  const title = t.gallery?.title || 'Galería'
+  const showDebugEmpty =
+    loadState.status !== 'loading' && items.length === 0
 
   return (
     <section id="gallery" className="gallery" ref={sectionRef}>
       <div className="container">
         <motion.div
           className="section-header"
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
         >
           <span className="section-overline">{t.gallery?.overline || 'Gallery'}</span>
-          <h2>{t.gallery?.title}</h2>
+          <h2>{title}</h2>
           <p className="section-subtitle">{t.gallery?.subtitle}</p>
         </motion.div>
 
-        <div className="gallery-grid">
-          {items.map((item, index) => (
-            <motion.button
-              type="button"
-              key={item.id}
-              className="gallery-item"
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: Math.min(index * 0.06, 0.4) }}
-              onClick={() => setLightbox(item)}
-            >
-              <img
-                src={item.url}
-                alt={t.gallery?.imageAlt || 'Confession Barcelona'}
-                loading="lazy"
-                decoding="async"
-                onError={() => {
-                  console.error('[Gallery] <img> failed to load', {
-                    id: item.id,
-                    imageKey: item.imageKey,
-                    src: item.url,
-                  })
-                }}
-              />
-              <span className="gallery-item-veil" aria-hidden />
-            </motion.button>
-          ))}
-        </div>
+        {loadState.status === 'loading' && (
+          <p className="gallery-debug" aria-live="polite">
+            Loading gallery…
+          </p>
+        )}
+
+        {showDebugEmpty && (
+          <p className="gallery-debug" aria-live="polite">
+            Gallery loaded, {loadState.resolvedUrls} images
+            {loadState.totalRecords > 0
+              ? ` (${loadState.totalRecords} records, URLs failed to resolve)`
+              : ''}
+            {loadState.error ? ` — ${loadState.error}` : ''}
+          </p>
+        )}
+
+        {items.length > 0 && (
+          <div className="gallery-grid">
+            {items.map((item, index) => (
+              <motion.button
+                type="button"
+                key={item.id}
+                className="gallery-item"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: Math.min(index * 0.06, 0.4) }}
+                onClick={() => setLightbox(item)}
+              >
+                <img
+                  src={item.url}
+                  alt={t.gallery?.imageAlt || 'Confession Barcelona'}
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => {
+                    console.error('[Gallery] <img> failed to load', {
+                      id: item.id,
+                      imageKey: item.imageKey,
+                      src: item.url,
+                    })
+                  }}
+                />
+                <span className="gallery-item-veil" aria-hidden />
+              </motion.button>
+            ))}
+          </div>
+        )}
       </div>
 
       <AnimatePresence>

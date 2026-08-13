@@ -9,6 +9,14 @@
   margin-bottom: var(--space-lg);
 }
 
+.gallery-debug {
+  text-align: center;
+  color: var(--color-charcoal, #1a1a1a);
+  opacity: 0.65;
+  font-size: 0.9rem;
+  margin: 0 0 var(--space-md, 1rem);
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
