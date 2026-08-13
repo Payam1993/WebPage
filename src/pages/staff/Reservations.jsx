@@ -28,6 +28,7 @@ import AvailabilityCalendar from '../../components/AvailabilityCalendar'
 import '../../components/AvailabilityCalendar.css'
 import { toBusyIntervals, getSlotConflictReasons } from '../../utils/availability'
 import { isStaffLinkRequest, isPublicWebRequest } from '../../utils/bookingStatus'
+import { bookingErrorMessage } from '../../utils/bookingErrors'
 import { staffT as t } from '../../i18n/staffEs'
 
 /**
@@ -320,8 +321,13 @@ const Reservations = () => {
     setConfirmFormData({
       therapistId: defaultTherapistId,
       therapistName: defaultTherapistName,
+      roomId: item.roomId || '',
+      roomName: item.roomName || '',
+      centerId: item.centerId || '',
+      centerName: item.centerName || '',
       totalPayment: '',
       localPayment: '',
+      conflictReasons: [],
     })
   }
 
@@ -330,20 +336,82 @@ const Reservations = () => {
     setConfirmFormData({})
   }
 
-  const handleConfirmTherapistSelect = (staffId) => {
-    const staff = staffList.find(s => s.id === staffId)
-    setConfirmFormData({
+  const refreshConfirmConflicts = async (nextForm) => {
+    const item = confirmModal.item
+    if (!item?.date || !item?.reservedTime) return []
+    try {
+      const [dayBookings, pending] = await Promise.all([
+        bookingAPI.list(item.date, item.date, {
+          ...(item.centerId ? { centerId: item.centerId } : {}),
+        }),
+        notConfirmedReservationAPI.list(item.date, item.date),
+      ])
+      const therapistBookings = nextForm.therapistId
+        ? await bookingAPI.list(item.date, item.date, {
+            therapistId: nextForm.therapistId,
+          })
+        : []
+      const byId = new Map()
+      ;[...dayBookings, ...therapistBookings].forEach((b) => {
+        if (b?.id) byId.set(b.id, b)
+      })
+      const busyIntervals = toBusyIntervals([
+        ...byId.values(),
+        ...pending.filter((p) => p.id !== item.id),
+      ])
+      return getSlotConflictReasons({
+        dateKey: item.date,
+        startTime: item.reservedTime,
+        durationMinutes: item.durationMinutes,
+        busyIntervals,
+        roomId: nextForm.roomId || null,
+        therapistId: nextForm.therapistId || null,
+      })
+    } catch {
+      return []
+    }
+  }
+
+  const handleConfirmTherapistSelect = async (staffId) => {
+    const staff = staffList.find((s) => s.id === staffId)
+    const next = {
       ...confirmFormData,
       therapistId: staffId,
       therapistName: staff?.staffName || '',
-    })
+    }
+    const conflictReasons = await refreshConfirmConflicts(next)
+    setConfirmFormData({ ...next, conflictReasons })
+  }
+
+  const handleConfirmRoomSelect = async (roomId) => {
+    const room = roomsList.find((r) => r.id === roomId)
+    const next = {
+      ...confirmFormData,
+      roomId,
+      roomName: room?.roomName || '',
+      centerId: room?.centerId || confirmFormData.centerId || confirmModal.item?.centerId || '',
+      centerName:
+        room?.centerName || confirmFormData.centerName || confirmModal.item?.centerName || '',
+    }
+    const conflictReasons = await refreshConfirmConflicts(next)
+    setConfirmFormData({ ...next, conflictReasons })
   }
 
   const handleConfirmReservation = async () => {
     setIsConfirming(true)
     try {
       const bookingDate = confirmModal.item.date
-      
+
+      if (!confirmFormData.therapistId) {
+        setError(t.reservations.therapistRequiredError)
+        setIsConfirming(false)
+        return
+      }
+      if (!confirmFormData.roomId) {
+        setError(t.reservations.roomRequiredError)
+        setIsConfirming(false)
+        return
+      }
       if (
         confirmFormData.localPayment === '' ||
         confirmFormData.localPayment == null ||
@@ -354,7 +422,15 @@ const Reservations = () => {
         return
       }
 
-      // Confirm the reservation (creates Booking, deletes NotConfirmedReservation)
+      const conflictReasons =
+        confirmFormData.conflictReasons ||
+        (await refreshConfirmConflicts(confirmFormData))
+      if (conflictReasons.length) {
+        setError(conflictReasons[0])
+        setIsConfirming(false)
+        return
+      }
+
       const source = isIndividualView ? 'StaffLink' : 'PublicWeb'
       if (isIndividualView && !isStaffLinkRequest(confirmModal.item)) {
         throw new Error(t.reservations.onlyStaffLinkForUser)
@@ -365,6 +441,10 @@ const Reservations = () => {
       await notConfirmedReservationAPI.confirm(confirmModal.item, {
         therapistId: confirmFormData.therapistId,
         therapistName: confirmFormData.therapistName,
+        roomId: confirmFormData.roomId,
+        roomName: confirmFormData.roomName,
+        centerId: confirmFormData.centerId || confirmModal.item.centerId,
+        centerName: confirmFormData.centerName || confirmModal.item.centerName,
         totalPayment:
           confirmFormData.totalPayment === '' || confirmFormData.totalPayment == null
             ? null
@@ -373,30 +453,38 @@ const Reservations = () => {
         priceAgreement: Number(confirmFormData.localPayment),
         bookingSource: source,
       })
-      
-      // Remove from not confirmed list immediately (optimistic update)
-      setNotConfirmedList(prev => prev.filter(item => item.id !== confirmModal.item.id))
-      
-      // Check if the confirmed booking falls within the current filter range
-      const isInCurrentRange = !appliedFilter.fromDate || !appliedFilter.toDate || 
+
+      setNotConfirmedList((prev) => prev.filter((item) => item.id !== confirmModal.item.id))
+
+      const isInCurrentRange =
+        !appliedFilter.fromDate ||
+        !appliedFilter.toDate ||
         (bookingDate >= appliedFilter.fromDate && bookingDate <= appliedFilter.toDate)
-      
+
       if (isInCurrentRange) {
-        // Booking is in current filter range, reload to show it
         await loadBookings()
       } else {
-        // Booking is outside current filter - expand filter to show the booking
-        const newFromDate = bookingDate < (appliedFilter.fromDate || bookingDate) ? bookingDate : appliedFilter.fromDate
-        const newToDate = bookingDate > (appliedFilter.toDate || bookingDate) ? bookingDate : appliedFilter.toDate
+        const newFromDate =
+          bookingDate < (appliedFilter.fromDate || bookingDate)
+            ? bookingDate
+            : appliedFilter.fromDate
+        const newToDate =
+          bookingDate > (appliedFilter.toDate || bookingDate)
+            ? bookingDate
+            : appliedFilter.toDate
         setDateFilter({ fromDate: newFromDate, toDate: newToDate })
         setAppliedFilter({ fromDate: newFromDate, toDate: newToDate })
-        // useEffect will trigger loadBookings
       }
-      
+
       handleCloseConfirmModal()
     } catch (err) {
-      setError(err.message || 'Failed to confirm reservation')
-      // Reload to ensure state is consistent
+      if (err?.errorCode === 'ALREADY_CONFIRMED') {
+        handleCloseConfirmModal()
+        await loadNotConfirmedReservations()
+        await loadBookings()
+        return
+      }
+      setError(bookingErrorMessage(err, t.bookingErrors))
       await loadNotConfirmedReservations()
     } finally {
       setIsConfirming(false)
@@ -411,8 +499,11 @@ const Reservations = () => {
       if (!formData.date) throw new Error('Date is required')
       if (!formData.reservedTime) throw new Error('Please select an available time from the calendar')
       if (!formData.durationMinutes) throw new Error('Duration is required')
-      if (isIndividualView && !formData.roomId) {
-        throw new Error('Room selection is required')
+      if (!formData.roomId) {
+        throw new Error(t.reservations.roomRequiredError)
+      }
+      if (!isIndividualView && !formData.therapistId) {
+        throw new Error(t.reservations.therapistRequiredError)
       }
       if (isIndividualView && !legalAccepted) {
         throw new Error('You must accept the local massage license declaration')
@@ -496,7 +587,7 @@ const Reservations = () => {
       await loadBookings()
       handleCloseModal()
     } catch (err) {
-      setError(err.message || 'Failed to save')
+      setError(bookingErrorMessage(err, t.bookingErrors))
     } finally {
       setIsSaving(false)
     }
@@ -1039,12 +1130,12 @@ const Reservations = () => {
                 onChange={(e) => handleServiceSelect(e.target.value)}
               />
               <Select
-                label={t.common.therapist}
-                options={staffOptions}
-                placeholder={t.reservations.selectTherapistOptional}
-                value={formData.therapistId || ''}
-                onChange={(e) => handleTherapistSelect(e.target.value)}
-              />
+                  label={t.reservations.assignTherapistRequired}
+                  options={staffOptions}
+                  placeholder={t.reservations.selectTherapistRequired}
+                  value={formData.therapistId || ''}
+                  onChange={(e) => handleTherapistSelect(e.target.value)}
+                />
               <Select
                 label={t.common.center}
                 options={centerFormOptions}
@@ -1293,13 +1384,30 @@ const Reservations = () => {
             <Grid cols={2} gap="default">
               {!isIndividualView && (
                 <Select
-                  label={t.reservations.assignTherapist}
+                  label={t.reservations.assignTherapistRequired}
                   options={staffOptions}
-                  placeholder={t.reservations.selectTherapistOptional}
+                  placeholder={t.reservations.selectTherapistRequired}
                   value={confirmFormData.therapistId || ''}
                   onChange={(e) => handleConfirmTherapistSelect(e.target.value)}
                 />
               )}
+              <Select
+                label={t.reservations.assignRoomRequired}
+                options={roomsList
+                  .filter(
+                    (r) =>
+                      !confirmModal.item?.centerId ||
+                      !r.centerId ||
+                      r.centerId === confirmModal.item.centerId
+                  )
+                  .map((r) => ({
+                    value: r.id,
+                    label: r.roomName || r.id,
+                  }))}
+                placeholder={t.reservations.selectRoom}
+                value={confirmFormData.roomId || ''}
+                onChange={(e) => handleConfirmRoomSelect(e.target.value)}
+              />
               <Input
                 label={t.reservations.totalPaymentOptional}
                 type="number"
@@ -1328,11 +1436,37 @@ const Reservations = () => {
               />
             </Grid>
 
+            {(confirmFormData.conflictReasons || []).length > 0 && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  borderRadius: 8,
+                  background: 'rgba(239,68,68,0.1)',
+                  color: '#dc2626',
+                  fontSize: '0.875rem',
+                }}
+              >
+                {(confirmFormData.conflictReasons || []).map((reason) => (
+                  <div key={reason}>{reason}</div>
+                ))}
+                <div style={{ marginTop: 6 }}>{t.reservations.conflictHint}</div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
               <Button variant="secondary" onClick={handleCloseConfirmModal}>
                 {t.common.cancel}
               </Button>
-              <Button onClick={handleConfirmReservation} loading={isConfirming}>
+              <Button
+                onClick={handleConfirmReservation}
+                loading={isConfirming}
+                disabled={
+                  !confirmFormData.therapistId ||
+                  !confirmFormData.roomId ||
+                  (confirmFormData.conflictReasons || []).length > 0
+                }
+              >
                 <Icons.Check /> {t.reservations.confirmBooking}
               </Button>
             </div>

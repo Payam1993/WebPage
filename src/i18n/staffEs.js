@@ -106,11 +106,22 @@ export const staffT = {
     all: 'Todos',
   },
 
-  /** Map API status enum → display label (keep Pending/Done/Canceled as stored values) */
+  /** Map API status enum → display label (Pending on calendar = already confirmed) */
   statusLabel: {
-    Pending: 'Pendiente',
+    Pending: 'Confirmada',
     Done: 'Hecho',
     Canceled: 'Cancelado',
+  },
+
+  bookingErrors: {
+    THERAPIST_CONFLICT: 'Este terapeuta ya tiene una reserva en este horario.',
+    ROOM_CONFLICT: 'Esta sala ya está reservada en este horario.',
+    THERAPIST_REQUIRED: 'Selecciona un terapeuta antes de confirmar.',
+    ROOM_REQUIRED: 'Selecciona una sala antes de confirmar.',
+    INVALID_TIME: 'Elige una fecha y hora válidas (hora en franja de 30 min).',
+    UNAUTHORIZED_BOOKING_ACTION: 'No tienes permiso para esta acción de reserva.',
+    ALREADY_CONFIRMED: 'Esta solicitud ya estaba confirmada.',
+    GENERIC: 'No se pudo guardar la reserva. Inténtalo de nuevo.',
   },
 
   reservations: {
@@ -181,6 +192,14 @@ export const staffT = {
     clientName: 'Nombre del cliente',
     clientPhone: 'Teléfono del cliente',
     assignTherapist: 'Asignar terapeuta',
+    assignTherapistRequired: 'Asignar terapeuta *',
+    assignRoomRequired: 'Asignar sala *',
+    selectTherapistRequired: 'Seleccionar terapeuta',
+    therapistRequiredError: 'El terapeuta es obligatorio',
+    roomRequiredError: 'La sala es obligatoria',
+    roomOccupied: 'Ocupada en este horario',
+    roomAvailable: 'Disponible',
+    conflictHint: 'Resuelve el conflicto de terapeuta o sala antes de confirmar.',
     priceAgreement: 'Precio acordado (€)',
     totalPayment: 'Pago total (€)',
     totalPaymentOptional: 'Pago total (€) — opcional',
@@ -379,6 +398,13 @@ export const staffT = {
     confirmReservation: 'Confirmar reserva',
     staffLinkMustConfirmByUser:
       'Las reservas por enlace de personal las debe confirmar el propio personal.',
+    assignTherapistRequired: 'Asignar terapeuta *',
+    assignRoomRequired: 'Asignar sala *',
+    selectTherapistRequired: 'Seleccionar terapeuta',
+    selectRoomRequired: 'Seleccionar sala',
+    roomOccupied: 'Ocupada en este horario',
+    roomAvailable: 'Disponible',
+    conflictHint: 'Resuelve el conflicto de terapeuta o sala antes de confirmar.',
     serviceConfirmation: 'Confirmación de servicio',
     slotsFinished: 'huecos finalizados — confirma que el servicio se realizó',
     noServicesWaiting: 'No hay servicios pendientes de confirmación',

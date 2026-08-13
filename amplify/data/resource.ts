@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { bookingConflictGuard } from "../functions/booking-conflict-guard/resource";
 
 /**
  * Confession Barcelona - Data Schema
@@ -11,6 +12,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * - DailyService: daily service records with full details
  * - DailyCost: daily cost records
  * - Booking: client reservations/bookings (staff portal)
+ * - BookingOccupancy: race-safe therapist/room slot locks (Lambda-owned)
  * - BusinessKpi: daily target / safe KPI for local payments
  * - NotConfirmedReservation: public booking requests awaiting confirmation
  * - WebsiteHomeImage / WebsiteServiceImage / WebsiteGalleryImage: public site images
@@ -20,6 +22,30 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * - Authenticated users: access to Booking model (staff portal)
  * - Public (guest): can create NotConfirmedReservation and StaffApplication
  */
+
+const bookingArgs = {
+  clientName: a.string(),
+  clientPhone: a.string(),
+  serviceId: a.string(),
+  serviceName: a.string(),
+  therapistId: a.string(),
+  therapistName: a.string(),
+  centerId: a.string(),
+  centerName: a.string(),
+  roomId: a.string(),
+  roomName: a.string(),
+  date: a.string(),
+  reservedTime: a.string(),
+  durationMinutes: a.integer(),
+  priceAgreement: a.float(),
+  totalPayment: a.float(),
+  localPayment: a.float(),
+  status: a.string(),
+  cancelReason: a.string(),
+  paymentStatus: a.string(),
+  bookingSource: a.string(),
+};
+
 const schema = a.schema({
   // ============================================
   // Static Data Models (Admin only)
@@ -215,7 +241,9 @@ const schema = a.schema({
       bookingSource: a.enum(["Staff", "StaffLink", "PublicWeb"]),
     })
     .authorization((allow) => [
-      allow.authenticated(), // All authenticated staff can CRUD bookings
+      // Writes go through booking-conflict-guard Lambda (DynamoDB IAM).
+      // Authenticated clients may only read — prevents bypassing guarded mutations.
+      allow.authenticated().to(["read"]),
       allow.publicApiKey().to(["read"]), // Public availability calendar (busy slots)
     ]),
 
@@ -246,12 +274,15 @@ const schema = a.schema({
       durationMinutes: a.integer().required(),
       // Status for tracking
       status: a.enum(["NotConfirmed", "Confirmed"]),
+      // Set when confirmed via guardedConfirmReservation (idempotent retries)
+      confirmedBookingId: a.string(),
       // StaffLink → owning staff confirms; PublicWeb → Mini Admin / Admin confirms
       bookingSource: a.enum(["Staff", "StaffLink", "PublicWeb"]),
     })
     .authorization((allow) => [
-      allow.publicApiKey().to(["create", "read"]), // Public create + read for availability
-      allow.authenticated(), // Staff can read, update, delete
+      allow.publicApiKey().to(["create", "read"]), // Public create + availability busy slots
+      // Confirmation writes go through booking-conflict-guard (DynamoDB IAM).
+      allow.authenticated().to(["read"]),
     ]),
 
   // ============================================
@@ -335,6 +366,88 @@ const schema = a.schema({
       allow.publicApiKey().to(["read"]),
       allow.authenticated().to(["read"]),
     ]),
+
+  // ============================================
+  // Race-safe therapist / room slot occupancy (Lambda writes via DynamoDB)
+  // Key: therapist|room # resourceId # date # slotStartMinutes
+  // ============================================
+  BookingOccupancy: a
+    .model({
+      occupancyKey: a.string().required(),
+      bookingId: a.string().required(),
+      resourceType: a.string().required(),
+      resourceId: a.string().required(),
+      date: a.date().required(),
+      slotStartMinutes: a.integer().required(),
+    })
+    .identifier(["occupancyKey"])
+    .authorization((allow) => [
+      // Infrastructure only: no client writes (create/update/delete).
+      // Lambda writes via DynamoDB IAM. Optional Admin read for ops troubleshooting.
+      allow.group("Admin_Confession").to(["read"]),
+    ]),
+
+  BookingGuardResult: a.customType({
+    ok: a.boolean().required(),
+    errorCode: a.string(),
+    message: a.string(),
+    booking: a.json(),
+  }),
+
+  guardedCreateBooking: a
+    .mutation()
+    .arguments(bookingArgs)
+    .returns(a.ref("BookingGuardResult"))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(bookingConflictGuard)),
+
+  guardedConfirmReservation: a
+    .mutation()
+    .arguments({
+      notConfirmedId: a.string().required(),
+      therapistId: a.string(),
+      therapistName: a.string(),
+      centerId: a.string(),
+      centerName: a.string(),
+      roomId: a.string(),
+      roomName: a.string(),
+      priceAgreement: a.float(),
+      totalPayment: a.float(),
+      localPayment: a.float(),
+      bookingSource: a.string(),
+    })
+    .returns(a.ref("BookingGuardResult"))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(bookingConflictGuard)),
+
+  guardedUpdateBooking: a
+    .mutation()
+    .arguments({
+      id: a.string().required(),
+      ...bookingArgs,
+    })
+    .returns(a.ref("BookingGuardResult"))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(bookingConflictGuard)),
+
+  guardedCancelBooking: a
+    .mutation()
+    .arguments({
+      id: a.string().required(),
+      cancelReason: a.string(),
+    })
+    .returns(a.ref("BookingGuardResult"))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(bookingConflictGuard)),
+
+  guardedDeleteBooking: a
+    .mutation()
+    .arguments({
+      id: a.string().required(),
+    })
+    .returns(a.ref("BookingGuardResult"))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(bookingConflictGuard)),
 });
 
 export type Schema = ClientSchema<typeof schema>;

@@ -10,6 +10,7 @@
  */
 
 import { generateClient } from 'aws-amplify/data'
+import { assertGuardOk } from '../utils/bookingErrors'
 
 // Initialize the Amplify Data client
 let client = null
@@ -19,6 +20,51 @@ const getClient = () => {
     client = generateClient()
   }
   return client
+}
+
+const callBookingGuard = async (mutationName, args) => {
+  const client = getClient()
+  const mut = client.mutations?.[mutationName]
+  if (typeof mut !== 'function') {
+    throw new Error(
+      'Booking guard is not deployed yet. Deploy the Amplify backend, then retry.'
+    )
+  }
+  const { data, errors } = await mut(args)
+  if (errors?.length) {
+    throw new Error(errors[0].message)
+  }
+  return assertGuardOk(data)
+}
+
+const normalizeReservedTime = (reservedTime) =>
+  reservedTime?.substring(0, 5) ? `${reservedTime.substring(0, 5)}:00` : reservedTime
+
+const toGuardBookingArgs = (bookingData, id = null) => {
+  const payments = normalizeBookingPayments(bookingData)
+  return {
+    ...(id ? { id } : {}),
+    clientName: bookingData.clientName,
+    clientPhone: bookingData.clientPhone?.trim() || null,
+    serviceId: bookingData.serviceId || null,
+    serviceName: bookingData.serviceName || null,
+    therapistId: bookingData.therapistId || null,
+    therapistName: bookingData.therapistName || null,
+    centerId: bookingData.centerId || null,
+    centerName: bookingData.centerName || null,
+    roomId: bookingData.roomId || null,
+    roomName: bookingData.roomName || null,
+    date: bookingData.date,
+    reservedTime: normalizeReservedTime(bookingData.reservedTime),
+    durationMinutes: Number(bookingData.durationMinutes) || 60,
+    priceAgreement: payments.priceAgreement,
+    totalPayment: payments.totalPayment,
+    localPayment: payments.localPayment,
+    status: bookingData.status || 'Pending',
+    cancelReason: bookingData.cancelReason || null,
+    paymentStatus: bookingData.paymentStatus || 'PaymentPending',
+    bookingSource: bookingData.bookingSource || 'Staff',
+  }
 }
 
 // ============================================
@@ -794,35 +840,8 @@ export const bookingAPI = {
 
   async create(bookingData) {
     try {
-      const client = getClient()
-      const reservedTime = bookingData.reservedTime?.substring(0, 5)
-        ? `${bookingData.reservedTime.substring(0, 5)}:00`
-        : bookingData.reservedTime
-      const payments = normalizeBookingPayments(bookingData)
-      const { data, errors } = await client.models.Booking.create({
-        clientName: bookingData.clientName,
-        clientPhone: bookingData.clientPhone?.trim() || null,
-        serviceId: bookingData.serviceId || null,
-        serviceName: bookingData.serviceName || null,
-        therapistId: bookingData.therapistId || null,
-        therapistName: bookingData.therapistName || null,
-        centerId: bookingData.centerId || null,
-        centerName: bookingData.centerName || null,
-        roomId: bookingData.roomId || null,
-        roomName: bookingData.roomName || null,
-        date: bookingData.date,
-        reservedTime,
-        durationMinutes: Number(bookingData.durationMinutes) || 60,
-        priceAgreement: payments.priceAgreement,
-        totalPayment: payments.totalPayment,
-        localPayment: payments.localPayment,
-        status: bookingData.status || 'Pending',
-        cancelReason: bookingData.cancelReason || null,
-        paymentStatus: bookingData.paymentStatus || 'PaymentPending',
-        bookingSource: bookingData.bookingSource || 'Staff',
-      })
-      if (errors) throw new Error(errors[0].message)
-      return data
+      // Always via Lambda — Booking model GraphQL create is read-only for clients.
+      return await callBookingGuard('guardedCreateBooking', toGuardBookingArgs(bookingData))
     } catch (error) {
       console.error('Error creating booking:', error)
       throw error
@@ -831,36 +850,12 @@ export const bookingAPI = {
 
   async update(id, bookingData) {
     try {
-      const client = getClient()
-      const reservedTime = bookingData.reservedTime?.substring(0, 5)
-        ? `${bookingData.reservedTime.substring(0, 5)}:00`
-        : bookingData.reservedTime
-      const payments = normalizeBookingPayments(bookingData)
-      const { data, errors } = await client.models.Booking.update({
-        id,
-        clientName: bookingData.clientName,
-        clientPhone: bookingData.clientPhone?.trim() || null,
-        serviceId: bookingData.serviceId || null,
-        serviceName: bookingData.serviceName || null,
-        therapistId: bookingData.therapistId || null,
-        therapistName: bookingData.therapistName || null,
-        centerId: bookingData.centerId || null,
-        centerName: bookingData.centerName || null,
-        roomId: bookingData.roomId || null,
-        roomName: bookingData.roomName || null,
-        date: bookingData.date,
-        reservedTime,
-        durationMinutes: Number(bookingData.durationMinutes) || 60,
-        priceAgreement: payments.priceAgreement,
-        totalPayment: payments.totalPayment,
-        localPayment: payments.localPayment,
-        status: bookingData.status,
-        cancelReason: bookingData.cancelReason || null,
-        paymentStatus: bookingData.paymentStatus || 'None',
-        ...(bookingData.bookingSource ? { bookingSource: bookingData.bookingSource } : {}),
-      })
-      if (errors) throw new Error(errors[0].message)
-      return data
+      // Schedule / cancel / occupancy-sensitive writes go through the guard.
+      // Payment-only and Done transitions also use the guard (safe no-op on locks when schedule unchanged).
+      return await callBookingGuard(
+        'guardedUpdateBooking',
+        toGuardBookingArgs(bookingData, id)
+      )
     } catch (error) {
       console.error('Error updating booking:', error)
       throw error
@@ -871,11 +866,15 @@ export const bookingAPI = {
    * Cancel a booking with a required reason
    */
   async cancel(booking, reason) {
-    return this.update(booking.id, {
-      ...booking,
-      status: 'Canceled',
-      cancelReason: reason,
-    })
+    try {
+      return await callBookingGuard('guardedCancelBooking', {
+        id: booking.id,
+        cancelReason: reason,
+      })
+    } catch (error) {
+      console.error('Error canceling booking:', error)
+      throw error
+    }
   },
 
   /**
@@ -902,9 +901,7 @@ export const bookingAPI = {
 
   async delete(id) {
     try {
-      const client = getClient()
-      const { errors } = await client.models.Booking.delete({ id })
-      if (errors) throw new Error(errors[0].message)
+      await callBookingGuard('guardedDeleteBooking', { id })
       return true
     } catch (error) {
       console.error('Error deleting booking:', error)
@@ -1023,7 +1020,7 @@ export const notConfirmedReservationAPI = {
   },
 
   /**
-   * Confirm a reservation: create Booking and delete NotConfirmedReservation
+   * Confirm a reservation via guarded Lambda (soft-confirms request + creates Booking).
    */
   async confirm(notConfirmedReservation, additionalData = {}) {
     try {
@@ -1031,35 +1028,20 @@ export const notConfirmedReservationAPI = {
         additionalData.bookingSource ||
         notConfirmedReservation.bookingSource ||
         (notConfirmedReservation.therapistId ? 'StaffLink' : 'PublicWeb')
-      // Create the confirmed booking — payment enters Mini Admin / Admin queue
-      const bookingData = {
-        clientName: notConfirmedReservation.clientName,
-        clientPhone: notConfirmedReservation.clientPhone,
-        serviceId: notConfirmedReservation.serviceId,
-        serviceName: notConfirmedReservation.serviceName,
+      return await callBookingGuard('guardedConfirmReservation', {
+        notConfirmedId: notConfirmedReservation.id,
         therapistId: additionalData.therapistId ?? notConfirmedReservation.therapistId ?? null,
-        therapistName: additionalData.therapistName ?? notConfirmedReservation.therapistName ?? null,
+        therapistName:
+          additionalData.therapistName ?? notConfirmedReservation.therapistName ?? null,
         centerId: additionalData.centerId ?? notConfirmedReservation.centerId ?? null,
         centerName: additionalData.centerName ?? notConfirmedReservation.centerName ?? null,
         roomId: additionalData.roomId ?? notConfirmedReservation.roomId ?? null,
         roomName: additionalData.roomName ?? notConfirmedReservation.roomName ?? null,
-        date: notConfirmedReservation.date,
-        reservedTime: notConfirmedReservation.reservedTime,
-        durationMinutes: notConfirmedReservation.durationMinutes,
         priceAgreement: additionalData.priceAgreement || 0,
         totalPayment: additionalData.totalPayment ?? null,
         localPayment: additionalData.localPayment ?? additionalData.priceAgreement ?? null,
-        status: 'Pending',
-        paymentStatus: 'PaymentPending',
         bookingSource: source,
-      }
-      
-      const newBooking = await bookingAPI.create(bookingData)
-      
-      // Delete the not confirmed reservation
-      await this.delete(notConfirmedReservation.id)
-      
-      return newBooking
+      })
     } catch (error) {
       console.error('Error confirming reservation:', error)
       throw error
