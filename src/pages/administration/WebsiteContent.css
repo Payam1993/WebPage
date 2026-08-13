@@ -6,6 +6,10 @@
   border-radius: 8px;
 }
 
+.website-content > .ui-card + .ui-card {
+  margin-top: 20px;
+}
+
 .wc-tabs {
   display: flex;
   gap: 8px;

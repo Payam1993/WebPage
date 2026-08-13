@@ -19,7 +19,10 @@ import {
   websiteGalleryImageAPI,
 } from '../../services/dataService'
 import { servicesData, serviceTranslations } from '../../data/services'
-import { WEBSITE_HOME_SLOTS } from '../../utils/websiteImages'
+import {
+  WEBSITE_HOME_CONTENT_SLOTS,
+  WEBSITE_LOGO_SLOT,
+} from '../../utils/websiteImages'
 import { useAuth } from '../../context/AuthContext'
 import './WebsiteContent.css'
 
@@ -156,7 +159,10 @@ const WebsiteContent = () => {
   const onHomeFile = (slot, file) => {
     if (!file) return
     runBusy(`home-${slot}`, async () => {
-      const key = await websiteImageAPI.uploadHome(file)
+      const key =
+        slot === WEBSITE_LOGO_SLOT.id
+          ? await websiteImageAPI.uploadHomeLogo(file)
+          : await websiteImageAPI.uploadHome(file)
       await websiteHomeImageAPI.save(slot, key)
     })
   }
@@ -246,77 +252,156 @@ const WebsiteContent = () => {
       ) : (
         <>
           {tab === 'home' && (
-            <Card>
-              <CardHeader>
-                <CardTitle subtitle="Named slots used on the public homepage">
-                  Homepage image slots
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="wc-list">
-                  {WEBSITE_HOME_SLOTS.map((slot) => {
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle subtitle="Shown in the public entrance loader. Animation timing is unchanged — only the image source is managed here.">
+                    Logo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const slot = WEBSITE_LOGO_SLOT
                     const row = homeBySlot[slot.id]
                     const inputKey = `home-${slot.id}`
                     return (
-                      <div key={slot.id} className="wc-row">
-                        <Thumb
-                          imageKey={row?.imageKey}
-                          fallback={slot.fallback}
-                          alt={slot.label}
-                        />
-                        <div className="wc-row-meta">
-                          <div className="wc-row-title">{slot.label}</div>
-                          <div className="wc-row-sub">
-                            Slot: <code>{slot.id}</code>
-                            {row?.imageKey ? (
-                              <>
-                                {' '}
-                                · <code className="wc-key">{row.imageKey}</code>
-                              </>
-                            ) : (
-                              ' · using fallback until you upload'
+                      <div className="wc-list">
+                        <div className="wc-row">
+                          <Thumb
+                            imageKey={row?.imageKey}
+                            fallback={null}
+                            alt={slot.label}
+                          />
+                          <div className="wc-row-meta">
+                            <div className="wc-row-title">{slot.label}</div>
+                            <div className="wc-row-sub">
+                              Slot: <code>{slot.id}</code>
+                              {row?.imageKey ? (
+                                <>
+                                  {' '}
+                                  · <code className="wc-key">{row.imageKey}</code>
+                                </>
+                              ) : (
+                                ' · using built-in animated SVG until you upload'
+                              )}
+                            </div>
+                          </div>
+                          <div className="wc-row-actions">
+                            <input
+                              ref={(el) => {
+                                fileRefs.current[inputKey] = el
+                              }}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              hidden
+                              onChange={(e) =>
+                                onHomeFile(slot.id, e.target.files?.[0])
+                              }
+                            />
+                            <Button
+                              size="small"
+                              loading={busyKey === inputKey}
+                              onClick={() => pickFile(inputKey)}
+                            >
+                              {row ? 'Replace Logo' : 'Upload Logo'}
+                            </Button>
+                            {row && (
+                              <Button
+                                size="small"
+                                variant="danger"
+                                onClick={() =>
+                                  setDeleteConfirm({
+                                    open: true,
+                                    kind: 'home',
+                                    item: { slot: slot.id },
+                                  })
+                                }
+                              >
+                                Remove Logo
+                              </Button>
                             )}
                           </div>
                         </div>
-                        <div className="wc-row-actions">
-                          <input
-                            ref={(el) => {
-                              fileRefs.current[inputKey] = el
-                            }}
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            hidden
-                            onChange={(e) => onHomeFile(slot.id, e.target.files?.[0])}
-                          />
-                          <Button
-                            size="small"
-                            loading={busyKey === inputKey}
-                            onClick={() => pickFile(inputKey)}
-                          >
-                            {row ? 'Replace' : 'Upload'}
-                          </Button>
-                          {row && (
-                            <Button
-                              size="small"
-                              variant="danger"
-                              onClick={() =>
-                                setDeleteConfirm({
-                                  open: true,
-                                  kind: 'home',
-                                  item: { slot: slot.id },
-                                })
-                              }
-                            >
-                              Remove
-                            </Button>
-                          )}
-                        </div>
                       </div>
                     )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                  })()}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle subtitle="Named slots used on the public homepage">
+                    Homepage image slots
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="wc-list">
+                    {WEBSITE_HOME_CONTENT_SLOTS.map((slot) => {
+                      const row = homeBySlot[slot.id]
+                      const inputKey = `home-${slot.id}`
+                      return (
+                        <div key={slot.id} className="wc-row">
+                          <Thumb
+                            imageKey={row?.imageKey}
+                            fallback={slot.fallback}
+                            alt={slot.label}
+                          />
+                          <div className="wc-row-meta">
+                            <div className="wc-row-title">{slot.label}</div>
+                            <div className="wc-row-sub">
+                              Slot: <code>{slot.id}</code>
+                              {row?.imageKey ? (
+                                <>
+                                  {' '}
+                                  · <code className="wc-key">{row.imageKey}</code>
+                                </>
+                              ) : (
+                                ' · using fallback until you upload'
+                              )}
+                            </div>
+                          </div>
+                          <div className="wc-row-actions">
+                            <input
+                              ref={(el) => {
+                                fileRefs.current[inputKey] = el
+                              }}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/gif"
+                              hidden
+                              onChange={(e) =>
+                                onHomeFile(slot.id, e.target.files?.[0])
+                              }
+                            />
+                            <Button
+                              size="small"
+                              loading={busyKey === inputKey}
+                              onClick={() => pickFile(inputKey)}
+                            >
+                              {row ? 'Replace' : 'Upload'}
+                            </Button>
+                            {row && (
+                              <Button
+                                size="small"
+                                variant="danger"
+                                onClick={() =>
+                                  setDeleteConfirm({
+                                    open: true,
+                                    kind: 'home',
+                                    item: { slot: slot.id },
+                                  })
+                                }
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
           )}
 
           {tab === 'services' && (

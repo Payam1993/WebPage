@@ -6,7 +6,15 @@
 
 export const WEBSITE_STORAGE_BUCKET = 'confessionFiles'
 
+/** Entrance / loader logo — public fallback is the inline SVG in Loader.jsx */
+export const WEBSITE_LOGO_SLOT = {
+  id: 'logo',
+  label: 'Logo — entrance / loader',
+  fallback: null,
+}
+
 export const WEBSITE_HOME_SLOTS = [
+  WEBSITE_LOGO_SLOT,
   {
     id: 'about-primary',
     label: 'About — main image',
@@ -20,6 +28,11 @@ export const WEBSITE_HOME_SLOTS = [
       'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=600&q=80',
   },
 ]
+
+/** Homepage slots excluding the logo (About images, etc.) */
+export const WEBSITE_HOME_CONTENT_SLOTS = WEBSITE_HOME_SLOTS.filter(
+  (s) => s.id !== WEBSITE_LOGO_SLOT.id
+)
 
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024 // 8 MB raw before optimize
@@ -66,20 +79,44 @@ export const optimizeImageFile = (file, options = {}) => {
       }
       ctx.drawImage(img, 0, 0, width, height)
 
-      const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(new Error('Could not encode image'))
-            return
-          }
-          const base = (file.name || 'image').replace(/\.[^.]+$/, '')
-          const ext = outType === 'image/png' ? 'png' : 'jpg'
-          resolve(new File([blob], `${base}.${ext}`, { type: outType }))
-        },
-        outType,
-        quality
-      )
+      // Keep alpha for PNG/WebP (logos). Never force JPEG on those.
+      const preferAlpha =
+        file.type === 'image/png' || file.type === 'image/webp'
+      const preferredType = preferAlpha
+        ? file.type === 'image/webp'
+          ? 'image/webp'
+          : 'image/png'
+        : 'image/jpeg'
+
+      const finish = (blob, outType) => {
+        if (!blob) {
+          reject(new Error('Could not encode image'))
+          return
+        }
+        const base = (file.name || 'image').replace(/\.[^.]+$/, '')
+        const ext =
+          outType === 'image/png' ? 'png' : outType === 'image/webp' ? 'webp' : 'jpg'
+        resolve(new File([blob], `${base}.${ext}`, { type: outType }))
+      }
+
+      const encode = (outType) => {
+        const q =
+          outType === 'image/jpeg' || outType === 'image/webp' ? quality : undefined
+        canvas.toBlob(
+          (blob) => {
+            if (!blob && outType === 'image/webp') {
+              // Browser may not support WebP encode — keep transparency via PNG
+              canvas.toBlob((pngBlob) => finish(pngBlob, 'image/png'), 'image/png')
+              return
+            }
+            finish(blob, outType)
+          },
+          outType,
+          q
+        )
+      }
+
+      encode(preferredType)
     }
     img.onerror = () => {
       URL.revokeObjectURL(url)

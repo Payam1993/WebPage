@@ -1597,13 +1597,13 @@ export const businessKpiAPI = {
 // Website images (homepage / services / gallery)
 // ============================================
 
-const uploadWebsiteImage = async (folder, file) => {
+const uploadWebsiteImage = async (folder, file, optimizeOptions = {}) => {
   const { optimizeImageFile } = await import('../utils/websiteImages')
   const { ensureStorageCredentials } = await import('../utils/cognitoIdentity')
   // Storage uses Identity Pool AWS credentials (not AppSync User Pool JWT).
   // Refresh credentials so a stale guest Identity ID cannot block uploadData.
   await ensureStorageCredentials()
-  const optimized = await optimizeImageFile(file)
+  const optimized = await optimizeImageFile(file, optimizeOptions)
   const { uploadData } = await import('aws-amplify/storage')
   const safeName = (optimized.name || 'image').replace(/[^a-zA-Z0-9._-]/g, '_')
   const path = `website-images/${folder}/${Date.now()}-${safeName}`
@@ -1638,6 +1638,14 @@ const uploadWebsiteImage = async (folder, file) => {
 export const websiteImageAPI = {
   async uploadHome(file) {
     return uploadWebsiteImage('home', file)
+  },
+  /** Logo slot — website-images/home/logo/... (still valid under home/ key prefix) */
+  async uploadHomeLogo(file) {
+    return uploadWebsiteImage('home/logo', file, {
+      maxWidth: 1024,
+      maxHeight: 1024,
+      quality: 0.92,
+    })
   },
   async uploadService(file) {
     return uploadWebsiteImage('services', file)
