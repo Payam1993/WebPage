@@ -16,6 +16,15 @@ const Gallery = () => {
     ;(async () => {
       try {
         const rows = await websiteGalleryImageAPI.listPublic()
+        console.info('[Gallery] public records', {
+          count: (rows || []).length,
+          items: (rows || []).map((r) => ({
+            id: r.id,
+            active: r.active,
+            sortOrder: r.sortOrder,
+            imageKey: r.imageKey,
+          })),
+        })
         const withUrls = await Promise.all(
           (rows || []).map(async (row) => {
             const url = await websiteImageAPI.getUrl(row.imageKey)
@@ -23,6 +32,18 @@ const Gallery = () => {
               console.error('[Gallery] getUrl returned null', {
                 id: row.id,
                 imageKey: row.imageKey,
+              })
+            } else {
+              console.info('[Gallery] getUrl ok', {
+                id: row.id,
+                imageKey: row.imageKey,
+                srcHost: (() => {
+                  try {
+                    return new URL(url).host
+                  } catch {
+                    return 'invalid-url'
+                  }
+                })(),
               })
             }
             return { ...row, url }

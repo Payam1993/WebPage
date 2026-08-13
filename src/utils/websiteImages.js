@@ -143,7 +143,7 @@ export const resolveWebsiteImageUrl = async (imageKey) => {
     // Guest Identity ID conflict: clear and retry once (public Gallery + admin thumbs)
     if (/access to identity/i.test(message)) {
       try {
-        const { clearCognitoIdentityIdCache } = await import('../context/AuthContext')
+        const { clearCognitoIdentityIdCache } = await import('./cognitoIdentity')
         clearCognitoIdentityIdCache()
         const { Amplify } = await import('aws-amplify')
         await Amplify.Auth?.clearCredentials?.()

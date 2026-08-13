@@ -410,7 +410,7 @@ export const roomAPI = {
  */
 export const roomPictureAPI = {
   async upload(file) {
-    const { ensureStorageCredentials } = await import('../context/AuthContext')
+    const { ensureStorageCredentials } = await import('../utils/cognitoIdentity')
     await ensureStorageCredentials()
     const { uploadData } = await import('aws-amplify/storage')
     const safeName = (file.name || 'room').replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -1617,7 +1617,7 @@ export const businessKpiAPI = {
 
 const uploadWebsiteImage = async (folder, file) => {
   const { optimizeImageFile } = await import('../utils/websiteImages')
-  const { ensureStorageCredentials } = await import('../context/AuthContext')
+  const { ensureStorageCredentials } = await import('../utils/cognitoIdentity')
   // Storage uses Identity Pool AWS credentials (not AppSync User Pool JWT).
   // Refresh credentials so a stale guest Identity ID cannot block uploadData.
   await ensureStorageCredentials()

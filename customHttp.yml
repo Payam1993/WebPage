@@ -1,0 +1,15 @@
+customHeaders:
+  # Always revalidate the shell so browsers pick up new hashed /assets/* after deploy.
+  - pattern: '/'
+    headers:
+      - key: Cache-Control
+        value: 'no-cache, no-store, must-revalidate'
+  - pattern: '/index.html'
+    headers:
+      - key: Cache-Control
+        value: 'no-cache, no-store, must-revalidate'
+  # Hashed Vite assets are immutable; long cache is safe because filenames change on rebuild.
+  - pattern: '/assets/*'
+    headers:
+      - key: Cache-Control
+        value: 'public, max-age=31536000, immutable'
