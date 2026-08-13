@@ -1,6 +1,10 @@
 /**
  * Website image helpers — S3 keys under website-images/*, client-side optimize.
+ *
+ * Storage resource name must match amplify/storage/resource.ts (`confessionFiles`).
  */
+
+export const WEBSITE_STORAGE_BUCKET = 'confessionFiles'
 
 export const WEBSITE_HOME_SLOTS = [
   {
@@ -87,3 +91,53 @@ export const optimizeImageFile = (file, options = {}) => {
 
 export const getHomeSlotFallback = (slotId) =>
   WEBSITE_HOME_SLOTS.find((s) => s.id === slotId)?.fallback || null
+
+/** True when value is already a usable browser URL (not an S3 object key). */
+export const isDirectImageUrl = (value) =>
+  typeof value === 'string' &&
+  (value.startsWith('http://') ||
+    value.startsWith('https://') ||
+    value.startsWith('data:'))
+
+/**
+ * Resolve an Amplify Storage object key under website-images/* to a temporary URL.
+ * Stores only keys in DynamoDB — never persist the returned URL.
+ *
+ * @param {string|null|undefined} imageKey e.g. website-images/gallery/123-photo.jpg
+ * @returns {Promise<string|null>}
+ */
+export const resolveWebsiteImageUrl = async (imageKey) => {
+  if (!imageKey) return null
+  if (isDirectImageUrl(imageKey)) return imageKey
+
+  const path = String(imageKey).replace(/^\//, '')
+  if (!path.startsWith('website-images/')) {
+    console.error('[websiteImage] Rejecting non website-images key:', path)
+    return null
+  }
+
+  try {
+    const { getUrl } = await import('aws-amplify/storage')
+    // path API (Gen 2) — same pattern as roomPictureAPI; default bucket = confessionFiles
+    const result = await getUrl({
+      path,
+      options: {
+        expiresIn: 3600,
+      },
+    })
+    const url = result?.url?.toString?.() || null
+    if (!url) {
+      console.error('[websiteImage] getUrl returned empty URL for', path)
+      return null
+    }
+    return url
+  } catch (error) {
+    console.error('[websiteImage] getUrl failed', {
+      path,
+      name: error?.name,
+      message: error?.message,
+      underlying: error?.underlyingError?.message || error?.cause?.message,
+    })
+    return null
+  }
+}

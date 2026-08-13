@@ -17,14 +17,26 @@ const Gallery = () => {
       try {
         const rows = await websiteGalleryImageAPI.listPublic()
         const withUrls = await Promise.all(
-          (rows || []).map(async (row) => ({
-            ...row,
-            url: await websiteImageAPI.getUrl(row.imageKey),
-          }))
+          (rows || []).map(async (row) => {
+            const url = await websiteImageAPI.getUrl(row.imageKey)
+            if (!url) {
+              console.error('[Gallery] getUrl returned null', {
+                id: row.id,
+                imageKey: row.imageKey,
+              })
+            }
+            return { ...row, url }
+          })
         )
-        if (!cancelled) {
-          setItems(withUrls.filter((r) => r.url))
+        if (cancelled) return
+        const ready = withUrls.filter((r) => r.url)
+        if (withUrls.length > 0 && ready.length === 0) {
+          console.error(
+            '[Gallery] Metadata loaded but every image URL failed to resolve',
+            withUrls.map((r) => r.imageKey)
+          )
         }
+        setItems(ready)
       } catch (err) {
         console.error('Gallery load failed:', err)
         if (!cancelled) setItems([])
@@ -78,6 +90,13 @@ const Gallery = () => {
                 alt={t.gallery?.imageAlt || 'Confession Barcelona'}
                 loading="lazy"
                 decoding="async"
+                onError={() => {
+                  console.error('[Gallery] <img> failed to load', {
+                    id: item.id,
+                    imageKey: item.imageKey,
+                    src: item.url,
+                  })
+                }}
               />
               <span className="gallery-item-veil" aria-hidden />
             </motion.button>

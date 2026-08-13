@@ -32,9 +32,15 @@ const Thumb = ({ imageKey, fallback, alt = '' }) => {
       setUrl(fallback || null)
       return undefined
     }
-    websiteImageAPI.getUrl(imageKey).then((resolved) => {
-      if (!cancelled) setUrl(resolved || fallback || null)
-    })
+    websiteImageAPI
+      .getUrl(imageKey)
+      .then((resolved) => {
+        if (!cancelled) setUrl(resolved || fallback || null)
+      })
+      .catch((err) => {
+        console.error('[WebsiteContent] thumb getUrl failed', imageKey, err)
+        if (!cancelled) setUrl(fallback || null)
+      })
     return () => {
       cancelled = true
     }
@@ -43,14 +49,26 @@ const Thumb = ({ imageKey, fallback, alt = '' }) => {
   if (!url) {
     return <div className="wc-thumb wc-thumb-empty">No image</div>
   }
-  return <img className="wc-thumb" src={url} alt={alt} loading="lazy" />
+  return (
+    <img
+      className="wc-thumb"
+      src={url}
+      alt={alt}
+      loading="lazy"
+      onError={() => {
+        console.error('[WebsiteContent] thumb <img> failed to load', { imageKey, url })
+      }}
+    />
+  )
 }
 
 /**
- * Website Content — Admin_Confession only (also behind AdminProtectedRoute)
+ * Website Content — Admin_Confession only (also behind AdminProtectedRoute).
+ * Uses the same AuthContext session as the rest of Administration / Staff portal.
+ * Do not introduce a separate auth check that races AuthProvider boot.
  */
 const WebsiteContent = () => {
-  const { isAdmin } = useAuth()
+  const { isAdmin, isLoading: authLoading, groups, user } = useAuth()
   const [tab, setTab] = useState('home') // home | services | gallery
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -76,16 +94,29 @@ const WebsiteContent = () => {
       setServiceRows(services || [])
       setGalleryRows(gallery || [])
     } catch (err) {
-      console.error(err)
+      console.error('[WebsiteContent] load failed', {
+        message: err?.message,
+        name: err?.name,
+        groups,
+        hasUser: !!user,
+      })
       setError(err.message || 'Failed to load website content')
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [groups, user])
 
   useEffect(() => {
-    if (isAdmin) loadAll()
-  }, [isAdmin, loadAll])
+    // Match Reservations/Calendar: wait for AuthProvider before Data calls.
+    // AdminProtectedRoute already verified Admin_Confession via JWT cognito:groups.
+    if (authLoading) return
+    if (!isAdmin) return
+    loadAll()
+  }, [authLoading, isAdmin, loadAll])
+
+  if (authLoading) {
+    return <LoadingState text="Checking authorization…" />
+  }
 
   if (!isAdmin) {
     return (

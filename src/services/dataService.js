@@ -1619,12 +1619,20 @@ const uploadWebsiteImage = async (folder, file) => {
   const { uploadData } = await import('aws-amplify/storage')
   const safeName = (optimized.name || 'image').replace(/[^a-zA-Z0-9._-]/g, '_')
   const path = `website-images/${folder}/${Date.now()}-${safeName}`
-  await uploadData({
+  const result = await uploadData({
     path,
     data: optimized,
-    options: { contentType: optimized.type || 'image/jpeg' },
+    options: {
+      contentType: optimized.type || 'image/jpeg',
+    },
   }).result
-  return path
+  // Persist the exact Storage path Amplify reports (must stay a key, not a URL)
+  const storedKey = result?.path || path
+  if (!String(storedKey).startsWith(`website-images/${folder}/`)) {
+    throw new Error(`Unexpected storage key: ${storedKey}`)
+  }
+  console.info('[websiteImage] uploaded', { folder, imageKey: storedKey })
+  return storedKey
 }
 
 export const websiteImageAPI = {
@@ -1639,18 +1647,8 @@ export const websiteImageAPI = {
   },
 
   async getUrl(imageKey) {
-    if (!imageKey) return null
-    if (imageKey.startsWith('data:') || imageKey.startsWith('http')) {
-      return imageKey
-    }
-    try {
-      const { getUrl } = await import('aws-amplify/storage')
-      const result = await getUrl({ path: imageKey })
-      return result.url.toString()
-    } catch (error) {
-      console.error('Error getting website image URL:', error)
-      return null
-    }
+    const { resolveWebsiteImageUrl } = await import('../utils/websiteImages')
+    return resolveWebsiteImageUrl(imageKey)
   },
 
   async removeObject(imageKey) {
@@ -1680,6 +1678,9 @@ export const websiteHomeImageAPI = {
   },
 
   async save(slot, imageKey) {
+    if (!imageKey || !String(imageKey).startsWith('website-images/home/')) {
+      throw new Error(`Home imageKey must start with website-images/home/: ${imageKey}`)
+    }
     const client = getClient()
     const existing = (await this.list()).find((r) => r.slot === slot)
     if (existing?.id) {
@@ -1728,6 +1729,11 @@ export const websiteServiceImageAPI = {
   },
 
   async save(serviceId, imageKey) {
+    if (!imageKey || !String(imageKey).startsWith('website-images/services/')) {
+      throw new Error(
+        `Service imageKey must start with website-images/services/: ${imageKey}`
+      )
+    }
     const client = getClient()
     const existing = (await this.list()).find((r) => r.serviceId === serviceId)
     if (existing?.id) {
@@ -1778,6 +1784,9 @@ export const websiteGalleryImageAPI = {
   },
 
   async create(imageKey, sortOrder = 0) {
+    if (!imageKey || !String(imageKey).startsWith('website-images/gallery/')) {
+      throw new Error(`Gallery imageKey must start with website-images/gallery/: ${imageKey}`)
+    }
     const client = getClient()
     const { data, errors } = await client.models.WebsiteGalleryImage.create({
       imageKey,
@@ -1785,6 +1794,7 @@ export const websiteGalleryImageAPI = {
       active: true,
     })
     if (errors) throw new Error(errors[0].message)
+    console.info('[websiteImage] gallery record created', { id: data?.id, imageKey })
     return data
   },
 
