@@ -1,12 +1,16 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { useLanguage } from '../context/LanguageContext'
+import { websiteHomeImageAPI, websiteImageAPI } from '../services/dataService'
+import { getHomeSlotFallback } from '../utils/websiteImages'
 import './About.css'
 
 const About = () => {
   const { t } = useLanguage()
   const sectionRef = useRef(null)
   const isInView = useInView(sectionRef, { once: true, margin: "-200px" })
+  const [primarySrc, setPrimarySrc] = useState(getHomeSlotFallback('about-primary'))
+  const [secondarySrc, setSecondarySrc] = useState(getHomeSlotFallback('about-secondary'))
   
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -16,6 +20,32 @@ const About = () => {
   const y1 = useTransform(scrollYProgress, [0, 1], [100, -100])
   const y2 = useTransform(scrollYProgress, [0, 1], [0, -50])
   const rotate = useTransform(scrollYProgress, [0, 1], [0, 10])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const rows = await websiteHomeImageAPI.listPublic()
+        const bySlot = Object.fromEntries((rows || []).map((r) => [r.slot, r.imageKey]))
+        const [primary, secondary] = await Promise.all([
+          bySlot['about-primary']
+            ? websiteImageAPI.getUrl(bySlot['about-primary'])
+            : null,
+          bySlot['about-secondary']
+            ? websiteImageAPI.getUrl(bySlot['about-secondary'])
+            : null,
+        ])
+        if (cancelled) return
+        if (primary) setPrimarySrc(primary)
+        if (secondary) setSecondarySrc(secondary)
+      } catch (err) {
+        console.error('About images load failed:', err)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const stats = [
     { number: "15+", label: t.about.stats.years },
@@ -50,7 +80,7 @@ const About = () => {
               style={{ y: y1 }}
             >
               <img 
-                src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=800&q=80" 
+                src={primarySrc} 
                 alt="Massage therapy session" 
                 loading="lazy"
               />
@@ -60,7 +90,7 @@ const About = () => {
               style={{ y: y2 }}
             >
               <img 
-                src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=600&q=80" 
+                src={secondarySrc} 
                 alt="Relaxation space" 
                 loading="lazy"
               />

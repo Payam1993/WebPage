@@ -1610,6 +1610,208 @@ export const businessKpiAPI = {
 }
 
 // ============================================
+// Website images (homepage / services / gallery)
+// ============================================
+
+const uploadWebsiteImage = async (folder, file) => {
+  const { optimizeImageFile } = await import('../utils/websiteImages')
+  const optimized = await optimizeImageFile(file)
+  const { uploadData } = await import('aws-amplify/storage')
+  const safeName = (optimized.name || 'image').replace(/[^a-zA-Z0-9._-]/g, '_')
+  const path = `website-images/${folder}/${Date.now()}-${safeName}`
+  await uploadData({
+    path,
+    data: optimized,
+    options: { contentType: optimized.type || 'image/jpeg' },
+  }).result
+  return path
+}
+
+export const websiteImageAPI = {
+  async uploadHome(file) {
+    return uploadWebsiteImage('home', file)
+  },
+  async uploadService(file) {
+    return uploadWebsiteImage('services', file)
+  },
+  async uploadGallery(file) {
+    return uploadWebsiteImage('gallery', file)
+  },
+
+  async getUrl(imageKey) {
+    if (!imageKey) return null
+    if (imageKey.startsWith('data:') || imageKey.startsWith('http')) {
+      return imageKey
+    }
+    try {
+      const { getUrl } = await import('aws-amplify/storage')
+      const result = await getUrl({ path: imageKey })
+      return result.url.toString()
+    } catch (error) {
+      console.error('Error getting website image URL:', error)
+      return null
+    }
+  },
+
+  async removeObject(imageKey) {
+    if (!imageKey || imageKey.startsWith('http') || imageKey.startsWith('data:')) return
+    try {
+      const { remove } = await import('aws-amplify/storage')
+      await remove({ path: imageKey })
+    } catch (error) {
+      console.warn('Could not delete storage object:', imageKey, error)
+    }
+  },
+}
+
+export const websiteHomeImageAPI = {
+  async list() {
+    const client = getClient()
+    const { data, errors } = await client.models.WebsiteHomeImage.list()
+    if (errors) throw new Error(errors[0].message)
+    return data || []
+  },
+
+  async listPublic() {
+    const client = generateClient({ authMode: 'apiKey' })
+    const { data, errors } = await client.models.WebsiteHomeImage.list()
+    if (errors) throw new Error(errors[0].message)
+    return data || []
+  },
+
+  async save(slot, imageKey) {
+    const client = getClient()
+    const existing = (await this.list()).find((r) => r.slot === slot)
+    if (existing?.id) {
+      const prevKey = existing.imageKey
+      const { data, errors } = await client.models.WebsiteHomeImage.update({
+        id: existing.id,
+        slot,
+        imageKey,
+      })
+      if (errors) throw new Error(errors[0].message)
+      if (prevKey && prevKey !== imageKey) {
+        await websiteImageAPI.removeObject(prevKey)
+      }
+      return data
+    }
+    const { data, errors } = await client.models.WebsiteHomeImage.create({
+      slot,
+      imageKey,
+    })
+    if (errors) throw new Error(errors[0].message)
+    return data
+  },
+
+  async clear(slot) {
+    const client = getClient()
+    const existing = (await this.list()).find((r) => r.slot === slot)
+    if (!existing) return
+    await client.models.WebsiteHomeImage.delete({ id: existing.id })
+    if (existing.imageKey) await websiteImageAPI.removeObject(existing.imageKey)
+  },
+}
+
+export const websiteServiceImageAPI = {
+  async list() {
+    const client = getClient()
+    const { data, errors } = await client.models.WebsiteServiceImage.list()
+    if (errors) throw new Error(errors[0].message)
+    return data || []
+  },
+
+  async listPublic() {
+    const client = generateClient({ authMode: 'apiKey' })
+    const { data, errors } = await client.models.WebsiteServiceImage.list()
+    if (errors) throw new Error(errors[0].message)
+    return data || []
+  },
+
+  async save(serviceId, imageKey) {
+    const client = getClient()
+    const existing = (await this.list()).find((r) => r.serviceId === serviceId)
+    if (existing?.id) {
+      const prevKey = existing.imageKey
+      const { data, errors } = await client.models.WebsiteServiceImage.update({
+        id: existing.id,
+        serviceId,
+        imageKey,
+      })
+      if (errors) throw new Error(errors[0].message)
+      if (prevKey && prevKey !== imageKey) {
+        await websiteImageAPI.removeObject(prevKey)
+      }
+      return data
+    }
+    const { data, errors } = await client.models.WebsiteServiceImage.create({
+      serviceId,
+      imageKey,
+    })
+    if (errors) throw new Error(errors[0].message)
+    return data
+  },
+
+  async clear(serviceId) {
+    const client = getClient()
+    const existing = (await this.list()).find((r) => r.serviceId === serviceId)
+    if (!existing) return
+    await client.models.WebsiteServiceImage.delete({ id: existing.id })
+    if (existing.imageKey) await websiteImageAPI.removeObject(existing.imageKey)
+  },
+}
+
+export const websiteGalleryImageAPI = {
+  async list() {
+    const client = getClient()
+    const { data, errors } = await client.models.WebsiteGalleryImage.list()
+    if (errors) throw new Error(errors[0].message)
+    return (data || []).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+  },
+
+  async listPublic() {
+    const client = generateClient({ authMode: 'apiKey' })
+    const { data, errors } = await client.models.WebsiteGalleryImage.list()
+    if (errors) throw new Error(errors[0].message)
+    return (data || [])
+      .filter((r) => r.active !== false)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+  },
+
+  async create(imageKey, sortOrder = 0) {
+    const client = getClient()
+    const { data, errors } = await client.models.WebsiteGalleryImage.create({
+      imageKey,
+      sortOrder,
+      active: true,
+    })
+    if (errors) throw new Error(errors[0].message)
+    return data
+  },
+
+  async update(id, patch) {
+    const client = getClient()
+    const { data, errors } = await client.models.WebsiteGalleryImage.update({
+      id,
+      ...patch,
+    })
+    if (errors) throw new Error(errors[0].message)
+    return data
+  },
+
+  async delete(item) {
+    const client = getClient()
+    await client.models.WebsiteGalleryImage.delete({ id: item.id })
+    if (item.imageKey) await websiteImageAPI.removeObject(item.imageKey)
+  },
+
+  async reorder(orderedIds) {
+    await Promise.all(
+      orderedIds.map((id, index) => this.update(id, { sortOrder: index }))
+    )
+  },
+}
+
+// ============================================
 // Utility Functions (local dates — no UTC shift)
 // ============================================
 export {

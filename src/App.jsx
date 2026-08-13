@@ -10,6 +10,7 @@ import Hero from './components/Hero'
 import Services from './components/Services'
 import About from './components/About'
 import Experience from './components/Experience'
+import Gallery from './components/Gallery'
 import Testimonials from './components/Testimonials'
 import Booking from './components/Booking'
 import Footer from './components/Footer'
@@ -45,6 +46,7 @@ import StaticData from './pages/administration/StaticData'
 import DailyData from './pages/administration/DailyData'
 import DailyConfirmation from './pages/administration/DailyConfirmation'
 import StaffManagement from './pages/administration/StaffManagement'
+import WebsiteContent from './pages/administration/WebsiteContent'
 
 import './App.css'
 
@@ -57,6 +59,7 @@ function HomePage({ setCursorVariant }) {
       <Hero setCursorVariant={setCursorVariant} />
       <Services setCursorVariant={setCursorVariant} />
       <About />
+      <Gallery />
       <Experience />
       <Testimonials />
       <Booking setCursorVariant={setCursorVariant} />
@@ -179,6 +182,7 @@ function NormalAppContent({ loading, cursorVariant, setCursorVariant }) {
               <Route index element={<Navigate to="reporting" replace />} />
               <Route path="reporting" element={<Reporting />} />
               <Route path="static-data" element={<StaticData />} />
+              <Route path="website-content" element={<WebsiteContent />} />
               <Route path="daily-data" element={<DailyData />} />
               <Route path="daily-confirmation" element={<DailyConfirmation />} />
               <Route path="staff" element={<StaffManagement />} />
@@ -332,6 +336,7 @@ function EroticAppContent({ loading, setCursorVariant }) {
                 <Route index element={<Navigate to="reporting" replace />} />
                 <Route path="reporting" element={<Reporting />} />
                 <Route path="static-data" element={<StaticData />} />
+                <Route path="website-content" element={<WebsiteContent />} />
                 <Route path="daily-data" element={<DailyData />} />
                 <Route path="daily-confirmation" element={<DailyConfirmation />} />
                 <Route path="staff" element={<StaffManagement />} />

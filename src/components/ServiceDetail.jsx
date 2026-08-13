@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useLanguage } from '../context/LanguageContext'
 import { useBooking } from '../context/BookingContext'
 import { servicesData, serviceTranslations } from '../data/services'
+import { websiteServiceImageAPI, websiteImageAPI } from '../services/dataService'
 import './ServiceDetail.css'
 
 const ServiceDetail = ({ setCursorVariant }) => {
@@ -14,6 +15,7 @@ const ServiceDetail = ({ setCursorVariant }) => {
   const [showContactForm, setShowContactForm] = useState(false)
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [heroImage, setHeroImage] = useState(null)
 
   const service = servicesData.find(s => s.id === serviceId)
   const t = serviceTranslations[language]
@@ -21,6 +23,28 @@ const ServiceDetail = ({ setCursorVariant }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [serviceId])
+
+  useEffect(() => {
+    let cancelled = false
+    if (!serviceId) return undefined
+    ;(async () => {
+      try {
+        const rows = await websiteServiceImageAPI.listPublic()
+        const match = (rows || []).find((r) => r.serviceId === serviceId)
+        if (match?.imageKey) {
+          const url = await websiteImageAPI.getUrl(match.imageKey)
+          if (!cancelled && url) setHeroImage(url)
+          return
+        }
+      } catch (err) {
+        console.error(err)
+      }
+      if (!cancelled) setHeroImage(null)
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [serviceId])
 
   if (!service || !serviceText) {
@@ -61,12 +85,14 @@ const ServiceDetail = ({ setCursorVariant }) => {
     }, 2000)
   }
 
+  const displayHero = heroImage || service.detailImage || service.image
+
   return (
     <div className="service-detail">
       {/* Hero Section */}
       <section className="service-hero">
         <div className="service-hero-bg">
-          <img src={service.detailImage} alt={serviceText.name} />
+          <img src={displayHero} alt={serviceText.name} />
           <div className="service-hero-overlay" />
         </div>
         <div className="container">

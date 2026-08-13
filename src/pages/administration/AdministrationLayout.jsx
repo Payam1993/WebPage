@@ -58,6 +58,7 @@ const AdministrationLayout = () => {
     const path = location.pathname
     if (path.includes('/reporting')) return 'Reporting'
     if (path.includes('/static-data')) return 'Local Configuration'
+    if (path.includes('/website-content')) return 'Website Content'
     if (path.includes('/daily-data')) return 'Daily Entry'
     if (path.includes('/daily-confirmation')) return 'Confirmation'
     if (path.includes('/staff')) return 'Staff'
@@ -85,6 +86,17 @@ const AdministrationLayout = () => {
           <line x1="16" y1="13" x2="8" y2="13"/>
           <line x1="16" y1="17" x2="8" y2="17"/>
           <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      ),
+    },
+    {
+      path: '/administration/website-content',
+      label: 'Website Content',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
         </svg>
       ),
     },

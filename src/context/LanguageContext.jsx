@@ -8,6 +8,7 @@ export const translations = {
     nav: {
       services: "Services",
       about: "About",
+      gallery: "Gallery",
       experience: "Experience",
       testimonials: "Testimonials",
       address: "Address",
@@ -83,6 +84,13 @@ export const translations = {
         therapists: "Expert Therapists",
         satisfaction: "Satisfaction Rate"
       }
+    },
+    // Gallery
+    gallery: {
+      overline: "Moments",
+      title: "Gallery",
+      subtitle: "A glimpse into the atmosphere of Confession Barcelona.",
+      imageAlt: "Confession Barcelona gallery",
     },
     // Experience
     experience: {
@@ -279,6 +287,7 @@ export const translations = {
     nav: {
       services: "Servicios",
       about: "Nosotros",
+      gallery: "Galería",
       experience: "Experiencia",
       testimonials: "Testimonios",
       address: "Dirección",
@@ -353,6 +362,12 @@ export const translations = {
         therapists: "Terapeutas Expertos",
         satisfaction: "Tasa de Satisfacción"
       }
+    },
+    gallery: {
+      overline: "Momentos",
+      title: "Galería",
+      subtitle: "Un vistazo a la atmósfera de Confession Barcelona.",
+      imageAlt: "Galería Confession Barcelona",
     },
     // Experience
     experience: {
@@ -549,6 +564,7 @@ export const translations = {
     nav: {
       services: "Serveis",
       about: "Nosaltres",
+      gallery: "Galeria",
       experience: "Experiència",
       testimonials: "Testimonis",
       address: "Adreça",
@@ -623,6 +639,12 @@ export const translations = {
         therapists: "Terapeutes Experts",
         satisfaction: "Taxa de Satisfacció"
       }
+    },
+    gallery: {
+      overline: "Moments",
+      title: "Galeria",
+      subtitle: "Una mirada a l'atmosfera de Confession Barcelona.",
+      imageAlt: "Galeria Confession Barcelona",
     },
     // Experience
     experience: {

@@ -13,6 +13,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
  * - Booking: client reservations/bookings (staff portal)
  * - BusinessKpi: daily target / safe KPI for local payments
  * - NotConfirmedReservation: public booking requests awaiting confirmation
+ * - WebsiteHomeImage / WebsiteServiceImage / WebsiteGalleryImage: public site images
  * 
  * Access: 
  * - Admin_Confession group: full access to all models
@@ -292,6 +293,47 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.authenticated(), // Staff can create and view their submissions
+    ]),
+
+  // ============================================
+  // Public website images (Amplify Storage keys)
+  // ============================================
+
+  // Homepage named slots (e.g. about-primary, about-secondary)
+  WebsiteHomeImage: a
+    .model({
+      slot: a.string().required(),
+      imageKey: a.string().required(),
+    })
+    .authorization((allow) => [
+      allow.group("Admin_Confession"),
+      allow.publicApiKey().to(["read"]),
+      allow.authenticated().to(["read"]),
+    ]),
+
+  // Marketing service card images — serviceId matches src/data/services.js ids
+  WebsiteServiceImage: a
+    .model({
+      serviceId: a.string().required(),
+      imageKey: a.string().required(),
+    })
+    .authorization((allow) => [
+      allow.group("Admin_Confession"),
+      allow.publicApiKey().to(["read"]),
+      allow.authenticated().to(["read"]),
+    ]),
+
+  // Homepage gallery strip
+  WebsiteGalleryImage: a
+    .model({
+      imageKey: a.string().required(),
+      sortOrder: a.integer().required(),
+      active: a.boolean().default(true),
+    })
+    .authorization((allow) => [
+      allow.group("Admin_Confession"),
+      allow.publicApiKey().to(["read"]),
+      allow.authenticated().to(["read"]),
     ]),
 });
 

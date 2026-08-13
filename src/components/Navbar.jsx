@@ -63,6 +63,7 @@ const Navbar = ({ setCursorVariant }) => {
   const navLinks = [
     { name: t.nav.services, href: '#services' },
     { name: t.nav.about, href: '#about' },
+    { name: t.nav.gallery, href: '#gallery' },
     { name: t.nav.experience, href: '#experience' },
     { name: t.nav.testimonials, href: '#testimonials' },
     { name: t.nav.address, href: '#booking' },

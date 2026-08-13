@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '../context/LanguageContext'
 import { servicesData, serviceTranslations } from '../data/services'
+import { websiteServiceImageAPI, websiteImageAPI } from '../services/dataService'
 import './Services.css'
 
 const ContactModal = ({ isOpen, onClose, title, subtitle, message, setCursorVariant, t, variant = 'corporate' }) => {
@@ -140,7 +141,11 @@ const ServiceCard = ({ service, serviceText, index, setCursorVariant, onContactC
         onClick={handleClick}
       >
         <div className="service-image img-zoom">
-          <img src={service.image} alt={serviceText.name} loading="lazy" />
+          <img
+            src={service.displayImage || service.image}
+            alt={serviceText.name}
+            loading="lazy"
+          />
           <div className="service-overlay">
             <div className="service-prices-preview">
               {isContactCard ? (
@@ -190,6 +195,30 @@ const Services = ({ setCursorVariant }) => {
   const isInView = useInView(sectionRef, { once: true, margin: "-200px" })
   const serviceTexts = serviceTranslations[language]
   const [contactModal, setContactModal] = useState(null) // 'corporate' | 'reserveRoom' | null
+  const [imageByServiceId, setImageByServiceId] = useState({})
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const rows = await websiteServiceImageAPI.listPublic()
+        const entries = await Promise.all(
+          (rows || []).map(async (row) => {
+            const url = await websiteImageAPI.getUrl(row.imageKey)
+            return [row.serviceId, url]
+          })
+        )
+        if (!cancelled) {
+          setImageByServiceId(Object.fromEntries(entries.filter(([, url]) => url)))
+        }
+      } catch (err) {
+        console.error('Service images load failed:', err)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <section id="services" className="services section" ref={sectionRef}>
@@ -209,7 +238,10 @@ const Services = ({ setCursorVariant }) => {
           {servicesData.map((service, index) => (
             <ServiceCard 
               key={service.id} 
-              service={service}
+              service={{
+                ...service,
+                displayImage: imageByServiceId[service.id] || service.image,
+              }}
               serviceText={serviceTexts[service.id]}
               index={index}
               setCursorVariant={setCursorVariant}
