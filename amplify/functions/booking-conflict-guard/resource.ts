@@ -6,6 +6,8 @@ import { defineFunction } from "@aws-amplify/backend";
 export const bookingConflictGuard = defineFunction({
   name: "booking-conflict-guard",
   entry: "./handler.ts",
+  // Data resolver + DynamoDB table access → same nested stack as Data (avoids CFN cycle)
+  resourceGroupName: "data",
   runtime: 20,
   timeoutSeconds: 30,
   memoryMB: 256,
