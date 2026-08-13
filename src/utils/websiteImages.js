@@ -132,12 +132,31 @@ export const resolveWebsiteImageUrl = async (imageKey) => {
     }
     return url
   } catch (error) {
+    const message = error?.message || String(error)
     console.error('[websiteImage] getUrl failed', {
       path,
       name: error?.name,
-      message: error?.message,
+      message,
+      isIdentityForbidden: /access to identity/i.test(message),
       underlying: error?.underlyingError?.message || error?.cause?.message,
     })
+    // Guest Identity ID conflict: clear and retry once (public Gallery + admin thumbs)
+    if (/access to identity/i.test(message)) {
+      try {
+        const { clearCognitoIdentityIdCache } = await import('../context/AuthContext')
+        clearCognitoIdentityIdCache()
+        const { Amplify } = await import('aws-amplify')
+        await Amplify.Auth?.clearCredentials?.()
+        const { getUrl } = await import('aws-amplify/storage')
+        const retry = await getUrl({ path, options: { expiresIn: 3600 } })
+        return retry?.url?.toString?.() || null
+      } catch (retryError) {
+        console.error('[websiteImage] getUrl retry after Identity clear failed', {
+          path,
+          message: retryError?.message,
+        })
+      }
+    }
     return null
   }
 }

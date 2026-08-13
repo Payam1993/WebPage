@@ -43,6 +43,91 @@ export const clearPersistedAuthTokens = () => {
   }
 }
 
+/**
+ * Clear Cognito Identity Pool ID cache (guest/auth identity), not User Pool tokens.
+ * A stale guest Identity ID + signed-in User Pool session causes:
+ * GetCredentialsForIdentity → "Access to Identity '…' is forbidden"
+ * which blocks Amplify Storage uploadData/getUrl for authenticated users.
+ */
+export const clearCognitoIdentityIdCache = () => {
+  try {
+    const keys = []
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i)
+      if (!key) continue
+      if (
+        key.startsWith('aws.cognito.identity-id.') ||
+        key.startsWith('aws.cognito.identity-providers.') ||
+        key.includes('CognitoIdentityId')
+      ) {
+        keys.push(key)
+      }
+    }
+    keys.forEach((key) => localStorage.removeItem(key))
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Ensure Identity Pool AWS credentials match the current User Pool session.
+ * Safe to call before Storage uploads; does not log secrets.
+ */
+export const ensureStorageCredentials = async () => {
+  const loadSession = async (forceRefresh = false) => {
+    try {
+      return await fetchAuthSession(forceRefresh ? { forceRefresh: true } : undefined)
+    } catch (error) {
+      const message = error?.message || String(error)
+      if (/access to identity/i.test(message) || /NotAuthorizedException/i.test(message)) {
+        console.warn('[auth] Identity credential fetch forbidden — clearing cached Identity ID', {
+          message,
+        })
+        clearCognitoIdentityIdCache()
+        try {
+          const { Amplify } = await import('aws-amplify')
+          await Amplify.Auth?.clearCredentials?.()
+        } catch {
+          // optional
+        }
+        return fetchAuthSession({ forceRefresh: true })
+      }
+      throw error
+    }
+  }
+
+  let session = await loadSession(false)
+  const hasUserPool = !!(session.tokens?.accessToken && session.tokens?.idToken)
+  if (!hasUserPool) {
+    throw new Error('No current user')
+  }
+
+  if (!(session.credentials?.accessKeyId && session.identityId)) {
+    clearCognitoIdentityIdCache()
+    try {
+      const { Amplify } = await import('aws-amplify')
+      await Amplify.Auth?.clearCredentials?.()
+    } catch {
+      // optional
+    }
+    session = await loadSession(true)
+  }
+
+  if (!(session.credentials?.accessKeyId && session.identityId)) {
+    throw new Error(
+      'Identity Pool credentials unavailable for Storage. Sign out and sign in again.'
+    )
+  }
+
+  console.info('[auth] storage credentials ready', {
+    hasUserPool: true,
+    hasIdentityId: !!session.identityId,
+    identityRegion: String(session.identityId || '').split(':')[0] || null,
+    groups: session.tokens?.idToken?.payload?.['cognito:groups'] || [],
+  })
+  return session
+}
+
 const markTabSessionActive = () => {
   try {
     sessionStorage.setItem(TAB_SESSION_KEY, '1')
@@ -209,10 +294,13 @@ export const AuthProvider = ({ children }) => {
     const hubListener = Hub.listen('auth', ({ payload }) => {
       switch (payload.event) {
         case 'signedIn':
+          // Drop any prior guest Identity ID so Storage can federate cleanly
+          clearCognitoIdentityIdCache()
           markTabSessionActive()
           refreshAuth()
           break
         case 'signedOut':
+          clearCognitoIdentityIdCache()
           clearAuth()
           break
         case 'tokenRefresh':

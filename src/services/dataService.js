@@ -410,6 +410,8 @@ export const roomAPI = {
  */
 export const roomPictureAPI = {
   async upload(file) {
+    const { ensureStorageCredentials } = await import('../context/AuthContext')
+    await ensureStorageCredentials()
     const { uploadData } = await import('aws-amplify/storage')
     const safeName = (file.name || 'room').replace(/[^a-zA-Z0-9._-]/g, '_')
     const path = `room-pictures/${Date.now()}-${safeName}`
@@ -1615,24 +1617,40 @@ export const businessKpiAPI = {
 
 const uploadWebsiteImage = async (folder, file) => {
   const { optimizeImageFile } = await import('../utils/websiteImages')
+  const { ensureStorageCredentials } = await import('../context/AuthContext')
+  // Storage uses Identity Pool AWS credentials (not AppSync User Pool JWT).
+  // Refresh credentials so a stale guest Identity ID cannot block uploadData.
+  await ensureStorageCredentials()
   const optimized = await optimizeImageFile(file)
   const { uploadData } = await import('aws-amplify/storage')
   const safeName = (optimized.name || 'image').replace(/[^a-zA-Z0-9._-]/g, '_')
   const path = `website-images/${folder}/${Date.now()}-${safeName}`
-  const result = await uploadData({
-    path,
-    data: optimized,
-    options: {
-      contentType: optimized.type || 'image/jpeg',
-    },
-  }).result
-  // Persist the exact Storage path Amplify reports (must stay a key, not a URL)
-  const storedKey = result?.path || path
-  if (!String(storedKey).startsWith(`website-images/${folder}/`)) {
-    throw new Error(`Unexpected storage key: ${storedKey}`)
+  try {
+    const result = await uploadData({
+      path,
+      data: optimized,
+      options: {
+        contentType: optimized.type || 'image/jpeg',
+      },
+    }).result
+    const storedKey = result?.path || path
+    if (!String(storedKey).startsWith(`website-images/${folder}/`)) {
+      throw new Error(`Unexpected storage key: ${storedKey}`)
+    }
+    console.info('[websiteImage] uploaded', { folder, imageKey: storedKey })
+    return storedKey
+  } catch (error) {
+    const message = error?.message || String(error)
+    console.error('[websiteImage] upload failed', {
+      folder,
+      path,
+      name: error?.name,
+      message,
+      // Cognito Identity GetCredentialsForIdentity — not AppSync/S3 message shape
+      isIdentityForbidden: /access to identity/i.test(message),
+    })
+    throw error
   }
-  console.info('[websiteImage] uploaded', { folder, imageKey: storedKey })
-  return storedKey
 }
 
 export const websiteImageAPI = {
