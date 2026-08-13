@@ -6,6 +6,7 @@ import {
   PutCommand,
   ScanCommand,
   TransactWriteCommand,
+  type GetCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
 import {
   parseCallerIdentity,
@@ -358,7 +359,7 @@ async function batchGetOccupancy(
   const chunk = 25;
   for (let i = 0; i < unique.length; i += chunk) {
     const slice = unique.slice(i, i + chunk);
-    const results = await Promise.all(
+    const results: GetCommandOutput[] = await Promise.all(
       slice.map((occupancyKey) =>
         ddb.send(
           new GetCommand({
@@ -368,7 +369,7 @@ async function batchGetOccupancy(
         )
       )
     );
-    results.forEach((r, idx) => {
+    results.forEach((r: GetCommandOutput, idx: number) => {
       if (r.Item) {
         map.set(slice[idx], {
           bookingId: r.Item.bookingId as string | undefined,
