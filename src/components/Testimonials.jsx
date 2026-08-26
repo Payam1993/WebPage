@@ -23,9 +23,9 @@ const testimonials = [
     location: "London",
     rating: 5,
     text: {
-      en: "I travel frequently for work and have tried massage centers worldwide. Confession Barcelona is in a league of its own. The attention to detail and skill of the therapists is unmatched.",
-      es: "Viajo frecuentemente por trabajo y he probado centros de masajes en todo el mundo. Confession Barcelona está en una liga propia. La atención al detalle y la habilidad de los terapeutas es inigualable.",
-      ca: "Viatjo freqüentment per feina i he provat centres de massatges arreu del món. Confession Barcelona està en una lliga pròpia. L'atenció al detall i l'habilitat dels terapeutes és inigualable."
+      en: "I travel frequently for work and have tried massage centers worldwide. Lavin is in a league of its own. The attention to detail and skill of the therapists is unmatched.",
+      es: "Viajo frecuentemente por trabajo y he probado centros de masajes en todo el mundo. Lavin está en una liga propia. La atención al detalle y la habilidad de los terapeutas es inigualable.",
+      ca: "Viatjo freqüentment per feina i he provat centres de massatges arreu del món. Lavin està en una lliga pròpia. L'atenció al detall i l'habilitat dels terapeutes és inigualable."
     },
     service: "Deep Tissue Revival",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80"
@@ -49,11 +49,11 @@ const testimonials = [
     location: "Milan",
     rating: 5,
     text: {
-      en: "After years of chronic back pain, I finally found relief. The therapists here truly understand the body. I now visit monthly and recommend Confession to everyone.",
-      es: "Después de años de dolor de espalda crónico, finalmente encontré alivio. Los terapeutas aquí realmente entienden el cuerpo. Ahora visito mensualmente y recomiendo Confession a todos.",
-      ca: "Després d'anys de dolor d'esquena crònic, finalment vaig trobar alleujament. Els terapeutes aquí realment entenen el cos. Ara visito mensualment i recomano Confession a tothom."
+      en: "After years of chronic back pain, I finally found relief. The therapists here truly understand the body. I now visit monthly and recommend Lavin to everyone.",
+      es: "Después de años de dolor de espalda crónico, finalmente encontré alivio. Los terapeutas aquí realmente entienden el cuerpo. Ahora visito mensualmente y recomiendo Lavin a todos.",
+      ca: "Després d'anys de dolor d'esquena crònic, finalment vaig trobar alleujament. Els terapeutes aquí realment entenen el cos. Ara visito mensualment i recomano Lavin a tothom."
     },
-    service: "Signature Confession",
+    service: "Signature Lavin",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80"
   }
 ]

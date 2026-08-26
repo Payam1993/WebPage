@@ -23,8 +23,7 @@ const Footer = ({ setCursorVariant }) => {
                 onMouseEnter={() => setCursorVariant('hover')}
                 onMouseLeave={() => setCursorVariant('default')}
               >
-                <span className="logo-main">Confession</span>
-                <span className="logo-sub">Barcelona</span>
+                <span className="logo-main">Lavin</span>
               </Link>
               <p className="footer-tagline">{t.footer.tagline}</p>
               <div className="footer-newsletter">
@@ -108,7 +107,7 @@ const Footer = ({ setCursorVariant }) => {
         <div className="container">
           <div className="footer-bottom-content">
             <p className="copyright">
-              © {currentYear} Confession Barcelona. {t.footer.copyright}
+              © {currentYear} Lavin. {t.footer.copyright}
             </p>
             
             <div className="footer-social">

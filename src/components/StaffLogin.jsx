@@ -95,7 +95,7 @@ const StaffLogin = ({ setCursorVariant }) => {
         if (totpSetupDetails) {
           try {
             // Get the setup URI for QR code generation
-            const appName = 'Confession Barcelona'
+            const appName = 'Lavin'
             const setupUri = totpSetupDetails.getSetupUri(appName)
             setTotpSetupUri(setupUri.toString())
             setTotpSecretKey(totpSetupDetails.sharedSecret)
@@ -373,8 +373,7 @@ const StaffLogin = ({ setCursorVariant }) => {
           <div className="login-card">
             <div className="login-header">
               <div className="login-logo">
-                <span className="logo-main">Confession</span>
-                <span className="logo-sub">Barcelona</span>
+                <span className="logo-main">Lavin</span>
               </div>
               <h1>{t.staffLogin?.totpSetupTitle || 'Set Up Authenticator'}</h1>
               <p>{t.staffLogin?.totpSetupSubtitle || 'Scan the QR code with your authenticator app'}</p>
@@ -488,8 +487,7 @@ const StaffLogin = ({ setCursorVariant }) => {
           <div className="login-card">
             <div className="login-header">
               <div className="login-logo">
-                <span className="logo-main">Confession</span>
-                <span className="logo-sub">Barcelona</span>
+                <span className="logo-main">Lavin</span>
               </div>
               <h1>{t.staffLogin?.mfaSelectTitle || 'Choose Verification Method'}</h1>
               <p>{t.staffLogin?.mfaSelectSubtitle || 'Select how you want to verify your sign-in.'}</p>
@@ -587,8 +585,7 @@ const StaffLogin = ({ setCursorVariant }) => {
           <div className="login-card">
             <div className="login-header">
               <div className="login-logo">
-                <span className="logo-main">Confession</span>
-                <span className="logo-sub">Barcelona</span>
+                <span className="logo-main">Lavin</span>
               </div>
               <h1>{t.staffLogin?.mfaTitle || 'Verification Required'}</h1>
               <p>
@@ -688,8 +685,7 @@ const StaffLogin = ({ setCursorVariant }) => {
           <div className="login-card">
             <div className="login-header">
               <div className="login-logo">
-                <span className="logo-main">Confession</span>
-                <span className="logo-sub">Barcelona</span>
+                <span className="logo-main">Lavin</span>
               </div>
               <h1>{t.staffLogin?.setNewPassword || 'Set New Password'}</h1>
               <p>{t.staffLogin?.newPasswordSubtitle || 'Please create a new password for your account'}</p>
@@ -839,8 +835,7 @@ const StaffLogin = ({ setCursorVariant }) => {
         <div className="login-card">
           <div className="login-header">
             <div className="login-logo">
-              <span className="logo-main">Confession</span>
-              <span className="logo-sub">Barcelona</span>
+              <span className="logo-main">Lavin</span>
             </div>
             <h1>{t.staffLogin?.title || 'Staff Portal'}</h1>
             <p>{t.staffLogin?.subtitle || 'Sign in to access the staff dashboard'}</p>

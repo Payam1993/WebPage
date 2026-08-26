@@ -3,7 +3,7 @@
  * Import as: import { staffT as t } from '../../i18n/staffEs'
  */
 export const staffT = {
-  brand: 'Confession',
+  brand: 'Lavin',
   portal: 'Portal del Personal',
   menuAdmin: 'Menú Admin',
   menuMiniAdmin: 'Menú Mini Admin',

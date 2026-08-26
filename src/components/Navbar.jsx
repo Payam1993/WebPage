@@ -143,8 +143,7 @@ const Navbar = ({ setCursorVariant }) => {
             onMouseEnter={() => setCursorVariant('hover')}
             onMouseLeave={() => setCursorVariant('default')}
           >
-            <span className="logo-main">Confession</span>
-            <span className="logo-sub">Barcelona</span>
+            <span className="logo-main">Lavin</span>
           </Link>
 
           <ul className="navbar-links">

@@ -236,7 +236,7 @@ const StaffLinkBooking = () => {
     <div style={pageStyle}>
       <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'left' }}>
         <p style={{ letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: 12, opacity: 0.6 }}>
-          Confession Barcelona
+          Lavin
         </p>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '1.75rem', margin: '8px 0 4px' }}>
           Book with {link.therapistName}

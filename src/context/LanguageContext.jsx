@@ -21,7 +21,7 @@ export const translations = {
     hero: {
       overline: "Wellness & Relaxation",
       titleLine1: "The Art of",
-      titleLine2: "Confession",
+      titleLine2: "Lavin",
       description: "Surrender to tranquility in the heart of Barcelona. Where ancient healing traditions meet contemporary luxury.",
       cta1: "Reserve Your Experience",
       cta2: "Explore Services",
@@ -73,7 +73,7 @@ export const translations = {
     about: {
       overline: "Our Story",
       title: "Where Healing Becomes Art",
-      text1: "Nestled in the vibrant heart of Barcelona, Confession was born from a simple belief: that true wellness transcends the physical. Our sanctuary offers more than massage—it's an invitation to pause, reflect, and reconnect with yourself.",
+      text1: "Nestled in the vibrant heart of Barcelona, Lavin was born from a simple belief: that true wellness transcends the physical. Our sanctuary offers more than massage—it's an invitation to pause, reflect, and reconnect with yourself.",
       text2: "Founded in 2009, we've curated a team of world-class therapists who blend time-honored techniques from across the globe with innovative approaches. Each treatment is a personalized journey, tailored to your body's unique needs.",
       text3: "Our space draws inspiration from Barcelona's architectural beauty—the organic curves of Gaudí, the warm terracotta of Gothic quarters, the tranquil blues of the Mediterranean. Step inside and let the city's magic embrace you.",
       founderName: "Maria Elena",
@@ -89,8 +89,8 @@ export const translations = {
     gallery: {
       overline: "Moments",
       title: "Gallery",
-      subtitle: "A glimpse into the atmosphere of Confession Barcelona.",
-      imageAlt: "Confession Barcelona gallery",
+      subtitle: "A glimpse into the atmosphere of Lavin.",
+      imageAlt: "Lavin gallery",
     },
     // Experience
     experience: {
@@ -189,7 +189,7 @@ export const translations = {
     // Work With Us
     workWithUs: {
       title: "Work With Us",
-      subtitle: "Become part of the Confession Barcelona family",
+      subtitle: "Become part of the Lavin family",
       formTitle: "Work With Us",
       formSubtitle: "Fill out the form below and we will get back to you shortly.",
       form: {
@@ -225,7 +225,7 @@ export const translations = {
     ourTeam: {
       title: "Our Professional Therapists",
       subtitle: "Meet the skilled hands behind your wellness journey",
-      intro: "At Confession Barcelona, we take pride in our exceptional team of certified massage therapists. Each member brings unique expertise, years of experience, and a genuine passion for helping you achieve optimal well-being.",
+      intro: "At Lavin, we take pride in our exceptional team of certified massage therapists. Each member brings unique expertise, years of experience, and a genuine passion for helping you achieve optimal well-being.",
       experience: "years experience",
       languages: "Languages",
       specialties: "Specialties",
@@ -300,7 +300,7 @@ export const translations = {
     hero: {
       overline: "Bienestar y Relajación",
       titleLine1: "El Arte de",
-      titleLine2: "Confession",
+      titleLine2: "Lavin",
       description: "Entrégate a la tranquilidad en el corazón de Barcelona. Donde las antiguas tradiciones curativas se encuentran con el lujo contemporáneo.",
       cta1: "Reserva Tu Experiencia",
       cta2: "Explorar Servicios",
@@ -351,7 +351,7 @@ export const translations = {
     about: {
       overline: "Nuestra Historia",
       title: "Donde la Curación se Convierte en Arte",
-      text1: "Ubicado en el vibrante corazón de Barcelona, Confession nació de una simple creencia: que el verdadero bienestar trasciende lo físico. Nuestro santuario ofrece más que masajes—es una invitación a pausar, reflexionar y reconectarte contigo mismo.",
+      text1: "Ubicado en el vibrante corazón de Barcelona, Lavin nació de una simple creencia: que el verdadero bienestar trasciende lo físico. Nuestro santuario ofrece más que masajes—es una invitación a pausar, reflexionar y reconectarte contigo mismo.",
       text2: "Fundado en 2009, hemos reunido un equipo de terapeutas de clase mundial que combinan técnicas consagradas de todo el mundo con enfoques innovadores. Cada tratamiento es un viaje personalizado, adaptado a las necesidades únicas de tu cuerpo.",
       text3: "Nuestro espacio se inspira en la belleza arquitectónica de Barcelona—las curvas orgánicas de Gaudí, la cálida terracota de los barrios góticos, los tranquilos azules del Mediterráneo. Entra y deja que la magia de la ciudad te abrace.",
       founderName: "Maria Elena",
@@ -366,8 +366,8 @@ export const translations = {
     gallery: {
       overline: "Momentos",
       title: "Galería",
-      subtitle: "Un vistazo a la atmósfera de Confession Barcelona.",
-      imageAlt: "Galería Confession Barcelona",
+      subtitle: "Un vistazo a la atmósfera de Lavin.",
+      imageAlt: "Galería Lavin",
     },
     // Experience
     experience: {
@@ -466,7 +466,7 @@ export const translations = {
     // Work With Us
     workWithUs: {
       title: "Trabaja con Nosotros",
-      subtitle: "Forma parte de la familia Confession Barcelona",
+      subtitle: "Forma parte de la familia Lavin",
       formTitle: "Trabaja con Nosotros",
       formSubtitle: "Completa el formulario y nos pondremos en contacto contigo pronto.",
       form: {
@@ -502,7 +502,7 @@ export const translations = {
     ourTeam: {
       title: "Nuestros Terapeutas Profesionales",
       subtitle: "Conoce las manos expertas detrás de tu viaje de bienestar",
-      intro: "En Confession Barcelona, nos enorgullecemos de nuestro excepcional equipo de terapeutas de masaje certificados. Cada miembro aporta experiencia única, años de práctica y una pasión genuina por ayudarte a alcanzar un bienestar óptimo.",
+      intro: "En Lavin, nos enorgullecemos de nuestro excepcional equipo de terapeutas de masaje certificados. Cada miembro aporta experiencia única, años de práctica y una pasión genuina por ayudarte a alcanzar un bienestar óptimo.",
       experience: "años de experiencia",
       languages: "Idiomas",
       specialties: "Especialidades",
@@ -577,7 +577,7 @@ export const translations = {
     hero: {
       overline: "Benestar i Relaxació",
       titleLine1: "L'Art de",
-      titleLine2: "Confession",
+      titleLine2: "Lavin",
       description: "Lliura't a la tranquil·litat al cor de Barcelona. On les antigues tradicions curatives es troben amb el luxe contemporani.",
       cta1: "Reserva la Teva Experiència",
       cta2: "Explorar Serveis",
@@ -628,7 +628,7 @@ export const translations = {
     about: {
       overline: "La Nostra Història",
       title: "On la Curació es Converteix en Art",
-      text1: "Ubicat al vibrant cor de Barcelona, Confession va néixer d'una simple creença: que el veritable benestar transcendeix el físic. El nostre santuari ofereix més que massatges—és una invitació a pausar, reflexionar i reconnectar-te amb tu mateix.",
+      text1: "Ubicat al vibrant cor de Barcelona, Lavin va néixer d'una simple creença: que el veritable benestar transcendeix el físic. El nostre santuari ofereix més que massatges—és una invitació a pausar, reflexionar i reconnectar-te amb tu mateix.",
       text2: "Fundat el 2009, hem reunit un equip de terapeutes de classe mundial que combinen tècniques consagrades de tot el món amb enfocaments innovadors. Cada tractament és un viatge personalitzat, adaptat a les necessitats úniques del teu cos.",
       text3: "El nostre espai s'inspira en la bellesa arquitectònica de Barcelona—les corbes orgàniques de Gaudí, la càlida terracota dels barris gòtics, els tranquils blaus del Mediterrani. Entra i deixa que la màgia de la ciutat t'abraci.",
       founderName: "Maria Elena",
@@ -643,8 +643,8 @@ export const translations = {
     gallery: {
       overline: "Moments",
       title: "Galeria",
-      subtitle: "Una mirada a l'atmosfera de Confession Barcelona.",
-      imageAlt: "Galeria Confession Barcelona",
+      subtitle: "Una mirada a l'atmosfera de Lavin.",
+      imageAlt: "Galeria Lavin",
     },
     // Experience
     experience: {
@@ -743,7 +743,7 @@ export const translations = {
     // Work With Us
     workWithUs: {
       title: "Treballa amb Nosaltres",
-      subtitle: "Forma part de la família Confession Barcelona",
+      subtitle: "Forma part de la família Lavin",
       formTitle: "Treballa amb Nosaltres",
       formSubtitle: "Completa el formulari i ens posarem en contacte amb tu aviat.",
       form: {
@@ -779,7 +779,7 @@ export const translations = {
     ourTeam: {
       title: "Els Nostres Terapeutes Professionals",
       subtitle: "Coneix les mans expertes darrere del teu viatge de benestar",
-      intro: "A Confession Barcelona, ens enorgullim del nostre excepcional equip de terapeutes de massatge certificats. Cada membre aporta experiència única, anys de pràctica i una passió genuïna per ajudar-te a aconseguir un benestar òptim.",
+      intro: "A Lavin, ens enorgullim del nostre excepcional equip de terapeutes de massatge certificats. Cada membre aporta experiència única, anys de pràctica i una passió genuïna per ajudar-te a aconseguir un benestar òptim.",
       experience: "anys d'experiència",
       languages: "Idiomes",
       specialties: "Especialitats",

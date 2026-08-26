@@ -118,8 +118,7 @@ const WorkWithUs = ({ setCursorVariant }) => {
           <div className="work-form-container">
             <div className="form-card">
               <div className="work-logo">
-                <span className="logo-main">Confession</span>
-                <span className="logo-sub">Barcelona</span>
+                <span className="logo-main">Lavin</span>
               </div>
               <h2>{t.workWithUs?.formTitle || 'Work With Us'}</h2>
               <p>

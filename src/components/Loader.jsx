@@ -98,7 +98,7 @@ const Loader = () => {
           {logoSrc ? (
             <img
               src={logoSrc}
-              alt="Confession Barcelona"
+              alt="Lavin"
               className="loader-logo-img"
               onError={() => setLogoSrc(null)}
             />
@@ -113,8 +113,7 @@ const Loader = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          <span className="loader-title">Confession</span>
-          <span className="loader-subtitle">Barcelona</span>
+          <span className="loader-title">Lavin</span>
         </motion.div>
 
         <motion.div

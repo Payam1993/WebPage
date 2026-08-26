@@ -157,7 +157,7 @@ const Gallery = () => {
               >
                 <img
                   src={item.url}
-                  alt={t.gallery?.imageAlt || 'Confession Barcelona'}
+                  alt={t.gallery?.imageAlt || 'Lavin'}
                   loading="lazy"
                   decoding="async"
                   onError={() => {

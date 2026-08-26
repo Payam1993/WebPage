@@ -140,7 +140,7 @@ const OurTeam = ({ setCursorVariant }) => {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8 }}
           >
-            {t.ourTeam?.intro || 'At Confession Barcelona, we take pride in our exceptional team of certified massage therapists.'}
+            {t.ourTeam?.intro || 'At Lavin, we take pride in our exceptional team of certified massage therapists.'}
           </motion.p>
         </div>
       </section>
@@ -174,7 +174,7 @@ const OurTeam = ({ setCursorVariant }) => {
             transition={{ duration: 0.8 }}
           >
             <h2>{t.workWithUs?.interested || 'Interested in Joining Our Team?'}</h2>
-            <p>{t.workWithUs?.subtitle || 'Become part of the Confession Barcelona family'}</p>
+            <p>{t.workWithUs?.subtitle || 'Become part of the Lavin family'}</p>
             <Link 
               to="/work-with-us" 
               className="btn btn-outline"
