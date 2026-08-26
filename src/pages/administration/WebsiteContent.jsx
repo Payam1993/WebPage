@@ -255,7 +255,7 @@ const WebsiteContent = () => {
             <>
               <Card>
                 <CardHeader>
-                  <CardTitle subtitle="Shown in the public entrance loader. Animation timing is unchanged — only the image source is managed here.">
+                  <CardTitle subtitle="Optional mark above the Lavin wordmark on the entrance screen. Without an upload, only the artistic typographic brand appears.">
                     Logo
                   </CardTitle>
                 </CardHeader>
@@ -282,7 +282,7 @@ const WebsiteContent = () => {
                                   · <code className="wc-key">{row.imageKey}</code>
                                 </>
                               ) : (
-                                ' · using built-in animated SVG until you upload'
+                                ' · using typographic Lavin wordmark until you upload'
                               )}
                             </div>
                           </div>

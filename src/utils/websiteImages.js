@@ -6,7 +6,7 @@
 
 export const WEBSITE_STORAGE_BUCKET = 'confessionFiles'
 
-/** Entrance / loader logo — public fallback is the inline SVG in Loader.jsx */
+/** Entrance optional mark — public fallback is the typographic Lavin wordmark in Loader.jsx */
 export const WEBSITE_LOGO_SLOT = {
   id: 'logo',
   label: 'Logo — entrance / loader',
