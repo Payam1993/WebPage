@@ -231,7 +231,10 @@ const Services = ({ setCursorVariant }) => {
         >
           <span className="section-overline">{t.services.overline}</span>
           <h2>{t.services.title}</h2>
-          <p className="section-subtitle">{t.services.subtitle}</p>
+          <div className="services-intro">
+            <p className="section-subtitle">{t.services.subtitle}</p>
+            <p className="services-license">{t.services.licenseNote}</p>
+          </div>
         </motion.div>
 
         <div className="services-grid">
