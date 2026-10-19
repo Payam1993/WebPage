@@ -8,11 +8,11 @@ export const therapistsData = [
     specialties: ['deep-tissue', 'sports', 'medical'],
     experience: '8',
     languages: ['Spanish', 'English', 'Catalan'],
-    certifications: ['Swedish Massage', 'Deep Tissue Therapy', 'Sports Medicine'],
+    certifications: ['Swedish Massage', 'Deep Tissue Massage', 'Sports Massage'],
     bio: {
-      en: "María brings passion and precision to every session. With 8 years of experience specializing in deep tissue and sports massage, she has helped countless athletes and professionals achieve optimal recovery and performance.",
-      es: "María aporta pasión y precisión a cada sesión. Con 8 años de experiencia especializada en masaje de tejido profundo y deportivo, ha ayudado a innumerables atletas y profesionales a lograr una recuperación y rendimiento óptimos.",
-      ca: "María aporta passió i precisió a cada sessió. Amb 8 anys d'experiència especialitzada en massatge de teixit profund i esportiu, ha ajudat innombrables atletes i professionals a aconseguir una recuperació i rendiment òptims."
+      en: "María brings passion and precision to every session. With 8 years of experience in deep tissue and sports massage, she offers a firm, comfortable massage for people who enjoy an active life.",
+      es: "María aporta pasión y precisión a cada sesión. Con 8 años de experiencia en masaje de tejido profundo y deportivo, ofrece un masaje firme y cómodo para quienes disfrutan de una vida activa.",
+      ca: "María aporta passió i precisió a cada sessió. Amb 8 anys d'experiència en massatge de teixit profund i esportiu, ofereix un massatge ferm i còmode per a qui gaudeixen d'una vida activa."
     }
   },
   {
@@ -22,11 +22,11 @@ export const therapistsData = [
     specialties: ['sports', 'deep-tissue', 'feet'],
     experience: '10',
     languages: ['Spanish', 'English'],
-    certifications: ['Sports Massage Therapy', 'Reflexology', 'Myofascial Release'],
+    certifications: ['Sports Massage', 'Foot Massage', 'Deep Tissue Massage'],
     bio: {
-      en: "Carlos is a dedicated sports massage specialist with over a decade of experience. His deep understanding of anatomy and athletic performance makes him the go-to therapist for professional athletes and fitness enthusiasts.",
-      es: "Carlos es un especialista dedicado en masaje deportivo con más de una década de experiencia. Su profundo conocimiento de la anatomía y el rendimiento atlético lo convierte en el terapeuta preferido de atletas profesionales y entusiastas del fitness.",
-      ca: "Carlos és un especialista dedicat en massatge esportiu amb més d'una dècada d'experiència. El seu profund coneixement de l'anatomia i el rendiment atlètic el converteix en el terapeuta preferit d'atletes professionals i entusiastes del fitness."
+      en: "Carlos is a dedicated sports massage professional with over a decade of experience. His steady, energetic touch is a favourite among people who enjoy training and an active lifestyle.",
+      es: "Carlos es un masajista dedicado al masaje deportivo, con más de una década de experiencia. Su tacto firme y enérgico es el preferido de quienes disfrutan del entrenamiento y de una vida activa.",
+      ca: "Carlos és un massatgista dedicat al massatge esportiu, amb més d'una dècada d'experiència. El seu tacte ferm i enèrgic és el preferit de qui gaudeixen de l'entrenament i d'una vida activa."
     }
   },
   {
@@ -36,7 +36,7 @@ export const therapistsData = [
     specialties: ['relax', 'medical', 'feet'],
     experience: '6',
     languages: ['German', 'English', 'Spanish'],
-    certifications: ['Aromatherapy', 'Medical Massage', 'Holistic Wellness'],
+    certifications: ['Aromatherapy', 'Couple Relax Massage', 'Wellness Massage'],
     bio: {
       en: "Anna creates a sanctuary of calm in every session. Her gentle yet effective approach to relaxation massage has earned her a devoted following among those seeking stress relief and holistic wellness.",
       es: "Anna crea un santuario de calma en cada sesión. Su enfoque suave pero efectivo del masaje de relajación le ha ganado seguidores devotos entre quienes buscan alivio del estrés y bienestar holístico.",
@@ -50,11 +50,11 @@ export const therapistsData = [
     specialties: ['feet', 'relax', 'deep-tissue'],
     experience: '12',
     languages: ['English', 'Mandarin', 'Spanish'],
-    certifications: ['Traditional Chinese Massage', 'Foot Reflexology Master', 'Acupressure'],
+    certifications: ['Traditional Massage', 'Foot Pressure Massage', 'Relaxing Massage'],
     bio: {
-      en: "David combines Eastern and Western massage traditions with 12 years of expertise. His mastery of foot reflexology and pressure techniques provides a unique healing experience rooted in ancient wisdom.",
-      es: "David combina las tradiciones de masaje oriental y occidental con 12 años de experiencia. Su dominio de la reflexología podal y las técnicas de presión proporciona una experiencia de curación única arraigada en la sabiduría ancestral.",
-      ca: "David combina les tradicions de massatge oriental i occidental amb 12 anys d'experiència. El seu domini de la reflexologia podal i les tècniques de pressió proporciona una experiència de curació única arrelada en la saviesa ancestral."
+      en: "David combines Eastern and Western massage traditions with 12 years of expertise. His foot pressure and slow, rhythmic touch offer a calm wellness experience rooted in long-standing massage traditions.",
+      es: "David combina las tradiciones de masaje oriental y occidental con 12 años de experiencia. Su masaje con presión de pies y su tacto lento y rítmico ofrecen una experiencia de bienestar calmada.",
+      ca: "David combina les tradicions de massatge oriental i occidental amb 12 anys d'experiència. El seu massatge amb pressió de peus i el seu tacte lent i rítmic ofereixen una experiència de benestar calmada."
     }
   }
 ]

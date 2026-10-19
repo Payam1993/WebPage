@@ -23,9 +23,9 @@ const testimonials = [
     location: "London",
     rating: 5,
     text: {
-      en: "I travel frequently for work and have tried massage centers worldwide. Lavin is in a league of its own. The attention to detail and skill of the therapists is unmatched.",
-      es: "Viajo frecuentemente por trabajo y he probado centros de masajes en todo el mundo. Lavin está en una liga propia. La atención al detalle y la habilidad de los terapeutas es inigualable.",
-      ca: "Viatjo freqüentment per feina i he provat centres de massatges arreu del món. Lavin està en una lliga pròpia. L'atenció al detall i l'habilitat dels terapeutes és inigualable."
+      en: "I travel frequently for work and have tried massage centers worldwide. Lavin is in a league of its own. The attention to detail and the skill of the massage team is unmatched.",
+      es: "Viajo frecuentemente por trabajo y he probado centros de masajes en todo el mundo. Lavin está en una liga propia. La atención al detalle y la habilidad del equipo de masaje es inigualable.",
+      ca: "Viatjo freqüentment per feina i he provat centres de massatges arreu del món. Lavin està en una lliga pròpia. L'atenció al detall i l'habilitat de l'equip de massatge és inigualable."
     },
     service: "Deep Tissue Revival",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80"
@@ -49,9 +49,9 @@ const testimonials = [
     location: "Milan",
     rating: 5,
     text: {
-      en: "After years of chronic back pain, I finally found relief. The therapists here truly understand the body. I now visit monthly and recommend Lavin to everyone.",
-      es: "Después de años de dolor de espalda crónico, finalmente encontré alivio. Los terapeutas aquí realmente entienden el cuerpo. Ahora visito mensualmente y recomiendo Lavin a todos.",
-      ca: "Després d'anys de dolor d'esquena crònic, finalment vaig trobar alleujament. Els terapeutes aquí realment entenen el cos. Ara visito mensualment i recomano Lavin a tothom."
+      en: "I leave every visit feeling lighter and more at ease. The massage team has a calm, careful touch. I now visit monthly and recommend Lavin to everyone.",
+      es: "Salgo de cada visita más ligero y en calma. El equipo de masaje tiene un tacto tranquilo y cuidadoso. Ahora visito cada mes y recomiendo Lavin a todos.",
+      ca: "Surto de cada visita més lleuger i en calma. L'equip de massatge té un tacte tranquil i curós. Ara visito cada mes i recomano Lavin a tothom."
     },
     service: "Signature Lavin",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80"

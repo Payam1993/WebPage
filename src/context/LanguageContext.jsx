@@ -13,7 +13,7 @@ export const translations = {
       testimonials: "Testimonials",
       address: "Address",
       workWithUs: "Work With Us",
-      ourTeam: "Our Therapists",
+      ourTeam: "Our Massage Team",
       staffSignIn: "Staff Sign In",
       location: "Barcelona, Spain",
     },
@@ -22,7 +22,7 @@ export const translations = {
       overline: "Wellness & Relaxation",
       titleLine1: "The Art of",
       titleLine2: "Lavin",
-      description: "Surrender to tranquility in the heart of Barcelona. Where ancient healing traditions meet contemporary luxury.",
+      description: "Surrender to tranquility in the heart of Barcelona. Where the art of massage meets contemporary luxury.",
       cta1: "Reserve Your Experience",
       cta2: "Explore Services",
       scroll: "Scroll to discover",
@@ -31,10 +31,10 @@ export const translations = {
     services: {
       overline: "Our Services",
       title: "Curated Experiences",
-      subtitle: "Each treatment is thoughtfully designed to guide you through a transformative journey of relaxation and renewal.",
+      subtitle: "Each massage is thoughtfully designed to guide you through a journey of relaxation and well-being.",
       bookThis: "Book This Service",
       customCta: "Looking for something special?",
-      customBtn: "Request Custom Treatment",
+      customBtn: "Request a Custom Massage",
     },
     // Corporate
     corporate: {
@@ -62,26 +62,26 @@ export const translations = {
     },
     // Reserve Room (for therapists)
     reserveRoom: {
-      badge: "For therapists",
+      badge: "For massage professionals",
       contactUs: "Contact Us",
-      subtitle: "Room reservation for massage therapists",
-      message: "If you are a massage therapist with experience and are looking for a room to treat your clients, get in contact with us and we will contact you.",
+      subtitle: "Room reservation for massage professionals",
+      message: "If you are a massage professional with experience and are looking for a room to welcome your clients, get in contact with us and we will contact you.",
       whatsappBtn: "Chat on WhatsApp",
       footer: "Our team is available Monday to Saturday, 10:00 - 20:00"
     },
     // About
     about: {
       overline: "Our Story",
-      title: "Where Healing Becomes Art",
-      text1: "Nestled in the vibrant heart of Barcelona, Lavin was born from a simple belief: that true wellness transcends the physical. Our sanctuary offers more than massage—it's an invitation to pause, reflect, and reconnect with yourself.",
-      text2: "Founded in 2009, we've curated a team of world-class therapists who blend time-honored techniques from across the globe with innovative approaches. Each treatment is a personalized journey, tailored to your body's unique needs.",
+      title: "Where Well-being Becomes Art",
+      text1: "Nestled in the vibrant heart of Barcelona, Lavin was born from a simple belief: that true wellness is a moment of calm. Our sanctuary offers more than massage—it's an invitation to pause, reflect, and reconnect with yourself.",
+      text2: "Founded in 2009, we've curated a team of skilled massage professionals who blend time-honored techniques from across the globe with a calm, personal approach. Each massage is a personalized journey of relaxation and well-being.",
       text3: "Our space draws inspiration from Barcelona's architectural beauty—the organic curves of Gaudí, the warm terracotta of Gothic quarters, the tranquil blues of the Mediterranean. Step inside and let the city's magic embrace you.",
       founderName: "Maria Elena",
-      founderTitle: "Founder & Lead Therapist",
+      founderTitle: "Founder & Lead Massage Professional",
       stats: {
         years: "Years Experience",
         clients: "Happy Clients",
-        therapists: "Expert Therapists",
+        therapists: "Massage Professionals",
         satisfaction: "Satisfaction Rate"
       }
     },
@@ -99,13 +99,13 @@ export const translations = {
       subtitle: "From the moment you arrive, every detail is designed to transport you to a state of complete serenity.",
       features: [
         { title: "Flexible Hours", description: "Open 7 days a week with early morning and late evening appointments available." },
-        { title: "Personalized Care", description: "Every treatment is customized to your specific needs and preferences." },
+        { title: "Personalized Care", description: "Every massage is adapted to your comfort and preferences." },
         { title: "Premium Products", description: "We use only organic, sustainably sourced oils and skincare products." },
-        { title: "Expert Guidance", description: "Our therapists provide aftercare tips to extend your treatment benefits." }
+        { title: "Expert Guidance", description: "Our massage team shares simple tips so the feeling of well-being can last a little longer." }
       ],
       amenitiesTitle: "Sanctuary Amenities",
       amenities: [
-        "Private treatment rooms",
+        "Private massage rooms",
         "Rainfall showers",
         "Organic herbal teas",
         "Heated massage beds",
@@ -178,7 +178,7 @@ export const translations = {
         time: "Preferred Time",
         timePlaceholder: "Select time",
         message: "Special Requests",
-        messagePlaceholder: "Any special requests or health considerations we should know about?",
+        messagePlaceholder: "Any special requests or preferences we should know about?",
         submit: "Request Booking"
       },
       success: {
@@ -223,9 +223,9 @@ export const translations = {
     },
     // Our Team Page
     ourTeam: {
-      title: "Our Professional Therapists",
+      title: "Our Massage Team",
       subtitle: "Meet the skilled hands behind your wellness journey",
-      intro: "At Lavin, we take pride in our exceptional team of certified massage therapists. Each member brings unique expertise, years of experience, and a genuine passion for helping you achieve optimal well-being.",
+      intro: "At Lavin, we take pride in our massage team. Each person brings their own touch, years of practice, and a genuine care for your comfort and well-being.",
       experience: "years experience",
       languages: "Languages",
       specialties: "Specialties",
@@ -270,7 +270,7 @@ export const translations = {
     },
     // Footer
     footer: {
-      tagline: "Where healing becomes art. Experience the finest massage therapy in the heart of Barcelona.",
+      tagline: "Where well-being becomes art. Experience massage and wellness in the heart of Barcelona.",
       newsletter: "Join our wellness circle",
       servicesTitle: "Services",
       companyTitle: "Company",
@@ -292,7 +292,7 @@ export const translations = {
       testimonials: "Testimonios",
       address: "Dirección",
       workWithUs: "Trabaja con Nosotros",
-      ourTeam: "Nuestros Terapeutas",
+      ourTeam: "Nuestro Equipo de Masaje",
       staffSignIn: "Acceso Personal",
       location: "Barcelona, España",
     },
@@ -301,7 +301,7 @@ export const translations = {
       overline: "Bienestar y Relajación",
       titleLine1: "El Arte de",
       titleLine2: "Lavin",
-      description: "Entrégate a la tranquilidad en el corazón de Barcelona. Donde las antiguas tradiciones curativas se encuentran con el lujo contemporáneo.",
+      description: "Entrégate a la tranquilidad en el corazón de Barcelona. Donde el arte del masaje se encuentra con el lujo contemporáneo.",
       cta1: "Reserva Tu Experiencia",
       cta2: "Explorar Servicios",
       scroll: "Desplaza para descubrir",
@@ -310,10 +310,10 @@ export const translations = {
     services: {
       overline: "Nuestros Servicios",
       title: "Experiencias Curadas",
-      subtitle: "Cada tratamiento está cuidadosamente diseñado para guiarte a través de un viaje transformador de relajación y renovación.",
+      subtitle: "Cada masaje está cuidadosamente pensado para acompañarte en un momento de relajación y bienestar.",
       bookThis: "Reservar Este Servicio",
       customCta: "¿Buscas algo especial?",
-      customBtn: "Solicitar Tratamiento Personalizado",
+      customBtn: "Solicitar un Masaje a Medida",
     },
     // Corporate
     corporate: {
@@ -340,7 +340,7 @@ export const translations = {
       b2bFooter: "Nuestro equipo está disponible de lunes a sábado, 10:00 - 20:00"
     },
     reserveRoom: {
-      badge: "Para terapeutas",
+      badge: "Para masajistas",
       contactUs: "Contáctanos",
       subtitle: "Reserva de sala para masajistas",
       message: "Si eres masajista, tienes experiencia y buscas una sala para atender a tus clientes, ponte en contacto con nosotros y te contactaremos.",
@@ -350,16 +350,16 @@ export const translations = {
     // About
     about: {
       overline: "Nuestra Historia",
-      title: "Donde la Curación se Convierte en Arte",
-      text1: "Ubicado en el vibrante corazón de Barcelona, Lavin nació de una simple creencia: que el verdadero bienestar trasciende lo físico. Nuestro santuario ofrece más que masajes—es una invitación a pausar, reflexionar y reconectarte contigo mismo.",
-      text2: "Fundado en 2009, hemos reunido un equipo de terapeutas de clase mundial que combinan técnicas consagradas de todo el mundo con enfoques innovadores. Cada tratamiento es un viaje personalizado, adaptado a las necesidades únicas de tu cuerpo.",
+      title: "Donde el Bienestar se Convierte en Arte",
+      text1: "Ubicado en el vibrante corazón de Barcelona, Lavin nació de una simple creencia: que el verdadero bienestar es un momento de calma. Nuestro santuario ofrece más que masajes—es una invitación a pausar, reflexionar y reconectarte contigo mismo.",
+      text2: "Fundado en 2009, hemos reunido un equipo de masajistas que combinan técnicas de masaje de todo el mundo con un enfoque calmado y personal. Cada masaje es un viaje de relajación y bienestar.",
       text3: "Nuestro espacio se inspira en la belleza arquitectónica de Barcelona—las curvas orgánicas de Gaudí, la cálida terracota de los barrios góticos, los tranquilos azules del Mediterráneo. Entra y deja que la magia de la ciudad te abrace.",
       founderName: "Maria Elena",
-      founderTitle: "Fundadora y Terapeuta Principal",
+      founderTitle: "Fundadora y masajista principal",
       stats: {
         years: "Años de Experiencia",
         clients: "Clientes Felices",
-        therapists: "Terapeutas Expertos",
+        therapists: "Masajistas",
         satisfaction: "Tasa de Satisfacción"
       }
     },
@@ -376,13 +376,13 @@ export const translations = {
       subtitle: "Desde el momento en que llegas, cada detalle está diseñado para transportarte a un estado de serenidad completa.",
       features: [
         { title: "Horarios Flexibles", description: "Abierto los 7 días de la semana con citas disponibles temprano en la mañana y tarde en la noche." },
-        { title: "Atención Personalizada", description: "Cada tratamiento se personaliza según tus necesidades y preferencias específicas." },
+        { title: "Atención Personalizada", description: "Cada masaje se adapta a tu confort y a tus preferencias." },
         { title: "Productos Premium", description: "Utilizamos solo aceites y productos para el cuidado de la piel orgánicos y de origen sostenible." },
-        { title: "Orientación Experta", description: "Nuestros terapeutas proporcionan consejos de cuidado posterior para extender los beneficios de tu tratamiento." }
+        { title: "Orientación Cercana", description: "Nuestro equipo de masaje comparte consejos sencillos para que la sensación de bienestar dure un poco más." }
       ],
       amenitiesTitle: "Comodidades del Santuario",
       amenities: [
-        "Salas de tratamiento privadas",
+        "Salas de masaje privadas",
         "Duchas de lluvia",
         "Tés de hierbas orgánicos",
         "Camas de masaje climatizadas",
@@ -455,7 +455,7 @@ export const translations = {
         time: "Hora Preferida",
         timePlaceholder: "Selecciona hora",
         message: "Solicitudes Especiales",
-        messagePlaceholder: "¿Alguna solicitud especial o consideración de salud que debamos saber?",
+        messagePlaceholder: "¿Alguna petición especial o preferencia que debamos saber?",
         submit: "Solicitar Reserva"
       },
       success: {
@@ -500,9 +500,9 @@ export const translations = {
     },
     // Our Team Page
     ourTeam: {
-      title: "Nuestros Terapeutas Profesionales",
-      subtitle: "Conoce las manos expertas detrás de tu viaje de bienestar",
-      intro: "En Lavin, nos enorgullecemos de nuestro excepcional equipo de terapeutas de masaje certificados. Cada miembro aporta experiencia única, años de práctica y una pasión genuina por ayudarte a alcanzar un bienestar óptimo.",
+      title: "Nuestro Equipo de Masaje",
+      subtitle: "Conoce las manos expertas detrás de tu momento de bienestar",
+      intro: "En Lavin, nos enorgullecemos de nuestro equipo de masaje. Cada persona aporta su propio tacto, años de práctica y un cuidado genuino por tu confort y bienestar.",
       experience: "años de experiencia",
       languages: "Idiomas",
       specialties: "Especialidades",
@@ -547,7 +547,7 @@ export const translations = {
     },
     // Footer
     footer: {
-      tagline: "Donde la curación se convierte en arte. Experimenta la mejor terapia de masajes en el corazón de Barcelona.",
+      tagline: "Donde el bienestar se convierte en arte. Disfruta del masaje y el bienestar en el corazón de Barcelona.",
       newsletter: "Únete a nuestro círculo de bienestar",
       servicesTitle: "Servicios",
       companyTitle: "Empresa",
@@ -569,7 +569,7 @@ export const translations = {
       testimonials: "Testimonis",
       address: "Adreça",
       workWithUs: "Treballa amb Nosaltres",
-      ourTeam: "Els Nostres Terapeutes",
+      ourTeam: "El Nostre Equip de Massatge",
       staffSignIn: "Accés Personal",
       location: "Barcelona, Catalunya",
     },
@@ -578,7 +578,7 @@ export const translations = {
       overline: "Benestar i Relaxació",
       titleLine1: "L'Art de",
       titleLine2: "Lavin",
-      description: "Lliura't a la tranquil·litat al cor de Barcelona. On les antigues tradicions curatives es troben amb el luxe contemporani.",
+      description: "Lliura't a la tranquil·litat al cor de Barcelona. On l'art del massatge es troba amb el luxe contemporani.",
       cta1: "Reserva la Teva Experiència",
       cta2: "Explorar Serveis",
       scroll: "Desplaça per descobrir",
@@ -587,10 +587,10 @@ export const translations = {
     services: {
       overline: "Els Nostres Serveis",
       title: "Experiències Curades",
-      subtitle: "Cada tractament està acuradament dissenyat per guiar-te a través d'un viatge transformador de relaxació i renovació.",
+      subtitle: "Cada massatge està pensat amb cura per acompanyar-te en un moment de relaxació i benestar.",
       bookThis: "Reservar Aquest Servei",
       customCta: "Busques alguna cosa especial?",
-      customBtn: "Sol·licitar Tractament Personalitzat",
+      customBtn: "Sol·licitar un Massatge a Mida",
     },
     // Corporate
     corporate: {
@@ -617,7 +617,7 @@ export const translations = {
       b2bFooter: "El nostre equip està disponible de dilluns a dissabte, 10:00 - 20:00"
     },
     reserveRoom: {
-      badge: "Per a terapeutes",
+      badge: "Per a massatgistes",
       contactUs: "Contacteu-nos",
       subtitle: "Reserva de sala per a massatgistes",
       message: "Si ets massatgista, tens experiència i busques una sala per atendre els teus clients, posa't en contacte amb nosaltres i et contactarem.",
@@ -627,16 +627,16 @@ export const translations = {
     // About
     about: {
       overline: "La Nostra Història",
-      title: "On la Curació es Converteix en Art",
-      text1: "Ubicat al vibrant cor de Barcelona, Lavin va néixer d'una simple creença: que el veritable benestar transcendeix el físic. El nostre santuari ofereix més que massatges—és una invitació a pausar, reflexionar i reconnectar-te amb tu mateix.",
-      text2: "Fundat el 2009, hem reunit un equip de terapeutes de classe mundial que combinen tècniques consagrades de tot el món amb enfocaments innovadors. Cada tractament és un viatge personalitzat, adaptat a les necessitats úniques del teu cos.",
+      title: "On el Benestar es Converteix en Art",
+      text1: "Ubicat al vibrant cor de Barcelona, Lavin va néixer d'una simple creença: que el veritable benestar és un moment de calma. El nostre santuari ofereix més que massatges—és una invitació a pausar, reflexionar i reconnectar-te amb tu mateix.",
+      text2: "Fundat el 2009, hem reunit un equip de massatgistes que combinen tècniques de massatge d'arreu del món amb un enfocament calmat i personal. Cada massatge és un viatge de relaxació i benestar.",
       text3: "El nostre espai s'inspira en la bellesa arquitectònica de Barcelona—les corbes orgàniques de Gaudí, la càlida terracota dels barris gòtics, els tranquils blaus del Mediterrani. Entra i deixa que la màgia de la ciutat t'abraci.",
       founderName: "Maria Elena",
-      founderTitle: "Fundadora i Terapeuta Principal",
+      founderTitle: "Fundadora i massatgista principal",
       stats: {
         years: "Anys d'Experiència",
         clients: "Clients Feliços",
-        therapists: "Terapeutes Experts",
+        therapists: "Massatgistes",
         satisfaction: "Taxa de Satisfacció"
       }
     },
@@ -653,13 +653,13 @@ export const translations = {
       subtitle: "Des del moment en què arribes, cada detall està dissenyat per transportar-te a un estat de serenitat completa.",
       features: [
         { title: "Horaris Flexibles", description: "Obert els 7 dies de la setmana amb cites disponibles d'hora al matí i tard a la nit." },
-        { title: "Atenció Personalitzada", description: "Cada tractament es personalitza segons les teves necessitats i preferències específiques." },
+        { title: "Atenció Personalitzada", description: "Cada massatge s'adapta al teu confort i a les teves preferències." },
         { title: "Productes Premium", description: "Utilitzem només olis i productes per a la cura de la pell orgànics i d'origen sostenible." },
-        { title: "Orientació Experta", description: "Els nostres terapeutes proporcionen consells de cura posterior per estendre els beneficis del teu tractament." }
+        { title: "Orientació Propera", description: "El nostre equip de massatge comparteix consells senzills perquè la sensació de benestar duri una mica més." }
       ],
       amenitiesTitle: "Comoditats del Santuari",
       amenities: [
-        "Sales de tractament privades",
+        "Sales de massatge privades",
         "Dutxes de pluja",
         "Tès d'herbes orgànics",
         "Llits de massatge climatitzats",
@@ -732,7 +732,7 @@ export const translations = {
         time: "Hora Preferida",
         timePlaceholder: "Selecciona hora",
         message: "Sol·licituds Especials",
-        messagePlaceholder: "Alguna sol·licitud especial o consideració de salut que haguem de saber?",
+        messagePlaceholder: "Alguna petició especial o preferència que hàgim de saber?",
         submit: "Sol·licitar Reserva"
       },
       success: {
@@ -777,9 +777,9 @@ export const translations = {
     },
     // Our Team Page
     ourTeam: {
-      title: "Els Nostres Terapeutes Professionals",
-      subtitle: "Coneix les mans expertes darrere del teu viatge de benestar",
-      intro: "A Lavin, ens enorgullim del nostre excepcional equip de terapeutes de massatge certificats. Cada membre aporta experiència única, anys de pràctica i una passió genuïna per ajudar-te a aconseguir un benestar òptim.",
+      title: "El Nostre Equip de Massatge",
+      subtitle: "Coneix les mans expertes darrere del teu moment de benestar",
+      intro: "A Lavin, ens enorgullim del nostre equip de massatge. Cada persona aporta el seu propi tacte, anys de pràctica i una cura genuïna pel teu confort i benestar.",
       experience: "anys d'experiència",
       languages: "Idiomes",
       specialties: "Especialitats",
@@ -811,7 +811,7 @@ export const translations = {
     },
     // Footer
     footer: {
-      tagline: "On la curació es converteix en art. Experimenta la millor teràpia de massatges al cor de Barcelona.",
+      tagline: "On el benestar es converteix en art. Gaudeix del massatge i el benestar al cor de Barcelona.",
       newsletter: "Uneix-te al nostre cercle de benestar",
       servicesTitle: "Serveis",
       companyTitle: "Empresa",

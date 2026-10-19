@@ -81,7 +81,7 @@ const About = () => {
             >
               <img 
                 src={primarySrc} 
-                alt="Massage therapy session" 
+                alt="Massage session" 
                 loading="lazy"
               />
             </motion.div>

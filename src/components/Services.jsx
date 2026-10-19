@@ -116,7 +116,7 @@ const ServiceCard = ({ service, serviceText, index, setCursorVariant, onContactC
   }
 
   const badgeLabel = isReserveRoom
-    ? (t.reserveRoom?.badge || 'For therapists')
+    ? (t.reserveRoom?.badge || 'For massage professionals')
     : (t.corporate?.agreementBased || 'Agreement Based')
 
   const ctaLabel = isReserveRoom

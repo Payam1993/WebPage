@@ -124,8 +124,8 @@ const OurTeam = ({ setCursorVariant }) => {
               </svg>
               {t.ourTeam?.backToHome || 'Back to Home'}
             </Link>
-            <span className="section-overline">{t.nav?.ourTeam || 'Our Therapists'}</span>
-            <h1>{t.ourTeam?.title || 'Our Professional Therapists'}</h1>
+            <span className="section-overline">{t.nav?.ourTeam || 'Our Massage Team'}</span>
+            <h1>{t.ourTeam?.title || 'Our Massage Team'}</h1>
             <p className="team-hero-subtitle">{t.ourTeam?.subtitle || 'Meet the skilled hands behind your wellness journey'}</p>
           </motion.div>
         </div>
@@ -140,7 +140,7 @@ const OurTeam = ({ setCursorVariant }) => {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8 }}
           >
-            {t.ourTeam?.intro || 'At Lavin, we take pride in our exceptional team of certified massage therapists.'}
+            {t.ourTeam?.intro || 'At Lavin, we take pride in our massage team.'}
           </motion.p>
         </div>
       </section>
