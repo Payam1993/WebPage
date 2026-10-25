@@ -24,9 +24,9 @@ export const servicesData = [
     image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     detailImage: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80",
     prices: {
-      min30: 55,
-      min60: 80,
-      min90: 120
+      min30: 100,
+      min60: 120,
+      min90: 180
     }
   },
   {
